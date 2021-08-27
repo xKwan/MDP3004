@@ -186,11 +186,17 @@ class _ChatPage extends State<ChatPage> {
         }
       }
     }
-
-    // Create message if there is new line character
+    print(buffer);
+    // Decode message into string
     String dataString = String.fromCharCodes(buffer);
-    int index = buffer.indexOf(10);
-    if (~index != 0) {
+    print ("Data string: " + dataString);
+
+    setState(() {
+      messages.add(_Message(2, dataString));
+    });
+
+    //int index = buffer.indexOf(0);
+    /*if (~index != 0) {
       setState(() {
         messages.add(
           _Message(
@@ -208,7 +214,7 @@ class _ChatPage extends State<ChatPage> {
           ? _messageBuffer.substring(
           0, _messageBuffer.length - backspacesCounter)
           : _messageBuffer + dataString);
-    }
+    }*/
   }
 
   void _sendMessage(String text) async {
