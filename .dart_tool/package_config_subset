@@ -30,6 +30,10 @@ fake_async
 2.12
 file:///S:/Android%20Studio/plugins/flutter/.pub-cache/hosted/pub.dartlang.org/fake_async-1.2.0/
 file:///S:/Android%20Studio/plugins/flutter/.pub-cache/hosted/pub.dartlang.org/fake_async-1.2.0/lib/
+flutter_bluetooth_serial
+2.12
+file:///S:/Android%20Studio/plugins/flutter/.pub-cache/hosted/pub.dartlang.org/flutter_bluetooth_serial-0.3.2/
+file:///S:/Android%20Studio/plugins/flutter/.pub-cache/hosted/pub.dartlang.org/flutter_bluetooth_serial-0.3.2/lib/
 matcher
 2.12
 file:///S:/Android%20Studio/plugins/flutter/.pub-cache/hosted/pub.dartlang.org/matcher-0.12.10/
@@ -42,6 +46,10 @@ path
 2.12
 file:///S:/Android%20Studio/plugins/flutter/.pub-cache/hosted/pub.dartlang.org/path-1.8.0/
 file:///S:/Android%20Studio/plugins/flutter/.pub-cache/hosted/pub.dartlang.org/path-1.8.0/lib/
+scoped_model
+2.0
+file:///S:/Android%20Studio/plugins/flutter/.pub-cache/hosted/pub.dartlang.org/scoped_model-1.1.0/
+file:///S:/Android%20Studio/plugins/flutter/.pub-cache/hosted/pub.dartlang.org/scoped_model-1.1.0/lib/
 source_span
 2.12
 file:///S:/Android%20Studio/plugins/flutter/.pub-cache/hosted/pub.dartlang.org/source_span-1.8.1/
@@ -88,6 +96,6 @@ file:///S:/Android%20Studio/plugins/flutter/packages/flutter_test/
 file:///S:/Android%20Studio/plugins/flutter/packages/flutter_test/lib/
 mdp3004
 2.12
-file:///S:/Documents/mdp3004/
-file:///S:/Documents/mdp3004/lib/
+file:///S:/Documents/GitHub/MDP3004/
+file:///S:/Documents/GitHub/MDP3004/lib/
 2

@@ -56,6 +56,12 @@
       "languageVersion": "2.12"
     },
     {
+      "name": "flutter_bluetooth_serial",
+      "rootUri": "file:///S:/Android%20Studio/plugins/flutter/.pub-cache/hosted/pub.dartlang.org/flutter_bluetooth_serial-0.3.2",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
       "name": "flutter_test",
       "rootUri": "file:///S:/Android%20Studio/plugins/flutter/packages/flutter_test",
       "packageUri": "lib/",
@@ -78,6 +84,12 @@
       "rootUri": "file:///S:/Android%20Studio/plugins/flutter/.pub-cache/hosted/pub.dartlang.org/path-1.8.0",
       "packageUri": "lib/",
       "languageVersion": "2.12"
+    },
+    {
+      "name": "scoped_model",
+      "rootUri": "file:///S:/Android%20Studio/plugins/flutter/.pub-cache/hosted/pub.dartlang.org/scoped_model-1.1.0",
+      "packageUri": "lib/",
+      "languageVersion": "2.0"
     },
     {
       "name": "sky_engine",
@@ -140,7 +152,7 @@
       "languageVersion": "2.12"
     }
   ],
-  "generated": "2021-08-22T07:59:30.778144Z",
+  "generated": "2021-08-25T10:13:33.453754Z",
   "generator": "pub",
   "generatorVersion": "2.13.4"
 }
