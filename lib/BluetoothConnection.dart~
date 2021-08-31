@@ -64,13 +64,17 @@ class BluetoothStateBroadcastWrapper {
 
 }
 
-class Broadcast extends ChangeNotifier {
+class BroadcastProvider extends ChangeNotifier {
 
-  static var instance;
+  var _instance;
 
-  static Future<BluetoothStateBroadcastWrapper> setInstance(broadcast) async {
-    instance = await broadcast;
-    return instance;
+  get instance => _instance;
+
+  Future<BluetoothStateBroadcastWrapper> setInstance(broadcast) async {
+    _instance = await broadcast;
+
+    notifyListeners();
+    return _instance;
   }
 
 }
