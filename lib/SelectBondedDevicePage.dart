@@ -1,19 +1,25 @@
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
+import 'package:mdp3004/ChatPage.dart';
 
 import './BluetoothDeviceListEntry.dart';
+import './MainPage.dart';
 
 class SelectBondedDevicePage extends StatefulWidget {
   /// If true, on page start there is performed discovery upon the bonded devices.
   /// Then, if they are not avaliable, they would be disabled from the selection.
   final bool checkAvailability;
+  var connection;
+  var broadcast;
 
-  const SelectBondedDevicePage({this.checkAvailability = true});
+  // const SelectBondedDevicePage({this.checkAvailability = true, this.connection});
+  SelectBondedDevicePage({ this.checkAvailability = true, this.connection, this.broadcast });
 
   @override
-  _SelectBondedDevicePage createState() => new _SelectBondedDevicePage();
+  _SelectBondedDevicePage createState() => new _SelectBondedDevicePage(connection, broadcast);
 }
 
 enum _DeviceAvailability {
@@ -32,13 +38,17 @@ class _DeviceWithAvailability {
 
 class _SelectBondedDevicePage extends State<SelectBondedDevicePage> {
   List<_DeviceWithAvailability> devices =
-      List<_DeviceWithAvailability>.empty(growable: true);
+  List<_DeviceWithAvailability>.empty(growable: true);
+  bool reload = false;
 
   // Availability
   StreamSubscription<BluetoothDiscoveryResult>? _discoveryStreamSubscription;
   bool _isDiscovering = false;
 
-  _SelectBondedDevicePage();
+  _SelectBondedDevicePage(this.connection, this.broadcast);
+
+  var connection;
+  var broadcast;
 
   @override
   void initState() {
@@ -70,11 +80,9 @@ class _SelectBondedDevicePage extends State<SelectBondedDevicePage> {
   }
 
   void _restartDiscovery() {
-    setState(() {
-      _isDiscovering = true;
-    });
+    setState(() {});
+    reload = true;
 
-    _startDiscovery();
   }
 
   void _startDiscovery() {
@@ -115,7 +123,15 @@ class _SelectBondedDevicePage extends State<SelectBondedDevicePage> {
               rssi: _device.rssi,
               enabled: _device.availability == _DeviceAvailability.yes,
               onTap: () {
-                Navigator.of(context).pop(_device.device);
+                print("bond");
+                print(connection);
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) {
+                      return ChatPage(server:_device.device, broadcast: broadcast,);
+                    },
+                  ),
+                );
               },
             ))
         .toList();
@@ -123,7 +139,7 @@ class _SelectBondedDevicePage extends State<SelectBondedDevicePage> {
       appBar: AppBar(
         title: Text('Select device'),
         actions: <Widget>[
-          _isDiscovering
+          reload
               ? FittedBox(
                   child: Container(
                     margin: new EdgeInsets.all(16.0),
@@ -136,7 +152,7 @@ class _SelectBondedDevicePage extends State<SelectBondedDevicePage> {
                 )
               : IconButton(
                   icon: Icon(Icons.replay),
-                  onPressed: _restartDiscovery,
+                  onPressed: _restartDiscovery, //Reload page
                 )
         ],
       ),
