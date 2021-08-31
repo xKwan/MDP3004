@@ -9,27 +9,26 @@ import './BackgroundCollectingTask.dart';
 import './ChatPage.dart';
 import './DiscoveryPage.dart';
 import './SelectBondedDevicePage.dart';
+import 'BluetoothConnection.dart';
 
 // import './helpers/LineChart.dart';
 
 class MainPage extends StatefulWidget {
-  var connection;
-  var broadcast;
+  // var connection;
+  // var broadcast;
   BluetoothDevice? selectedDevice;
 
   // const MainPage({ this.connection, this.selectedDevice });
 
-  MainPage({ this.connection, this.selectedDevice, this.broadcast });
+  MainPage({ this.selectedDevice });
 
   @override
-  _MainPage createState() => new _MainPage(connection, selectedDevice, broadcast);
+  _MainPage createState() => new _MainPage();
 }
 
 class _MainPage extends State<MainPage> {
   BluetoothState _bluetoothState = BluetoothState.UNKNOWN;
-  var selectedDevice;
-  var connection;
-  var broadcast;
+  var connection  = BluetoothStateBroadcastWrapper.connection ;
 
   String _address = "...";
   String _name = "...";
@@ -42,8 +41,10 @@ class _MainPage extends State<MainPage> {
   BackgroundCollectingTask? _collectingTask;
 
   bool _autoAcceptPairingRequests = false;
+  bool get isConnected => (connection!=null ? true : false);
 
-  _MainPage(this.connection, this.selectedDevice, this.broadcast);
+
+  // _MainPage(this.connection, this.selectedDevice, this.broadcast);
 
   // get selectedDevice => this.selectedDevice ;
 
@@ -139,7 +140,7 @@ class _MainPage extends State<MainPage> {
             ),
             ListTile(
               title: const Text('Bluetooth status'),
-              subtitle: Text(_connectedDevice.isBonded ? "Connected"+_connectedDevice.address : "Disconnected"),
+              subtitle: Text(isConnected ? "Connected: "+_connectedDevice.address : "Disconnected"),
               trailing: ElevatedButton(
                 child: const Text('Settings'),
                 onPressed: () {
@@ -275,13 +276,11 @@ class _MainPage extends State<MainPage> {
               title: ElevatedButton(
                 child: const Text('Connect to paired device to chat'),
                 onPressed: () async {
-                  print("main");
-                  print(this.connection);
 
                   Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (context) {
-                        return SelectBondedDevicePage(checkAvailability: false, broadcast: broadcast);
+                        return SelectBondedDevicePage(checkAvailability: false);
                       },
                     ),
                   );

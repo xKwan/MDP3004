@@ -55,6 +55,9 @@ class BluetoothStateBroadcastWrapper {
   void dispose() {
     _stateStreamController?.close();
     _sub?.cancel();
+    connection.dispose();
+    connection = null;
+    //TODO: Close connection
 
   }
 

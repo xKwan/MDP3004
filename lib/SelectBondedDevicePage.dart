@@ -16,10 +16,10 @@ class SelectBondedDevicePage extends StatefulWidget {
   var broadcast;
 
   // const SelectBondedDevicePage({this.checkAvailability = true, this.connection});
-  SelectBondedDevicePage({ this.checkAvailability = true, this.connection, this.broadcast });
+  SelectBondedDevicePage({ this.checkAvailability = true});
 
   @override
-  _SelectBondedDevicePage createState() => new _SelectBondedDevicePage(connection, broadcast);
+  _SelectBondedDevicePage createState() => new _SelectBondedDevicePage();
 }
 
 enum _DeviceAvailability {
@@ -45,10 +45,10 @@ class _SelectBondedDevicePage extends State<SelectBondedDevicePage> {
   StreamSubscription<BluetoothDiscoveryResult>? _discoveryStreamSubscription;
   bool _isDiscovering = false;
 
-  _SelectBondedDevicePage(this.connection, this.broadcast);
-
-  var connection;
-  var broadcast;
+  // _SelectBondedDevicePage(this.connection, this.broadcast);
+  //
+  // var connection;
+  // var broadcast;
 
   @override
   void initState() {
@@ -123,12 +123,12 @@ class _SelectBondedDevicePage extends State<SelectBondedDevicePage> {
               rssi: _device.rssi,
               enabled: _device.availability == _DeviceAvailability.yes,
               onTap: () {
-                print("bond");
-                print(connection);
+                // print("bond");
+                // print(connection);
                 Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (context) {
-                      return ChatPage(server:_device.device, broadcast: broadcast,);
+                      return ChatPage(server:_device.device);
                     },
                   ),
                 );
