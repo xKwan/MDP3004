@@ -123,19 +123,23 @@ class _MainPage extends State<MainPage> {
               value: _bluetoothState.isEnabled,
               onChanged: (bool value) {
                 // Do the request and update with the true value then
-                if(!_bluetoothState.isEnabled){
-                  // print(Broadcast.instance);
-                  print("DISPOSE");
-                  Broadcast.instance.dispose();
-                  Broadcast.setInstance(null);
-                }
+                // if(!_bluetoothState.isEnabled){
+                //   // print(Broadcast.instance);
+                //   print("DISPOSE");
+                //   Broadcast.instance.dispose();
+                //   Broadcast.setInstance(null);
+                // }
 
                 future() async {
                   // async lambda seems to not working
                   if (value)
                     await FlutterBluetoothSerial.instance.requestEnable();
                   else
+                  {
                     await FlutterBluetoothSerial.instance.requestDisable();
+                    Broadcast.instance.dispose();
+                    Broadcast.setInstance(null);
+                  }
                 }
 
                 future().then((_) {
