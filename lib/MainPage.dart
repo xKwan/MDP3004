@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
+import 'package:mdp3004/GridArena.dart';
+import 'bin/testpage.dart';
 // import 'package:mdp3004/BluetoothBroadcastState.dart';
 import 'package:scoped_model/scoped_model.dart';
 
@@ -227,19 +229,21 @@ class _MainPage extends State<MainPage> {
             //     ],
             //   ),
             // ),
-            // Divider(),
-            // ListTile(
-            //   title: ElevatedButton(
-            //     child: const Text('Check bonded devices'),
-            //     onPressed: () async {
-            //       FlutterBluetoothSerial.instance
-            //           .getBondedDevices()
-            //           .then((List<BluetoothDevice> bondedDevices) {
-            //             bondedDevices.map((device) => print(device.name)).toList();
-            //       });
-            //     }
-            //
-            // )),
+            Divider(),
+            ListTile(
+              title: ElevatedButton(
+                child: const Text('Grid Arena'),
+                onPressed: () async {
+                  Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) {
+                          return GridArena();
+                        },
+                    )
+                  );
+                }
+
+            )),
             // SwitchListTile(
             //   title: const Text('Auto-try specific pin when pairing'),
             //   subtitle: const Text('Pin 1234'),
@@ -293,7 +297,7 @@ class _MainPage extends State<MainPage> {
                   Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (context) {
-                        return SelectBondedDevicePage(checkAvailability: false);
+                        return SelectBondedDevicePage(checkAvailability: true);
                       },
                     ),
                   );
