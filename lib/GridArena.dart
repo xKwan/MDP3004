@@ -3,16 +3,14 @@ import 'dart:typed_data';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:mdp3004/helpers/CustomDialog.dart';
 import 'package:swipe_gesture_recognizer/swipe_gesture_recognizer.dart';
 import 'BluetoothConnection.dart';
 
 enum action {
-  ADD, REMOVE, PLACE
+  UNKNOWN, ADD, REMOVE, PLACE, RESIZE, BORDER
 }
 
-enum command {
-  FORWARD, BACK, LEFT, RIGHT
-}
 
 class _Message {
   int whom;
@@ -29,22 +27,23 @@ class GridArena extends StatefulWidget {
  
  class _GridArenaState extends State<GridArena> {
 
-  int _columns = 10;
-  int _rows = 15;
+  int _columns = 5;
+  int _rows = 7;
 
   List<int> _index = [];
   int _robot = -1;
-  var _action;
+  var _action = action.UNKNOWN;
 
   Border _border = Border();
   var _cards = new Map();
+
+  Map<int, Obstacle> obstacles = {};
 
   static final clientID = 0;
   var connection  = BluetoothStateBroadcastWrapper.connection ;
   // var server;
 
   List<_Message> messages = List<_Message>.empty(growable: true);
-  var _command;
 
   final TextEditingController textEditingController =
   new TextEditingController();
@@ -54,7 +53,6 @@ class GridArena extends StatefulWidget {
   bool get isConnected => (connection!=null ? true : false);
 
   bool isDisconnecting = false;
-
 
   @override
   void initState() {
@@ -93,49 +91,161 @@ class GridArena extends StatefulWidget {
     });
   }
 
-  Card rebuildCard (index, border) {
-      return  Card(
-        color: (_index.contains(index)) ? Colors.blueGrey : Colors.white,
-        elevation: 10,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10.0),
-        ),
-        child: Center(
-          child: Container(
-            child: _robot == index?
-            Icon( Icons.android,
-                  color: Colors.deepOrange,) : null,
-            decoration: BoxDecoration(
-              border: Border()
-            ),
-            height: 100,
-            width: 100,
+  Widget dragTarget(context, index) =>
+      DragTarget<Obstacle>(
+          builder: (context, candidateData, rejectedData) => Container(
+              child:
+              //Check if robot has been placed
+              _robot == index?
+              Icon( Icons.android,
+                  color: Colors.deepOrange) :
+              //Else check if obstacle has been placed
+              _index.contains(index)?
+              Text(obstacles[index]!.id.toString(),
+                  style: TextStyle(color: Colors.white))
+                  : null,
           ),
-        ),
+          onWillAccept: (data) => true,
+          onAccept: (data) {
+            setState(() {
+              if(data.action == action.ADD){
+                _index.add(index);
+                data = Obstacle.updateIndex(data, index);
+                obstacles.addAll({index: data});
+                print(obstacles);
+              }
+
+            });
+          }
       );
-  }
+
+  Widget rebuildCard(BuildContext context, index) =>
+        Card(
+          color: (_index.contains(index)) ? Colors.blueGrey : Colors.white,
+          elevation: 10,
+          shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10.0),
+          ),
+
+            child: Container(
+              decoration: BoxDecoration(
+                  border: (
+                    //Check if obstacle exists
+                    _index.contains(index)) ?
+
+                    //If exists, is the obstacle facing up?
+                    obstacles[index]!.direction == "U" ? Border(
+                    top: BorderSide(width: 5, color: Colors.red)
+                    ):
+                    //If exists, is the obstacle facing down?
+                    obstacles[index]!.direction == "D" ? Border(
+                    bottom: BorderSide(width: 5, color: Colors.red)
+                    ):
+                    //If exists, is the obstacle facing left?
+                    obstacles[index]!.direction == "L" ? Border(
+                    left: BorderSide(width: 5, color: Colors.red)
+                    ):
+                    //If exists, is the obstacle facing right?
+                    obstacles[index]!.direction == "R" ? Border(
+                    right: BorderSide(width: 5, color: Colors.red)
+                    ):
+                    //If does not exist or if direction not specified, return null
+                    null : Border()
+              ),
+              height: 100,
+              width: 100,
+              child: Center(
+                child: _index.contains(index)? Draggable<Obstacle>(
+                  data: Obstacle.updateAction(obstacles[index]!, action.REMOVE),
+                  child: dragTarget(context, index),
+                  feedback: Material(child: Icon(Icons.view_in_ar, color: Colors.black) ),
+                ): dragTarget(context, index),
+            ),
+          ),
+        );
+
+
+    Map<String, int> getCoordinates () {
+      Map<String, int> cord = {"x": -1, "y": -1};
+      if (_robot != -1){
+        cord["x"] = _robot%_columns;
+        cord["y"] = (_robot/_columns).floor();
+      }
+      return cord;
+    }
 
    @override
    Widget build(BuildContext context) {
+     int obstID = obstacles.entries.length;
+
      return Scaffold(
        appBar: AppBar(
-         title: Row(
-         children: <Widget>[
-           //Place robot
-           IconButton(onPressed: () => {
-              _action = action.PLACE
-           }, icon: Icon(Icons.android_rounded)),
-           //Place obstacle
-           IconButton(onPressed: () => {
-              _action = action.ADD
-           }, icon: Icon(Icons.view_in_ar)),
-           //Remove obstacle
-           IconButton(onPressed: () => {
-             _action = action.REMOVE
-           }, icon: Icon(Icons.close))
+         title: DragTarget<Obstacle>(
+            builder: (context, candidateData, rejectedData) => Container(
+             alignment: Alignment.center,
+             child: Row(
+              children: <Widget>[
 
-         ],
-       )),
+                 //Change dimension of grid
+                 IconButton(onPressed: () async => {
+                   await CustomDialog.showDialog(context).then((gridVal) =>
+                     setState(() {
+                       print("Set");
+                       _columns = gridVal["column"]!;
+                       _rows = gridVal["row"]!;
+                     })
+                   ),
+
+                  }, icon: Icon(Icons.apps)),
+
+                 //Place robot
+                 IconButton(onPressed: () => {
+                   if(_action == action.PLACE)
+                     _action = action.UNKNOWN
+                   else
+                    _action = action.PLACE
+                 }, icon: Icon(Icons.android_rounded)),
+
+                 //Place Obstacle
+                 Draggable<Obstacle>(
+                   data: new Obstacle(id: obstID++, action: action.ADD),
+                   child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10)),
+                              child: Icon(Icons.view_in_ar)
+                          ),
+                   feedback: Material(child: Icon(Icons.view_in_ar, color: Colors.black) ),
+                 ),
+
+                Expanded(
+                  flex: 5,
+                  child: Container(
+                    child: Text("("+
+                      getCoordinates()["x"].toString()+" , "+
+                          getCoordinates()["y"].toString()+")",
+                      style: TextStyle(
+                        fontSize: 25.0,
+                      ),
+                      // maxLines: 2,   // TRY THIS
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+              ],
+             ),
+            ),
+             onWillAccept: (data) => true,
+             onAccept: (data) {
+               setState(() {
+                 if(data.action == action.REMOVE){
+                   _index.remove(data.index);
+                   obstacles.remove(data.index);
+                  print(obstacles);
+                }
+              });
+            }
+         ),
+       ),
          body: Padding(
            padding: const EdgeInsets.all(8.0),
            child: Container(
@@ -149,61 +259,69 @@ class GridArena extends StatefulWidget {
                    onTap: () => {
                      setState (() {
                        print(index);
-                       if (_action == action.ADD)
-                          _index.add(index);
-                       else if (_action == action.REMOVE)
-                         _index.remove(index);
-                       else if (_action == action.PLACE) {
+                       // if (_action == action.ADD)
+                       //    _index.add(index);
+                       // else if (_action == action.REMOVE)
+                       //   _index.remove(index);
+                       if (_action == action.PLACE) {
                          _robot = index;
                        }
                      })
                    },
-                   onLongPress: () => {
+                   child: GestureDetector(
+                     onLongPressMoveUpdate: (updates) => {
+                        setState(() {
+                          if(updates.localOffsetFromOrigin.dx > 0 && updates.localOffsetFromOrigin.dy !> updates.localOffsetFromOrigin.dx){
+                            Obstacle.updateDirection(obstacles[index]!, "D");
+                          }
+                          else if(updates.localOffsetFromOrigin.dx < 0 && updates.localOffsetFromOrigin.dy !> updates.localOffsetFromOrigin.dx){
+                            Obstacle.updateDirection(obstacles[index]!, "L");
+                          }
+                          else if(updates.localOffsetFromOrigin.dy > 0){
+                            Obstacle.updateDirection(obstacles[index]!, "R");
+                          }
+                          else if(updates.localOffsetFromOrigin.dy < 0){
+                            Obstacle.updateDirection(obstacles[index]!, "U");
+                          }
+                        })
 
+                     },
 
-                   },
-                   child: SwipeGestureRecognizer(
-                   onSwipeUp: () => {
-                   setState((){
-                   _border = Border(
-                   top: BorderSide(width: 5, color: Colors.red)
-                   );
-                   print(_border);
-                   })
-
-                   },
-
-
-                   onSwipeDown: () => {
-                   setState((){
-                   _border = Border(
-                   bottom: BorderSide(width: 5, color: Colors.red)
-                   );
-                   print(_border);
-                   })
-
-                   },
-
-                   onSwipeLeft: () => {
-                   setState((){
-                   _border = Border(
-                   left: BorderSide(width: 5, color: Colors.red)
-                   );
-                   print(_border);
-                   })
-
-                   },
-
-                   onSwipeRight: () => {
-                   setState((){
-                   _border = Border(
-                   right: BorderSide(width: 5, color: Colors.red)
-                   );
-                   print(_border);
-                   }),
-                   },
-
-                   child: rebuildCard(index, _border)
+                     // onLongPress: () => {
+                     //     onSwipeUp: () => {
+                     //       setState((){
+                     //         Obstacle.updateDirection(obstacles[index]!, "U");
+                     //         print("up");
+                     //       })
+                     //
+                     //     },
+                     //
+                     //
+                     //     onSwipeDown: () => {
+                     //       setState((){
+                     //         Obstacle.updateDirection(obstacles[index]!, "D");
+                     //         print("down");
+                     //       })
+                     //
+                     //     },
+                     //
+                     //     onSwipeLeft: () => {
+                     //       setState((){
+                     //         Obstacle.updateDirection(obstacles[index]!, "L");
+                     //         print("left");
+                     //       })
+                     //
+                     //     },
+                     //
+                     //     onSwipeRight: () => {
+                     //       setState((){
+                     //         Obstacle.updateDirection(obstacles[index]!, "R");
+                     //         print("right");
+                     //       }),
+                     //     },
+                     //
+                     // },
+                     child: rebuildCard(context, index)
                    ),
                  );
                }),
@@ -304,4 +422,41 @@ class GridArena extends StatefulWidget {
     }
   }
  }
+
+class Obstacle {
+  var index;
+  var id;
+  var direction;
+  var action;
+
+  // get oid => this.id;
+  // get dir => this.direction;
+
+  static Obstacle updateAction(Obstacle obstacle, action) {
+    obstacle.action = action;
+    return obstacle;
+  }
+
+  static Obstacle updateIndex(Obstacle obstacle, index) {
+
+    obstacle.index = index;
+    return obstacle;
+  }
+
+  static Obstacle updateId(Obstacle obstacle, id) {
+
+    obstacle.id = id;
+    return obstacle;
+  }
+
+  static Obstacle updateDirection(Obstacle obstacle, dir) {
+
+    obstacle.direction = dir;
+    return obstacle;
+  }
+
+  Obstacle( {required this.id, this.index, this.direction, required this.action} );
+}
+
+
  
