@@ -10,6 +10,7 @@ import './BackgroundCollectingTask.dart';
 import './ChatPage.dart';
 import './DiscoveryPage.dart';
 import './SelectBondedDevicePage.dart';
+import 'BluetoothConnection.dart';
 
 
 // import './helpers/LineChart.dart';
@@ -22,10 +23,10 @@ class MainPage extends StatefulWidget {
 class _MainPage extends State<MainPage> {
   BluetoothState _bluetoothState = BluetoothState.UNKNOWN;
 
-  static BluetoothDevice? server;
+  static late BluetoothDevice server;
   static var serverAddress;
   static BluetoothConnection? connection;
-  static bool isConnecting = true;
+  static bool isConnecting = false;
   static bool get isConnected => (connection?.isConnected ?? false);
 
   bool isDisconnecting = false;
@@ -95,6 +96,14 @@ class _MainPage extends State<MainPage> {
     super.dispose();
   }
 
+  void getConnection() async {
+    await Broadcast.setInstance(await BluetoothStateBroadcastWrapper.create(server.address));
+    connection = BluetoothStateBroadcastWrapper.connection;
+    //listenToStream();
+
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -126,7 +135,7 @@ class _MainPage extends State<MainPage> {
             ),
             ListTile(
               title: const Text('Bluetooth status'),
-              subtitle: server!=null? Text('Live chat with ' + serverAddress.toString())
+              subtitle: isConnected? Text('Live chat with ' + serverAddress.toString())
                   : Text('Disconnected'),
               trailing: ElevatedButton(
                 child: const Text('Settings'),
@@ -209,7 +218,7 @@ class _MainPage extends State<MainPage> {
                     print(isConnected);
                     server = selectedDevice;
                     serverAddress = selectedDevice.address;
-                    _establishConnection(context, selectedDevice);
+                    _establishConnection(context, server!);
                     print("Establishing connection...");
                     print(isConnected);
 
@@ -226,6 +235,16 @@ class _MainPage extends State<MainPage> {
                 onPressed: ()  {
                     _startChat(context, server!);
                   },
+              ),
+            ),
+            ListTile(
+              title: ElevatedButton(
+                child: const Text('Connection status'),
+                onPressed: ()  {
+                  print("Is connected?: " + isConnected.toString());
+                  print("Connection Status: " + connection.toString());
+
+                },
               ),
             ),
             ListTile(
@@ -247,34 +266,79 @@ class _MainPage extends State<MainPage> {
 
   void _establishConnection(BuildContext context, BluetoothDevice server) {
     isConnecting = true;
-    //get isConnected => (connection?.isConnected ?? false);
-    bool isDisconnecting = false;
 
-    @override
-    void initState() {
-      super.initState();
+    try{
+      if (connection == null){
+        getConnection();
+      } else {
+        //listenToStream();
+      }
 
-      BluetoothConnection.toAddress(server.address).then((_connection) {
-        print('Connected to the device');
-        connection = _connection;
-        setState(() {
-          isConnecting = false;
-          isDisconnecting = false;
-        });
-      }).catchError((error) {
-        print('Cannot connect, exception occured');
-        print(error);
-      });
+    } catch (e) {
+      print(e);
     }
+
   }
+
+  //   BluetoothConnection.toAddress(server.address).then((_connection) {
+  //
+  //     connection = _connection;
+  //     print('Connected to the device');
+  //     print('Connection is: $connection');
+  //     print('Connection address: ' + server.address);
+  //
+  //     setState(() {
+  //       isConnecting = false;
+  //       isDisconnecting = false;
+  //       print("Connection is: " + connection.toString());
+  //       getConnection(server.address);
+  //     });
+  //   }).catchError((error) {
+  //     print('Cannot connect, exception occured');
+  //     print(error);
+  //   });
+  // }
+
+  /*void listenToStream() {
+
+    setState(() {
+      isConnecting = false;
+      isDisconnecting = false;
+    });
+
+    Broadcast.instance.btStateStream.listen(_onDataReceived).onDone(() {
+
+      if (isDisconnecting) {
+        print('Disconnecting locally!');
+        // dispose();
+      } else {
+        print('Disconnected remotely!');
+      }
+      if (this.mounted) {
+        setState(() {});
+      }
+
+    });*/
+
 
   void _disconnect(BuildContext context, BluetoothDevice server) {
        // Avoid memory leak (`setState` after dispose) and disconnect
+    print("Disconnect button is pressed, isConnected status:");
+    print(isConnected);
+    print("Connection is: " + connection.toString());
+    print("Server is: " + server.toString());
+
       if (isConnected) {
         isDisconnecting = true;
         connection?.dispose();
         connection = null;
       }
+      setState(() {
+
+      });
+
+      print("After disconnecting:");
+      print(server.bondState);
       print("Connection is $connection");
   }
 

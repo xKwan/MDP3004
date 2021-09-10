@@ -4,17 +4,12 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
-import 'package:mdp3004/MainPage.dart';
 import 'BluetoothConnection.dart';
-// import 'BluetoothBroadcastState.dart';
 
 class ChatPage extends StatefulWidget {
   final BluetoothDevice server;
-  // var connection = BluetoothStateBroadcastWrapper.connection;
-  // var broadcast;
 
-
-  ChatPage({required this.server});
+  const ChatPage({required this.server});
 
   @override
   _ChatPage createState() => new _ChatPage();
@@ -29,9 +24,7 @@ class _Message {
 
 class _ChatPage extends State<ChatPage> {
   static final clientID = 0;
-  var connection  = BluetoothStateBroadcastWrapper.connection ;
-  // var broadcast = Broadcast.instance;
-  var server;
+  BluetoothConnection? connection = Broadcast.instance;
 
   List<_Message> messages = List<_Message>.empty(growable: true);
   String _messageBuffer = '';
@@ -40,63 +33,89 @@ class _ChatPage extends State<ChatPage> {
       new TextEditingController();
   final ScrollController listScrollController = new ScrollController();
 
-  bool isConnecting = true;
-  bool get isConnected => (connection!=null ? true : false);
-  // set isConnected(connection) => isConnected = connection;
+  bool isConnecting = false;
+  bool get isConnected => (connection?.isConnected ?? false);
 
   bool isDisconnecting = false;
 
-  // _ChatPage(this.server, this.broadcast);
-
-
   @override
-  void initState() {
-    super.initState();
 
-    print("chatinit");
-    print(connection);
-    try{
-      if (connection == null){
-        //getConnection();
-      } else {
-        listenToStream();
+    void initState() {
+      super.initState();
+
+      try{
+        if (connection != null){
+          listenToStream();
+        }
+
+      } catch (e) {
+        print(e);
       }
-
-    } catch (e) {
-      print(e);
     }
 
+
+    void listenToStream() {
+
+      setState(() {
+        isConnecting = false;
+        isDisconnecting = false;
+      });
+
+      Broadcast.instance.btStateStream.listen(_onDataReceived).onDone(() {
+
+        if (isDisconnecting) {
+          print('Disconnecting locally!');
+          // dispose();
+        } else {
+          print('Disconnected remotely!');
+        }
+        if (this.mounted) {
+          setState(() {});
+        }
+
+      });
+
+    // BluetoothConnection.toAddress(widget.server.address).then((_connection) {
+    //   print('Connected to the device');
+    //   connection = _connection;
+    //   setState(() {
+    //     isConnecting = false;
+    //     isDisconnecting = false;
+    //   });
+
+      // connection!.input!.listen(_onDataReceived).onDone(() {
+      //   // Example: Detect which side closed the connection
+      //   // There should be `isDisconnecting` flag to show are we are (locally)
+      //   // in middle of disconnecting process, should be set before calling
+      //   // `dispose`, `finish` or `close`, which all causes to disconnect.
+      //   // If we except the disconnection, `onDone` should be fired as result.
+      //   // If we didn't except this (no flag set), it means closing by remote.
+      //   if (isDisconnecting) {
+      //     print('Disconnecting locally!');
+      //   } else {
+      //     print('Disconnected remotely!');
+      //   }
+      //   if (this.mounted) {
+      //     setState(() {});
+      //   }
+      // });
+    /*}).catchError((error) {
+      print('Cannot connect, exception occured');
+      print(error);
+    });*/
   }
 
+ /* @override
+  void dispose() {
+    // Avoid memory leak (`setState` after dispose) and disconnect
+    if (isConnected) {
+      isDisconnecting = true;
+      connection?.dispose();
+      connection = null;
+    }
 
-  void getConnection() async {
-    await Broadcast.setInstance(await BluetoothStateBroadcastWrapper.create(widget.server.address));
-    connection = BluetoothStateBroadcastWrapper.connection;
-    listenToStream();
-    
-  }
-
-  void listenToStream() {
-
-    setState(() {
-      isConnecting = false;
-      isDisconnecting = false;
-    });
-
-    Broadcast.instance.btStateStream.listen(_onDataReceived).onDone(() {
-
-      if (isDisconnecting) {
-        print('Disconnecting locally!');
-        // dispose();
-      } else {
-        print('Disconnected remotely!');
-      }
-      if (this.mounted) {
-        setState(() {});
-      }
-
-    });
-  }
+    super.dispose();
+  }*/
 
   @override
   Widget build(BuildContext context) {
@@ -127,10 +146,6 @@ class _ChatPage extends State<ChatPage> {
     final serverName = widget.server.name ?? "Unknown";
     return Scaffold(
       appBar: AppBar(
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back, color: Colors.white),
-            onPressed: () => Navigator.of(context).pop(context),
-          ),
           title: (isConnecting
               ? Text('Connecting chat to ' + serverName + '...')
               : isConnected
@@ -208,30 +223,10 @@ class _ChatPage extends State<ChatPage> {
 
     // Create message if there is new line character
     String dataString = String.fromCharCodes(buffer);
-    
     setState(() {
       messages.add(_Message(1, dataString));
     });
-    // int index = buffer.indexOf(10);
-    // if (~index != 0) {
-    //   setState(() {
-    //     messages.add(
-    //       _Message(
-    //         1,
-    //         backspacesCounter > 0
-    //             ? _messageBuffer.substring(
-    //                 0, _messageBuffer.length - backspacesCounter)
-    //             : _messageBuffer + dataString.substring(0, index),
-    //       ),
-    //     );
-    //     _messageBuffer = dataString.substring(index);
-    //   });
-    // } else {
-    //   _messageBuffer = (backspacesCounter > 0
-    //       ? _messageBuffer.substring(
-    //           0, _messageBuffer.length - backspacesCounter)
-    //       : _messageBuffer + dataString);
-    // }
+
   }
 
   void _sendMessage(String text) async {
@@ -259,8 +254,4 @@ class _ChatPage extends State<ChatPage> {
       }
     }
   }
-
-  // bool isConnected() {
-  //   return connection != null && connection?.isConnected;
-  // }
 }
