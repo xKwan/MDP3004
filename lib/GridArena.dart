@@ -113,6 +113,8 @@ class GridArena extends StatefulWidget {
                 data = Obstacle.updateIndex(data, index);
                 obstacles.addAll({index: data});
                 print(obstacles);
+                
+                _sendMessage("ADD, $index, ("+getObstacleCoordinates(obstacles[index]!)["x"].toString()+", "+getObstacleCoordinates(obstacles[index]!)["y"].toString()+")");
               }
 
             });
@@ -134,19 +136,19 @@ class GridArena extends StatefulWidget {
                     _index.contains(index)) ?
 
                     //If exists, is the obstacle facing up?
-                    obstacles[index]!.direction == "U" ? Border(
+                    obstacles[index]!.direction == "N" ? Border(
                     top: BorderSide(width: 5, color: Colors.red)
                     ):
                     //If exists, is the obstacle facing down?
-                    obstacles[index]!.direction == "D" ? Border(
+                    obstacles[index]!.direction == "S" ? Border(
                     bottom: BorderSide(width: 5, color: Colors.red)
                     ):
                     //If exists, is the obstacle facing left?
-                    obstacles[index]!.direction == "L" ? Border(
+                    obstacles[index]!.direction == "W" ? Border(
                     left: BorderSide(width: 5, color: Colors.red)
                     ):
                     //If exists, is the obstacle facing right?
-                    obstacles[index]!.direction == "R" ? Border(
+                    obstacles[index]!.direction == "E" ? Border(
                     right: BorderSide(width: 5, color: Colors.red)
                     ):
                     //If does not exist or if direction not specified, return null
@@ -165,11 +167,20 @@ class GridArena extends StatefulWidget {
         );
 
 
-    Map<String, int> getCoordinates () {
+    Map<String, int> getRobotCoordinates () {
       Map<String, int> cord = {"x": -1, "y": -1};
       if (_robot != -1){
         cord["x"] = _robot%_columns;
         cord["y"] = (_robot/_columns).floor();
+      }
+      return cord;
+    }
+    Map<String, int> getObstacleCoordinates (Obstacle ob) {
+
+      Map<String, int> cord = {"x": -1, "y": -1};
+      if (ob.index != -1){
+        cord["x"] = ob.index%_columns;
+        cord["y"] = (ob.index/_columns).floor();
       }
       return cord;
     }
@@ -221,8 +232,8 @@ class GridArena extends StatefulWidget {
                   flex: 5,
                   child: Container(
                     child: Text("("+
-                      getCoordinates()["x"].toString()+" , "+
-                          getCoordinates()["y"].toString()+")",
+                      getRobotCoordinates()["x"].toString()+" , "+
+                        getRobotCoordinates()["y"].toString()+")",
                       style: TextStyle(
                         fontSize: 25.0,
                       ),
@@ -238,9 +249,12 @@ class GridArena extends StatefulWidget {
              onAccept: (data) {
                setState(() {
                  if(data.action == action.REMOVE){
+
                    _index.remove(data.index);
                    obstacles.remove(data.index);
-                  print(obstacles);
+                   print(obstacles);
+
+                   _sendMessage("SUB, "+data.index.toString());
                 }
               });
             }
@@ -272,55 +286,32 @@ class GridArena extends StatefulWidget {
                      onLongPressMoveUpdate: (updates) => {
                         setState(() {
                           if(updates.localOffsetFromOrigin.dx > 0 && updates.localOffsetFromOrigin.dy !> updates.localOffsetFromOrigin.dx){
-                            Obstacle.updateDirection(obstacles[index]!, "D");
+                            Obstacle.updateDirection(obstacles[index]!, "S");
+                            
+                            _sendMessage("FACE, $index, S");
                           }
                           else if(updates.localOffsetFromOrigin.dx < 0 && updates.localOffsetFromOrigin.dy !> updates.localOffsetFromOrigin.dx){
-                            Obstacle.updateDirection(obstacles[index]!, "L");
+                            Obstacle.updateDirection(obstacles[index]!, "W");
+
+                            _sendMessage("FACE, $index, W");
+
                           }
                           else if(updates.localOffsetFromOrigin.dy > 0){
-                            Obstacle.updateDirection(obstacles[index]!, "R");
+                            Obstacle.updateDirection(obstacles[index]!, "E");
+
+                            _sendMessage("FACE, $index, E");
+
                           }
                           else if(updates.localOffsetFromOrigin.dy < 0){
-                            Obstacle.updateDirection(obstacles[index]!, "U");
+                            Obstacle.updateDirection(obstacles[index]!, "N");
+
+                            _sendMessage("FACE, $index, N");
+
                           }
                         })
 
-                     },
-
-                     // onLongPress: () => {
-                     //     onSwipeUp: () => {
-                     //       setState((){
-                     //         Obstacle.updateDirection(obstacles[index]!, "U");
-                     //         print("up");
-                     //       })
-                     //
-                     //     },
-                     //
-                     //
-                     //     onSwipeDown: () => {
-                     //       setState((){
-                     //         Obstacle.updateDirection(obstacles[index]!, "D");
-                     //         print("down");
-                     //       })
-                     //
-                     //     },
-                     //
-                     //     onSwipeLeft: () => {
-                     //       setState((){
-                     //         Obstacle.updateDirection(obstacles[index]!, "L");
-                     //         print("left");
-                     //       })
-                     //
-                     //     },
-                     //
-                     //     onSwipeRight: () => {
-                     //       setState((){
-                     //         Obstacle.updateDirection(obstacles[index]!, "R");
-                     //         print("right");
-                     //       }),
-                     //     },
-                     //
-                     // },
+                      },
+                       
                      child: rebuildCard(context, index)
                    ),
                  );
@@ -390,6 +381,27 @@ class GridArena extends StatefulWidget {
       else if (dataString == 'r'){
         if (_robot%_columns != _columns-1) {
           _robot = _robot+1;
+        }
+      }
+
+      else if (dataString.split(',')[0] == "TARGET"){
+        if (obstacles[dataString.split(',')[1]]!=null){
+          Obstacle data = Obstacle.updateId(obstacles[dataString.split(',')[1]]!, obstacles[dataString.split(',')[2]]);
+          obstacles.update(int.parse(dataString.split(',')[1]), (value) => data);
+
+        } else {
+          Obstacle data = new Obstacle(id: int.parse(dataString.split(',')[2]), index: int.parse(dataString.split(',')[1]), action: action.UNKNOWN );
+          _index.add(int.parse(dataString.split(',')[1]));
+          obstacles.addAll({int.parse(dataString.split(',')[1]): data});
+
+        }
+
+        try {
+          Obstacle data = Obstacle.updateDirection(obstacles[dataString.split(',')[1]]!, dataString.split(',')[3].toString());
+          obstacles.update(int.parse(dataString.split(',')[1]), (value) => data);
+
+        } catch (e) {
+          print(e);
         }
       }
 
