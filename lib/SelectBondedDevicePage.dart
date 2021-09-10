@@ -32,7 +32,7 @@ class _DeviceWithAvailability {
 
 class _SelectBondedDevicePage extends State<SelectBondedDevicePage> {
   List<_DeviceWithAvailability> devices =
-      List<_DeviceWithAvailability>.empty(growable: true);
+  List<_DeviceWithAvailability>.empty(growable: true);
 
   // Availability
   StreamSubscription<BluetoothDiscoveryResult>? _discoveryStreamSubscription;
@@ -58,12 +58,12 @@ class _SelectBondedDevicePage extends State<SelectBondedDevicePage> {
         devices = bondedDevices
             .map(
               (device) => _DeviceWithAvailability(
-                device,
-                widget.checkAvailability
-                    ? _DeviceAvailability.maybe
-                    : _DeviceAvailability.yes,
-              ),
-            )
+            device,
+            widget.checkAvailability
+                ? _DeviceAvailability.maybe
+                : _DeviceAvailability.yes,
+          ),
+        )
             .toList();
       });
     });
@@ -80,17 +80,17 @@ class _SelectBondedDevicePage extends State<SelectBondedDevicePage> {
   void _startDiscovery() {
     _discoveryStreamSubscription =
         FlutterBluetoothSerial.instance.startDiscovery().listen((r) {
-      setState(() {
-        Iterator i = devices.iterator;
-        while (i.moveNext()) {
-          var _device = i.current;
-          if (_device.device == r.device) {
-            _device.availability = _DeviceAvailability.yes;
-            _device.rssi = r.rssi;
-          }
-        }
-      });
-    });
+          setState(() {
+            Iterator i = devices.iterator;
+            while (i.moveNext()) {
+              var _device = i.current;
+              if (_device.device == r.device) {
+                _device.availability = _DeviceAvailability.yes;
+                _device.rssi = r.rssi;
+              }
+            }
+          });
+        });
 
     _discoveryStreamSubscription?.onDone(() {
       setState(() {
@@ -111,13 +111,13 @@ class _SelectBondedDevicePage extends State<SelectBondedDevicePage> {
   Widget build(BuildContext context) {
     List<BluetoothDeviceListEntry> list = devices
         .map((_device) => BluetoothDeviceListEntry(
-              device: _device.device,
-              rssi: _device.rssi,
-              enabled: _device.availability == _DeviceAvailability.yes,
-              onTap: () {
-                Navigator.of(context).pop(_device.device);
-              },
-            ))
+      device: _device.device,
+      rssi: _device.rssi,
+      enabled: _device.availability == _DeviceAvailability.yes,
+      onTap: () {
+        Navigator.of(context).pop(_device.device);
+      },
+    ))
         .toList();
     return Scaffold(
       appBar: AppBar(
@@ -125,19 +125,19 @@ class _SelectBondedDevicePage extends State<SelectBondedDevicePage> {
         actions: <Widget>[
           _isDiscovering
               ? FittedBox(
-                  child: Container(
-                    margin: new EdgeInsets.all(16.0),
-                    child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        Colors.white,
-                      ),
-                    ),
-                  ),
-                )
+            child: Container(
+              margin: new EdgeInsets.all(16.0),
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  Colors.white,
+                ),
+              ),
+            ),
+          )
               : IconButton(
-                  icon: Icon(Icons.replay),
-                  onPressed: _restartDiscovery,
-                )
+            icon: Icon(Icons.replay),
+            onPressed: _restartDiscovery,
+          )
         ],
       ),
       body: ListView(children: list),

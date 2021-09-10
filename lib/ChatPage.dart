@@ -4,11 +4,17 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
+import 'package:mdp3004/MainPage.dart';
+import 'BluetoothConnection.dart';
+// import 'BluetoothBroadcastState.dart';
 
 class ChatPage extends StatefulWidget {
   final BluetoothDevice server;
+  // var connection = BluetoothStateBroadcastWrapper.connection;
+  // var broadcast;
 
-  const ChatPage({required this.server});
+
+  ChatPage({required this.server});
 
   @override
   _ChatPage createState() => new _ChatPage();
@@ -23,7 +29,9 @@ class _Message {
 
 class _ChatPage extends State<ChatPage> {
   static final clientID = 0;
-  BluetoothConnection? connection;
+  var connection  = BluetoothStateBroadcastWrapper.connection ;
+  // var broadcast = Broadcast.instance;
+  var server;
 
   List<_Message> messages = List<_Message>.empty(growable: true);
   String _messageBuffer = '';
@@ -33,54 +41,61 @@ class _ChatPage extends State<ChatPage> {
   final ScrollController listScrollController = new ScrollController();
 
   bool isConnecting = true;
-  bool get isConnected => (connection?.isConnected ?? false);
+  bool get isConnected => (connection!=null ? true : false);
+  // set isConnected(connection) => isConnected = connection;
 
   bool isDisconnecting = false;
+
+  // _ChatPage(this.server, this.broadcast);
+
 
   @override
   void initState() {
     super.initState();
 
-    BluetoothConnection.toAddress(widget.server.address).then((_connection) {
-      print('Connected to the device');
-      connection = _connection;
-      setState(() {
-        isConnecting = false;
-        isDisconnecting = false;
-      });
+    print("chatinit");
+    print(connection);
+    try{
+      if (connection == null){
+        //getConnection();
+      } else {
+        listenToStream();
+      }
 
-      connection!.input!.listen(_onDataReceived).onDone(() {
-        // Example: Detect which side closed the connection
-        // There should be `isDisconnecting` flag to show are we are (locally)
-        // in middle of disconnecting process, should be set before calling
-        // `dispose`, `finish` or `close`, which all causes to disconnect.
-        // If we except the disconnection, `onDone` should be fired as result.
-        // If we didn't except this (no flag set), it means closing by remote.
-        if (isDisconnecting) {
-          print('Disconnecting locally!');
-        } else {
-          print('Disconnected remotely!');
-        }
-        if (this.mounted) {
-          setState(() {});
-        }
-      });
-    }).catchError((error) {
-      print('Cannot connect, exception occured');
-      print(error);
-    });
-  }
-
-  @override
-  void dispose() {
-    // Avoid memory leak (`setState` after dispose) and disconnect
-    if (isConnected) {
-      isDisconnecting = true;
-      connection?.dispose();
-      connection = null;
+    } catch (e) {
+      print(e);
     }
 
-    super.dispose();
+  }
+
+
+  void getConnection() async {
+    await Broadcast.setInstance(await BluetoothStateBroadcastWrapper.create(widget.server.address));
+    connection = BluetoothStateBroadcastWrapper.connection;
+    listenToStream();
+
+  }
+
+  void listenToStream() {
+
+    setState(() {
+      isConnecting = false;
+      isDisconnecting = false;
+    });
+
+    Broadcast.instance.btStateStream.listen(_onDataReceived).onDone(() {
+
+      if (isDisconnecting) {
+        print('Disconnecting locally!');
+        // dispose();
+      } else {
+        print('Disconnected remotely!');
+      }
+      if (this.mounted) {
+        setState(() {});
+      }
+
+    });
   }
 
   @override
@@ -112,6 +127,10 @@ class _ChatPage extends State<ChatPage> {
     final serverName = widget.server.name ?? "Unknown";
     return Scaffold(
       appBar: AppBar(
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () => Navigator.of(context).pop(context),
+          ),
           title: (isConnecting
               ? Text('Connecting chat to ' + serverName + '...')
               : isConnected
@@ -186,35 +205,33 @@ class _ChatPage extends State<ChatPage> {
         }
       }
     }
-    print(buffer);
-    // Decode message into string
+
+    // Create message if there is new line character
     String dataString = String.fromCharCodes(buffer);
-    print ("Data string: " + dataString);
 
     setState(() {
-      messages.add(_Message(2, dataString));
+      messages.add(_Message(1, dataString));
     });
-
-    //int index = buffer.indexOf(0);
-    /*if (~index != 0) {
-      setState(() {
-        messages.add(
-          _Message(
-            1,
-            backspacesCounter > 0
-                ? _messageBuffer.substring(
-                0, _messageBuffer.length - backspacesCounter)
-                : _messageBuffer + dataString.substring(0, index),
-          ),
-        );
-        _messageBuffer = dataString.substring(index);
-      });
-    } else {
-      _messageBuffer = (backspacesCounter > 0
-          ? _messageBuffer.substring(
-          0, _messageBuffer.length - backspacesCounter)
-          : _messageBuffer + dataString);
-    }*/
+    // int index = buffer.indexOf(10);
+    // if (~index != 0) {
+    //   setState(() {
+    //     messages.add(
+    //       _Message(
+    //         1,
+    //         backspacesCounter > 0
+    //             ? _messageBuffer.substring(
+    //                 0, _messageBuffer.length - backspacesCounter)
+    //             : _messageBuffer + dataString.substring(0, index),
+    //       ),
+    //     );
+    //     _messageBuffer = dataString.substring(index);
+    //   });
+    // } else {
+    //   _messageBuffer = (backspacesCounter > 0
+    //       ? _messageBuffer.substring(
+    //           0, _messageBuffer.length - backspacesCounter)
+    //       : _messageBuffer + dataString);
+    // }
   }
 
   void _sendMessage(String text) async {
@@ -223,7 +240,7 @@ class _ChatPage extends State<ChatPage> {
 
     if (text.length > 0) {
       try {
-        connection!.output.add(Uint8List.fromList(utf8.encode(text + "\r\n")));
+        connection!.output.add(Uint8List.fromList(utf8.encode(text)));
         await connection!.output.allSent;
 
         setState(() {
@@ -242,4 +259,8 @@ class _ChatPage extends State<ChatPage> {
       }
     }
   }
+
+// bool isConnected() {
+//   return connection != null && connection?.isConnected;
+// }
 }
