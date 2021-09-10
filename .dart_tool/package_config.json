@@ -152,12 +152,6 @@
       "languageVersion": "2.12"
     },
     {
-      "name": "swipe_gesture_recognizer",
-      "rootUri": "file:///S:/Android%20Studio/plugins/flutter/.pub-cache/hosted/pub.dartlang.org/swipe_gesture_recognizer-0.0.2",
-      "packageUri": "lib/",
-      "languageVersion": "2.1"
-    },
-    {
       "name": "term_glyph",
       "rootUri": "file:///S:/Android%20Studio/plugins/flutter/.pub-cache/hosted/pub.dartlang.org/term_glyph-1.2.0",
       "packageUri": "lib/",
@@ -188,7 +182,7 @@
       "languageVersion": "2.12"
     }
   ],
-  "generated": "2021-09-10T08:50:54.468845Z",
+  "generated": "2021-09-10T17:40:02.747582Z",
   "generator": "pub",
   "generatorVersion": "2.13.4"
 }

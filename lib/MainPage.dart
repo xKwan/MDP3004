@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
+import 'package:mdp3004/GridArena.dart';
 // import 'package:mdp3004/BluetoothBroadcastState.dart';
 import 'package:scoped_model/scoped_model.dart';
 
@@ -148,7 +149,7 @@ class _MainPage extends State<MainPage> {
               onLongPress: null,
             ),
 
-            Divider(),
+            /*Divider(),
             ListTile(title: const Text('Devices discovery and connection')),
             SwitchListTile(
               title: const Text('Auto-try specific pin when pairing'),
@@ -172,7 +173,25 @@ class _MainPage extends State<MainPage> {
                       .setPairingRequestHandler(null);
                 }
               },
-            ),
+            ),*/
+
+
+            Divider(),
+            ListTile(
+                title: ElevatedButton(
+                    child: const Text('Grid Arena'),
+                    onPressed: () async {
+                      Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) {
+                              return GridArena();
+                            },
+                          )
+                      );
+                    }
+
+                )),
+
             ListTile(
               title: ElevatedButton(
                   child: const Text('Explore discovered devices'),
@@ -247,8 +266,9 @@ class _MainPage extends State<MainPage> {
                   print("Connection Status: " + connection.toString());
                   print("Broadcast instance is:");
                   print(Broadcast.instance);
+                  print(Broadcast.instance!=null?.toString());
                   print(BluetoothStateBroadcastWrapper.connection);
-
+                  print("Server address: $serverAddress");
                 },
               ),
             ),

@@ -5,7 +5,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'package:mdp3004/MainPage.dart';
-import 'BluetoothConnection.dart';
+import '../BluetoothConnection.dart';
 // import 'BluetoothBroadcastState.dart';
 
 class ControlsPage extends StatefulWidget {
