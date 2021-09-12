@@ -50,8 +50,18 @@ class _DiscoveryPage extends State<DiscoveryPage> {
                     (element) => element.device.address == r.device.address);
             if (existingIndex >= 0)
               results[existingIndex] = r;
-            else
-              results.add(r);
+            else{
+              print('Device address is: ' + r.device.address.toString());
+              print('Device name is: ' + r.device.name.toString());
+
+              if(r.device.name == null){
+                results[existingIndex] = r;
+              }
+              else
+                {
+                  results.add(r);
+                }
+            }
           });
         });
 

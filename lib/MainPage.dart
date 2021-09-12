@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
@@ -262,13 +263,32 @@ class _MainPage extends State<MainPage> {
               title: ElevatedButton(
                 child: const Text('Connection status'),
                 onPressed: ()  {
+                  print("Print Server: $server");
                   print("Is connected?: " + isConnected.toString());
                   print("Connection Status: " + connection.toString());
-                  print("Broadcast instance is:");
-                  print(Broadcast.instance);
+                  print("Broadcast instance is bonded?:");
+                  //print(Broadcast.instance);
                   print(Broadcast.instance!=null?.toString());
-                  print(BluetoothStateBroadcastWrapper.connection);
+                  //(BluetoothStateBroadcastWrapper.connection);
                   print("Server address: $serverAddress");
+
+                },
+              ),
+            ),
+            ListTile(
+              title: ElevatedButton(
+                child: const Text('Reconnect'),
+                onPressed: ()  {
+                  if(!isConnected) {
+                    getConnection();
+
+                  }
+
+                  else
+                    {print("Already connected!");}
+                  setState(() {
+
+                  });
                 },
               ),
             ),
@@ -296,7 +316,7 @@ class _MainPage extends State<MainPage> {
       if (connection == null){
         getConnection();
       } else {
-        //listenToStream();
+        listenToStream();
       }
 
     } catch (e) {
@@ -349,10 +369,35 @@ class _MainPage extends State<MainPage> {
   void getConnection() async {
     await Broadcast.setInstance(await BluetoothStateBroadcastWrapper.create(server.address));
     connection = BluetoothStateBroadcastWrapper.connection;
+    setState(() {
+
+    });
+
     //listenToStream();
 
   }
 
+  void listenToStream() {
+
+    setState(() {
+      isConnecting = false;
+      isDisconnecting = false;
+    });
+
+    Broadcast.instance.btStateStream.listen(_onDataReceived).onDone(() {
+
+      if (isDisconnecting) {
+        print('Disconnecting locally!');
+        // dispose();
+      } else {
+        print('Disconnected remotely!');
+      }
+      if (this.mounted) {
+        setState(() {});
+      }
+
+    });
+  }
 
   void _disconnect(BuildContext context, BluetoothDevice server) {
     // Avoid memory leak (`setState` after dispose) and disconnect
@@ -361,19 +406,23 @@ class _MainPage extends State<MainPage> {
     print("Connection is: " + connection.toString());
     print("Server is: " + server.toString());
 
+    //Broadcast.instance.dispose();
+    //BluetoothStateBroadcastWrapper.connection.dispose();
+    Broadcast.setInstance(null);
+    print("Broadcast instance is:");
+    print(Broadcast.instance);
+
     if (isConnected) {
       isDisconnecting = true;
       connection?.dispose();
       connection = null;
     }
     setState(() {
-      Broadcast.instance.dispose();
-      BluetoothStateBroadcastWrapper.connection.dispose();
-      print("Broadcast instance is:");
-      print(Broadcast.instance);
+
     });
 
     print("After disconnecting:");
+
     print(server.bondState);
     print("Connection is $connection");
   }
@@ -398,6 +447,59 @@ class _MainPage extends State<MainPage> {
         },
       ),
     );
+  }
+
+  void _onDataReceived(Uint8List data) {
+    // Allocate buffer for parsed data
+    int backspacesCounter = 0;
+    data.forEach((byte) {
+      if (byte == 8 || byte == 127) {
+        backspacesCounter++;
+      }
+    });
+    Uint8List buffer = Uint8List(data.length - backspacesCounter);
+    int bufferIndex = buffer.length;
+
+    // Apply backspace control character
+    backspacesCounter = 0;
+    for (int i = data.length - 1; i >= 0; i--) {
+      if (data[i] == 8 || data[i] == 127) {
+        backspacesCounter++;
+      } else {
+        if (backspacesCounter > 0) {
+          backspacesCounter--;
+        } else {
+          buffer[--bufferIndex] = data[i];
+        }
+      }
+    }
+
+    // Create message if there is new line character
+    String dataString = String.fromCharCodes(buffer);
+
+    setState(() {
+
+    });
+    // int index = buffer.indexOf(10);
+    // if (~index != 0) {
+    //   setState(() {
+    //     messages.add(
+    //       _Message(
+    //         1,
+    //         backspacesCounter > 0
+    //             ? _messageBuffer.substring(
+    //                 0, _messageBuffer.length - backspacesCounter)
+    //             : _messageBuffer + dataString.substring(0, index),
+    //       ),
+    //     );
+    //     _messageBuffer = dataString.substring(index);
+    //   });
+    // } else {
+    //   _messageBuffer = (backspacesCounter > 0
+    //       ? _messageBuffer.substring(
+    //           0, _messageBuffer.length - backspacesCounter)
+    //       : _messageBuffer + dataString);
+    // }
   }
 
   Future<void> _startBackgroundTask(
