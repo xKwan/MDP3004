@@ -49,7 +49,7 @@ class _ControlsPageState extends State<ControlsPage> {
   void initState() {
     super.initState();
     
-    messages = PageStorage.of(context)?.readState(context, identifier: ValueKey("messages")) ?? messages;
+    //messages = PageStorage.of(context)?.readState(context, identifier: ValueKey("messages")) ?? messages;
 
     print("chatinit");
     print(connection);
@@ -99,6 +99,7 @@ class _ControlsPageState extends State<ControlsPage> {
 
   @override
   Widget build(BuildContext context) {
+
     final List<Row> list = messages.map((_message) {
       return Row(
         children: <Widget>[
@@ -158,6 +159,12 @@ class _ControlsPageState extends State<ControlsPage> {
                 onPressed: () {
                   print('Forward');
                   _sendMessage('f');
+                  Future.delayed(const Duration(milliseconds: 500), () {
+                    var text = _encodeString('State: Moving forward...');
+                    _onDataReceived(text);
+                    var text2 = _encodeString('State: Ready');
+                    _onDataReceived(text2);
+                  });
                 },
                 style: ElevatedButton.styleFrom(
                   //fixedSize: Size(240, 80),
@@ -175,6 +182,12 @@ class _ControlsPageState extends State<ControlsPage> {
                     onPressed: () {
                       print('Left');
                       _sendMessage('tl');
+                      Future.delayed(const Duration(milliseconds: 500), () {
+                        var text = _encodeString('State: Rotating Anti-clockwise...');
+                        _onDataReceived(text);
+                        var text2 = _encodeString('State: Ready');
+                        _onDataReceived(text2);
+                      });
                     },
                     style: ElevatedButton.styleFrom(
                       //fixedSize: Size(240, 80),
@@ -187,6 +200,12 @@ class _ControlsPageState extends State<ControlsPage> {
                     onPressed: () {
                       print('Right');
                       _sendMessage('tr');
+                      Future.delayed(const Duration(milliseconds: 500), () {
+                        var text = _encodeString('State: Rotating Clockwise...');
+                        _onDataReceived(text);
+                        var text2 = _encodeString('State: Ready');
+                        _onDataReceived(text2);
+                      });
                     },
                     style: ElevatedButton.styleFrom(
                       //fixedSize: Size(240, 80),
@@ -205,6 +224,12 @@ class _ControlsPageState extends State<ControlsPage> {
                 onPressed: () {
                   print('Reverse');
                   _sendMessage('r');
+                  Future.delayed(const Duration(milliseconds: 500), () {
+                    var text = _encodeString('State: Reversing...');
+                    _onDataReceived(text);
+                    var text2 = _encodeString('State: Ready');
+                    _onDataReceived(text2);
+                  });
                 },
                 style: ElevatedButton.styleFrom(
                   //fixedSize: Size(240, 80),
@@ -218,6 +243,10 @@ class _ControlsPageState extends State<ControlsPage> {
       ),
     );
 
+  }
+
+  _encodeString(var text) {
+    return Uint8List.fromList(utf8.encode(text));
   }
 
   void _onDataReceived(Uint8List data) {
