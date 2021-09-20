@@ -9,12 +9,6 @@ import '../BluetoothConnection.dart';
 // import 'BluetoothBroadcastState.dart';
 
 class ControlsPage extends StatefulWidget {
-  final BluetoothDevice server;
-  // var connection = BluetoothStateBroadcastWrapper.connection;
-  // var broadcast;
-
-
-  ControlsPage({required this.server});
 
   @override
   _ControlsPageState createState() => _ControlsPageState();
@@ -29,7 +23,7 @@ class _Message {
 
 
 
-class _ControlsPageState extends State<ControlsPage> {
+class _ControlsPageState extends State<ControlsPage> with AutomaticKeepAliveClientMixin<ControlsPage>{
   static final clientID = 0;
   var connection  = BluetoothStateBroadcastWrapper.connection ;
   var broadcast = Broadcast.instance;
@@ -46,10 +40,11 @@ class _ControlsPageState extends State<ControlsPage> {
   final ScrollController listScrollController = new ScrollController();
 
   @override
+  bool get wantKeepAlive => true;
+
+  @override
   void initState() {
     super.initState();
-    
-    //messages = PageStorage.of(context)?.readState(context, identifier: ValueKey("messages")) ?? messages;
 
     print("chatinit");
     print(connection);
@@ -66,14 +61,6 @@ class _ControlsPageState extends State<ControlsPage> {
     }
 
   }
-
-
-  // void getConnection() async {
-  //   await Broadcast.setInstance(await BluetoothStateBroadcastWrapper.create(widget.server.address));
-  //   connection = BluetoothStateBroadcastWrapper.connection;
-  //   listenToStream();
-  //
-  // }
 
   void listenToStream() {
 
@@ -138,9 +125,6 @@ class _ControlsPageState extends State<ControlsPage> {
     final serverName = "Name" ?? "Unknown";
     print('serverName is ' + serverName.toString());
     return Scaffold(
-      appBar: AppBar(
-          title: (Text('Controlling $serverName')
-          )),
       body: SafeArea(
         child: Column(
           children: <Widget>[

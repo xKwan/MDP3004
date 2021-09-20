@@ -10,7 +10,6 @@ enum action {
   UNKNOWN, ADD, REMOVE, PLACE, RESIZE, BORDER
 }
 
-
 class _Message {
   int whom;
   String text;
@@ -24,7 +23,7 @@ class GridArena extends StatefulWidget {
 
  }
  
- class _GridArenaState extends State<GridArena> {
+ class _GridArenaState extends State<GridArena> with AutomaticKeepAliveClientMixin<GridArena>{
 
   int _columns = 5;
   int _rows = 7;
@@ -32,11 +31,14 @@ class GridArena extends StatefulWidget {
   List<int> _index = [];
   int _robot = -1;
   var _action = action.UNKNOWN;
+  double robotAngle = 0;
+  var robotCurrentDirection = "N";
 
   Border _border = Border();
   var _cards = new Map();
 
   Map<int, Obstacle> obstacles = {};
+  var data = "";
 
   static final clientID = 0;
   var connection  = BluetoothStateBroadcastWrapper.connection ;
@@ -50,8 +52,10 @@ class GridArena extends StatefulWidget {
 
   bool isConnecting = true;
   bool get isConnected => (connection!=null ? true : false);
-
   bool isDisconnecting = false;
+
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
@@ -187,9 +191,47 @@ class GridArena extends StatefulWidget {
    @override
    Widget build(BuildContext context) {
      int obstID = obstacles.entries.length;
+     final List<Row> list = messages.map((_message) {
+       return Row(
+         children: <Widget>[
+           Container(
+             child: Text(
+                     (text) {
+                   if (text == 'f'){
+                     text = 'Forward';
+                   }
+                   if (text == 'tl'){
+                     text = 'Turn Left';
+                   }
+                   if (text == 'tr'){
+                     text = 'Turn Right';
+                   }
+                   if (text == 'r'){
+                     text = 'Reverse';
+                   }
+                   return text == '/shrug' ? '¯\\_(ツ)_/¯' : text;
+                 }(_message.text.trim()),
+                 style: TextStyle(color: Colors.white)),
+             padding: EdgeInsets.all(12.0),
+             margin: EdgeInsets.only(bottom: 8.0, left: 8.0, right: 8.0),
+             width: 222.0,
+             decoration: BoxDecoration(
+                 color:_message.whom == clientID ? Colors.blueAccent : Colors.grey,
+                 borderRadius: BorderRadius.circular(7.0)),
+           ),
+         ],
+         mainAxisAlignment: _message.whom == clientID
+             ? MainAxisAlignment.end
+             : MainAxisAlignment.start,
+       );
+     }).toList();
+
+     final serverName = "Name" ?? "Unknown";
+     print('serverName is ' + serverName.toString());
 
      return Scaffold(
        appBar: AppBar(
+         backgroundColor: Colors.cyan,
          title: DragTarget<Obstacle>(
             builder: (context, candidateData, rejectedData) => Container(
              alignment: Alignment.center,
@@ -259,69 +301,154 @@ class GridArena extends StatefulWidget {
             }
          ),
        ),
-         body: Padding(
-           padding: const EdgeInsets.all(8.0),
-           child: Container(
-             // height: MediaQuery.of(context).size.height*.95,
-             // width: MediaQuery.of(context).size.width*.7,
-             child: GridView.count(
-               childAspectRatio: 1,
-               crossAxisCount: _columns,
-               children: List.generate(_rows*_columns, (index) {
-                 return InkWell(
-                   onTap: () => {
-                     setState (() {
-                       print(index);
-                       // if (_action == action.ADD)
-                       //    _index.add(index);
-                       // else if (_action == action.REMOVE)
-                       //   _index.remove(index);
-                       if (_action == action.PLACE) {
-                         _robot = index;
-                       }
-                     })
-                   },
-                   child: GestureDetector(
-                     onLongPressMoveUpdate: (updates) => {
-                        setState(() {
-                          if(updates.localOffsetFromOrigin.dx > 0 && updates.localOffsetFromOrigin.dy !> updates.localOffsetFromOrigin.dx){
-                            Obstacle.updateDirection(obstacles[index]!, "S");
-                            
-                            _sendMessage("FACE, $index, S");
-                          }
-                          else if(updates.localOffsetFromOrigin.dx < 0 && updates.localOffsetFromOrigin.dy !> updates.localOffsetFromOrigin.dx){
-                            Obstacle.updateDirection(obstacles[index]!, "W");
+         resizeToAvoidBottomInset: false,
+         body: Container(
+           child: Column(
+             children: [
+               Container(
+                 child: Padding(
+                   padding: const EdgeInsets.all(8.0),
+                   child: Container(
+                      height: MediaQuery.of(context).size.height*.4,
+                      //width: MediaQuery.of(context).size.width*.7,
+                     child: GridView.count(
+                       childAspectRatio: 1,
+                       crossAxisCount: _columns,
+                       children: List.generate(_rows*_columns, (index) {
+                         return InkWell(
+                           onTap: () => {
+                             setState (() {
+                               print(index);
+                               // if (_action == action.ADD)
+                               //    _index.add(index);
+                               // else if (_action == action.REMOVE)
+                               //   _index.remove(index);
+                               if (_action == action.PLACE) {
+                                 _robot = index;
+                               }
+                             })
+                           },
+                           child: GestureDetector(
+                             onLongPressMoveUpdate: (updates) => {
+                                setState(() {
+                                  if(updates.localOffsetFromOrigin.dx > 0 && updates.localOffsetFromOrigin.dy !> updates.localOffsetFromOrigin.dx){
+                                    Obstacle.updateDirection(obstacles[index]!, "S");
 
-                            _sendMessage("FACE, $index, W");
+                                    _sendMessage("FACE, $index, S");
+                                  }
+                                  else if(updates.localOffsetFromOrigin.dx < 0 && updates.localOffsetFromOrigin.dy !> updates.localOffsetFromOrigin.dx){
+                                    Obstacle.updateDirection(obstacles[index]!, "W");
 
-                          }
-                          else if(updates.localOffsetFromOrigin.dy > 0){
-                            Obstacle.updateDirection(obstacles[index]!, "E");
+                                    _sendMessage("FACE, $index, W");
 
-                            _sendMessage("FACE, $index, E");
+                                  }
+                                  else if(updates.localOffsetFromOrigin.dy > 0){
+                                    Obstacle.updateDirection(obstacles[index]!, "E");
 
-                          }
-                          else if(updates.localOffsetFromOrigin.dy < 0){
-                            Obstacle.updateDirection(obstacles[index]!, "N");
+                                    _sendMessage("FACE, $index, E");
 
-                            _sendMessage("FACE, $index, N");
+                                  }
+                                  else if(updates.localOffsetFromOrigin.dy < 0){
+                                    Obstacle.updateDirection(obstacles[index]!, "N");
 
-                          }
-                        })
+                                    _sendMessage("FACE, $index, N");
 
-                      },
-                       
-                     child: rebuildCard(context, index)
+                                  }
+                                })
+                              },
+                             child: rebuildCard(context, index)
+                           ),
+                         );
+                       }),
+                     ),
                    ),
-                 );
-               }),
+                 ),
+               ),
+               
+               SizedBox(height: 30.0),
+               
+               Expanded(
+                 child: SingleChildScrollView(
+                   child: Container(
+                     child: Column(
+                       children: [
+                         ElevatedButton.icon(
+                           onPressed: () {
+                             print('Forward');
+                             _sendMessage('f');
+                             var text = _encodeString('f');
+                             _onDataReceived(text);
+                           },
+                           style: ElevatedButton.styleFrom(
+                             //fixedSize: Size(240, 80),
+                               primary: Colors.blue),
+                           icon: Icon(Icons.arrow_upward),
+                           label: Text('Forward'),
+                         ),
 
-             ),
+                         SizedBox(height: 30.0),
+
+                         Row(
+                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                           children: [
+                             ElevatedButton.icon(
+                               onPressed: () {
+                                 print('Left');
+                                 _sendMessage('tl');
+                                 var text = _encodeString('l');
+                                 _onDataReceived(text);
+                               },
+                               style: ElevatedButton.styleFrom(
+                                 //fixedSize: Size(240, 80),
+                                   primary: Colors.blue),
+                               icon: Icon(Icons.arrow_back),
+                               label: Text('Left'),
+                             ),
+
+                             SizedBox(width: 10.0),
+
+                             ElevatedButton.icon(
+                               onPressed: () {
+                                 print('Right');
+                                 _sendMessage('tr');
+                                 var text = _encodeString('r');
+                                 _onDataReceived(text);
+                               },
+                               style: ElevatedButton.styleFrom(
+                                 //fixedSize: Size(240, 80),
+                                   primary: Colors.blue),
+                               icon: Icon(Icons.arrow_forward),
+                               label: Text('Right'),
+                             ),
+                           ],
+                         ),
+
+                         SizedBox(height: 30.0),
+                         ElevatedButton.icon(
+                           onPressed: () {
+                             print('Reverse');
+                             _sendMessage('r');
+                             var text = _encodeString('b');
+                             _onDataReceived(text);
+                           },
+                           style: ElevatedButton.styleFrom(
+                             //fixedSize: Size(240, 80),
+                               primary: Colors.blue),
+                           icon: Icon(Icons.arrow_downward),
+                           label: Text('Reverse'),
+                         ),
+                       ],
+                     ),
+                   ),
+                 ),
+               ),
+             ],
            ),
-         ));
+         )
+     );
    }
 
-  void _onDataReceived(Uint8List data) {
+   _onDataReceived(Uint8List data) {
     // Allocate buffer for parsed data
     int backspacesCounter = 0;
     data.forEach((byte) {
@@ -353,7 +480,7 @@ class GridArena extends StatefulWidget {
     print(dataString);
 
     setState(() {
-      // messages.add(_Message(1, dataString));
+      //messages.add(_Message(1, dataString));
       print(_robot);
       if(dataString == 'f'){
         if (_robot < _columns);
@@ -405,6 +532,11 @@ class GridArena extends StatefulWidget {
       }
 
     });
+     return dataString;
+  }
+
+  _encodeString(var text) {
+    return Uint8List.fromList(utf8.encode(text));
   }
 
   void _sendMessage(String text) async {

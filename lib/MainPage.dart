@@ -1,22 +1,15 @@
 import 'dart:async';
 import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'package:mdp3004/GridArena.dart';
-// import 'package:mdp3004/BluetoothBroadcastState.dart';
-import 'package:scoped_model/scoped_model.dart';
-
-import './BackgroundCollectedPage.dart';
 import './BackgroundCollectingTask.dart';
 import './ChatPage.dart';
 import './DiscoveryPage.dart';
 import './SelectBondedDevicePage.dart';
 import 'BluetoothConnection.dart';
-import 'Controls.dart';
 
 
-// import './helpers/LineChart.dart';
 
 class MainPage extends StatefulWidget {
   @override
@@ -42,7 +35,7 @@ class _MainPage extends State<MainPage> {
 
   BackgroundCollectingTask? _collectingTask;
 
-  bool _autoAcceptPairingRequests = false;
+
 
   @override
   void initState() {
@@ -104,8 +97,9 @@ class _MainPage extends State<MainPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Flutter Bluetooth Serial'),
+        title: const Text('MDP Android Group 15'),
       ),
+
       body: Container(
         child: ListView(
           children: <Widget>[
@@ -150,49 +144,8 @@ class _MainPage extends State<MainPage> {
               onLongPress: null,
             ),
 
-            /*Divider(),
-            ListTile(title: const Text('Devices discovery and connection')),
-            SwitchListTile(
-              title: const Text('Auto-try specific pin when pairing'),
-              subtitle: const Text('Pin 1234'),
-              value: _autoAcceptPairingRequests,
-              onChanged: (bool value) {
-                setState(() {
-                  _autoAcceptPairingRequests = value;
-                });
-                if (value) {
-                  FlutterBluetoothSerial.instance.setPairingRequestHandler(
-                          (BluetoothPairingRequest request) {
-                        print("Trying to auto-pair with Pin 1234");
-                        if (request.pairingVariant == PairingVariant.Pin) {
-                          return Future.value("1234");
-                        }
-                        return Future.value(null);
-                      });
-                } else {
-                  FlutterBluetoothSerial.instance
-                      .setPairingRequestHandler(null);
-                }
-              },
-            ),*/
-
 
             Divider(),
-            ListTile(
-                title: ElevatedButton(
-                    child: const Text('Grid Arena'),
-                    onPressed: () async {
-                      Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) {
-                              return GridArena();
-                            },
-                          )
-                      );
-                    }
-
-                )),
-
             ListTile(
               title: ElevatedButton(
                   child: const Text('Explore discovered devices'),
@@ -215,7 +168,7 @@ class _MainPage extends State<MainPage> {
             ),
             ListTile(
               title: ElevatedButton(
-                child: const Text('Connect to paired device to chat'),
+                child: const Text('Connect to paired device'),
                 onPressed: () async {
                   final BluetoothDevice? selectedDevice =
                   await Navigator.of(context).push(
@@ -253,9 +206,15 @@ class _MainPage extends State<MainPage> {
             ),
             ListTile(
               title: ElevatedButton(
-                child: const Text('Controls'),
+                child: const Text('Grid Page'),
                 onPressed: ()  {
-                  _startControl(context, server!);
+                  Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) {
+                          return GridArena();
+                        },
+                      )
+                  );
                 },
               ),
             ),
@@ -271,6 +230,10 @@ class _MainPage extends State<MainPage> {
                   print(Broadcast.instance!=null?.toString());
                   //(BluetoothStateBroadcastWrapper.connection);
                   print("Server address: $serverAddress");
+
+                  var c1 = BluetoothStateBroadcastWrapper.connection;
+                  print("C1 connection is:");
+                  print(c1);
 
                 },
               ),
@@ -325,60 +288,15 @@ class _MainPage extends State<MainPage> {
 
   }
 
-  //   BluetoothConnection.toAddress(server.address).then((_connection) {
-  //
-  //     connection = _connection;
-  //     print('Connected to the device');
-  //     print('Connection is: $connection');
-  //     print('Connection address: ' + server.address);
-  //
-  //     setState(() {
-  //       isConnecting = false;
-  //       isDisconnecting = false;
-  //       print("Connection is: " + connection.toString());
-  //       getConnection(server.address);
-  //     });
-  //   }).catchError((error) {
-  //     print('Cannot connect, exception occured');
-  //     print(error);
-  //   });
-  // }
-
-  /*void listenToStream() {
-
-    setState(() {
-      isConnecting = false;
-      isDisconnecting = false;
-    });
-
-    Broadcast.instance.btStateStream.listen(_onDataReceived).onDone(() {
-
-      if (isDisconnecting) {
-        print('Disconnecting locally!');
-        // dispose();
-      } else {
-        print('Disconnected remotely!');
-      }
-      if (this.mounted) {
-        setState(() {});
-      }
-
-    });*/
-
 
   void getConnection() async {
     await Broadcast.setInstance(await BluetoothStateBroadcastWrapper.create(server.address));
     connection = BluetoothStateBroadcastWrapper.connection;
     setState(() {
-
     });
-
-    //listenToStream();
-
   }
 
   void listenToStream() {
-
     setState(() {
       isConnecting = false;
       isDisconnecting = false;
@@ -395,7 +313,6 @@ class _MainPage extends State<MainPage> {
       if (this.mounted) {
         setState(() {});
       }
-
     });
   }
 
@@ -428,7 +345,6 @@ class _MainPage extends State<MainPage> {
   }
 
   void _startChat(BuildContext context, BluetoothDevice server) {
-
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) {
@@ -438,16 +354,6 @@ class _MainPage extends State<MainPage> {
     );
   }
 
-  void _startControl(BuildContext context, BluetoothDevice server) {
-
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) {
-          return ControlsPage(server: server);
-        },
-      ),
-    );
-  }
 
   void _onDataReceived(Uint8List data) {
     // Allocate buffer for parsed data
@@ -480,54 +386,5 @@ class _MainPage extends State<MainPage> {
     setState(() {
 
     });
-    // int index = buffer.indexOf(10);
-    // if (~index != 0) {
-    //   setState(() {
-    //     messages.add(
-    //       _Message(
-    //         1,
-    //         backspacesCounter > 0
-    //             ? _messageBuffer.substring(
-    //                 0, _messageBuffer.length - backspacesCounter)
-    //             : _messageBuffer + dataString.substring(0, index),
-    //       ),
-    //     );
-    //     _messageBuffer = dataString.substring(index);
-    //   });
-    // } else {
-    //   _messageBuffer = (backspacesCounter > 0
-    //       ? _messageBuffer.substring(
-    //           0, _messageBuffer.length - backspacesCounter)
-    //       : _messageBuffer + dataString);
-    // }
-  }
-
-  Future<void> _startBackgroundTask(
-      BuildContext context,
-      BluetoothDevice server,
-      ) async {
-    try {
-      _collectingTask = await BackgroundCollectingTask.connect(server);
-      await _collectingTask!.start();
-    } catch (ex) {
-      _collectingTask?.cancel();
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: const Text('Error occured while connecting'),
-            content: Text("${ex.toString()}"),
-            actions: <Widget>[
-              new TextButton(
-                child: new Text("Close"),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-          );
-        },
-      );
-    }
   }
 }
