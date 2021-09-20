@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:typed_data';
+import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -29,10 +30,10 @@ class GridArena extends StatefulWidget {
   int _rows = 7;
 
   List<int> _index = [];
-  int _robot = -1;
+  int robotIndex = -1;
   var _action = action.UNKNOWN;
   double robotAngle = 0;
-  var robotCurrentDirection = "N";
+  var robotCurrentDirection = "0";
 
   Border _border = Border();
   var _cards = new Map();
@@ -99,9 +100,8 @@ class GridArena extends StatefulWidget {
           builder: (context, candidateData, rejectedData) => Container(
               child:
               //Check if robot has been placed
-              _robot == index?
-              Icon( Icons.android,
-                  color: Colors.deepOrange) :
+              robotIndex == index?
+              buildRotateRobot() :
               //Else check if obstacle has been placed
               _index.contains(index)?
               Text(obstacles[index]!.id.toString(),
@@ -123,6 +123,24 @@ class GridArena extends StatefulWidget {
             });
           }
       );
+
+  Widget buildRotateRobot() {
+    return Column (
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        //Text(robotCurrentDirection),
+        //Text(robotIndex.toString()),
+        Transform.rotate(
+          angle: robotAngle,
+          child: Icon(
+            Icons.android,
+            color: Colors.lightGreen,
+            size: 50,
+          ),
+        ),
+      ],
+    );
+  }
 
   Widget rebuildCard(BuildContext context, index) =>
         Card(
@@ -169,15 +187,15 @@ class GridArena extends StatefulWidget {
           ),
         );
 
-
-    Map<String, int> getRobotCoordinates () {
-      Map<String, int> cord = {"x": -1, "y": -1};
-      if (_robot != -1){
-        cord["x"] = _robot%_columns;
-        cord["y"] = (_robot/_columns).floor();
-      }
-      return cord;
+  Map<String, int> getRobotCoordinates () {
+    Map<String, int> cord = {"x": -1, "y": -1};
+    if (robotIndex != -1){
+      cord["x"] = robotIndex%_columns;
+      cord["y"] = (robotIndex/_columns).floor();
     }
+    return cord;
+  }
+
     Map<String, int> getObstacleCoordinates (Obstacle ob) {
 
       Map<String, int> cord = {"x": -1, "y": -1};
@@ -237,7 +255,6 @@ class GridArena extends StatefulWidget {
              alignment: Alignment.center,
              child: Row(
               children: <Widget>[
-
                  //Change dimension of grid
                  IconButton(onPressed: () async => {
                    await CustomDialog.showDialog(context).then((gridVal) =>
@@ -269,11 +286,11 @@ class GridArena extends StatefulWidget {
                    feedback: Material(child: Icon(Icons.view_in_ar, color: Colors.black) ),
                  ),
 
-                Expanded(
-                  flex: 5,
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16.0, 8.0, 0.0, 8.0),
                   child: Container(
                     child: Text("("+
-                      getRobotCoordinates()["x"].toString()+" , "+
+                        getRobotCoordinates()["x"].toString()+" , "+
                         getRobotCoordinates()["y"].toString()+")",
                       style: TextStyle(
                         fontSize: 25.0,
@@ -282,6 +299,17 @@ class GridArena extends StatefulWidget {
                       textAlign: TextAlign.center,
                     ),
                   ),
+                ),
+
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(robotCurrentDirection),
+                ),
+
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text("(" + robotIndex.toString() + ")"),
+
                 ),
               ],
              ),
@@ -324,7 +352,7 @@ class GridArena extends StatefulWidget {
                                // else if (_action == action.REMOVE)
                                //   _index.remove(index);
                                if (_action == action.PLACE) {
-                                 _robot = index;
+                                 robotIndex = index;
                                }
                              })
                            },
@@ -375,6 +403,7 @@ class GridArena extends StatefulWidget {
                          ElevatedButton.icon(
                            onPressed: () {
                              print('Forward');
+                             moveForward();
                              _sendMessage('f');
                              var text = _encodeString('f');
                              _onDataReceived(text);
@@ -393,7 +422,8 @@ class GridArena extends StatefulWidget {
                            children: [
                              ElevatedButton.icon(
                                onPressed: () {
-                                 print('Left');
+                                 rotateLeft();
+                                 print('Rotate Left');
                                  _sendMessage('tl');
                                  var text = _encodeString('l');
                                  _onDataReceived(text);
@@ -402,14 +432,15 @@ class GridArena extends StatefulWidget {
                                  //fixedSize: Size(240, 80),
                                    primary: Colors.blue),
                                icon: Icon(Icons.arrow_back),
-                               label: Text('Left'),
+                               label: Text('Rotate Left'),
                              ),
 
                              SizedBox(width: 10.0),
 
                              ElevatedButton.icon(
                                onPressed: () {
-                                 print('Right');
+                                 rotateRight();
+                                 print('Rotate Right');
                                  _sendMessage('tr');
                                  var text = _encodeString('r');
                                  _onDataReceived(text);
@@ -418,7 +449,7 @@ class GridArena extends StatefulWidget {
                                  //fixedSize: Size(240, 80),
                                    primary: Colors.blue),
                                icon: Icon(Icons.arrow_forward),
-                               label: Text('Right'),
+                               label: Text('Rotate Right'),
                              ),
                            ],
                          ),
@@ -426,6 +457,7 @@ class GridArena extends StatefulWidget {
                          SizedBox(height: 30.0),
                          ElevatedButton.icon(
                            onPressed: () {
+                             moveReverse();
                              print('Reverse');
                              _sendMessage('r');
                              var text = _encodeString('b');
@@ -437,6 +469,16 @@ class GridArena extends StatefulWidget {
                            icon: Icon(Icons.arrow_downward),
                            label: Text('Reverse'),
                          ),
+
+                         /*ElevatedButton(
+                             onPressed: () {
+                               setRobotLocation(4, 2, "W");
+                             },
+                             child: Text(
+                               "Set Robot Location",
+                               style: TextStyle(color: Colors.white),
+                             )
+                         ),*/
                        ],
                      ),
                    ),
@@ -481,34 +523,41 @@ class GridArena extends StatefulWidget {
 
     setState(() {
       //messages.add(_Message(1, dataString));
-      print(_robot);
+      /*print(robotIndex);
       if(dataString == 'f'){
-        if (_robot < _columns);
+        if (robotIndex < _columns);
         else {
-          _robot = (_robot-_columns);
-          print(_robot);
+          robotIndex = (robotIndex-_columns);
+          print(robotIndex);
         }
       }
 
       else if (dataString == 'b'){
-        if (_robot >= (_columns*(_rows-1)));
+        if (robotIndex >= (_columns*(_rows-1)));
         else {
-          _robot = (_robot+_columns);
-          print(_robot);
+          robotIndex = (robotIndex+_columns);
+          print(robotIndex);
         }
       }
 
       else if (dataString == 'l'){
-        if (_robot%_columns != 0) {
-          _robot = _robot-1;
+        if (robotIndex%_columns != 0) {
+          robotIndex = robotIndex-1;
         }
       }
 
       else if (dataString == 'r'){
-        if (_robot%_columns != _columns-1) {
-          _robot = _robot+1;
+        if (robotIndex%_columns != _columns-1) {
+          robotIndex = robotIndex+1;
         }
-      }
+      }*/
+
+      print(dataString.split(',')[0]);
+      if (dataString.split(',')[0] == "ROBOT"){
+        dataString = dataString.toUpperCase();
+        print("Received ROBOT Command");
+        setRobotLocation(int.parse(dataString.split(',')[1]), int.parse(dataString.split(',')[2]), dataString.split(',')[3]);
+        }
 
       else if (dataString.split(',')[0] == "TARGET"){
         if (obstacles[dataString.split(',')[1]]!=null){
@@ -563,6 +612,142 @@ class GridArena extends StatefulWidget {
         setState(() {});
       }
     }
+  }
+
+  moveForward() {
+    setState(() {
+      if(robotCurrentDirection == "N"){
+        if(robotIndex < _columns);
+        else {
+          robotIndex = robotIndex - _columns;
+        }
+        print(robotIndex);
+      }
+
+      else if(robotCurrentDirection == "E"){
+        if (robotIndex%_columns != _columns-1) {
+          robotIndex = robotIndex+1;
+        }
+        print(robotIndex);
+      }
+
+      else if(robotCurrentDirection == "S"){
+        if (robotIndex >= (_columns*(_rows-1)));
+        else {
+          robotIndex = (robotIndex+_columns);
+        }
+        print(robotIndex);
+      }
+
+      else if(robotCurrentDirection == "W"){
+        if (robotIndex%_columns != 0) {
+          robotIndex = robotIndex-1;
+        }
+
+      }
+    });
+  }
+
+  moveReverse() {
+    setState(() {
+      if(robotCurrentDirection == "N"){
+        if(robotIndex >= _columns*(_rows-1));
+        else {
+          robotIndex = robotIndex + _columns;
+        }
+        print(robotIndex);
+      }
+
+      else if(robotCurrentDirection == "E"){
+        if (robotIndex%_columns < 1);
+        else {
+          robotIndex = robotIndex-1;
+        }
+        print(robotIndex);
+      }
+
+      else if(robotCurrentDirection == "S"){
+        if (robotIndex < _columns);
+        else {
+          robotIndex = (robotIndex-_columns);
+        }
+        print(robotIndex);
+      }
+
+      else if(robotCurrentDirection == "W"){
+        if (robotIndex%_columns == _columns-1);
+        else {
+          robotIndex = robotIndex+1;
+        }
+      }
+    });
+  }
+
+  rotateLeft() {
+    setState(() {
+      if (robotAngle < -6) {
+        robotAngle = 0;
+      }
+      robotAngle -= pi / 2;
+      checkRobotDirection();
+    });
+    print("Angle is: $robotAngle");
+    return robotAngle;
+  }
+
+  rotateRight() {
+    setState(() {
+      if (robotAngle > 6) {
+        robotAngle = 0;
+      }
+      robotAngle += pi / 2;
+      checkRobotDirection();
+    });
+    print("Angle is: $robotAngle");
+    return robotAngle;
+  }
+
+  checkRobotDirection() {
+    if (robotAngle % (pi * 2) == pi * 0.5) {
+      robotCurrentDirection = "E";
+    }
+    else if (robotAngle % (pi * 2) == pi) {
+      robotCurrentDirection = "S";
+    }
+    else if (robotAngle % (pi * 2) == pi * 1.5) {
+      robotCurrentDirection = "W";
+    }
+    else if (robotAngle % (pi * 2) == 0) {
+      robotCurrentDirection = "N";
+    }
+  }
+
+  setRobotDirection(direction) {
+    setState(() {
+      if (direction == "E") {
+        robotAngle = pi * 0.5;
+      }
+      else if (direction == "S") {
+        robotAngle = pi;
+      }
+      else if (direction == "W") {
+        robotAngle = pi * 1.5;
+      }
+      else if (direction == "N") {
+        robotAngle = 0;
+      }
+    });
+  }
+
+  setRobotLocation(x, y, direction) {
+      print("Received message to update robot location");
+      print("$x, $y, $direction");
+
+    setState(() {
+      robotIndex = x + 5*(y);
+      robotCurrentDirection = direction;
+      setRobotDirection(direction);
+    });
   }
  }
 

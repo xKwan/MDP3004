@@ -21,7 +21,7 @@ class _RobotUI extends State<RobotUI> {
   bool isDisconnecting = false;
 
 
-  @override
+  /*@override
   void initState() {
     super.initState();
     print("initState");
@@ -64,7 +64,7 @@ class _RobotUI extends State<RobotUI> {
       }
 
     });
-  }
+  }*/
 
 
   @override
@@ -108,7 +108,7 @@ class _RobotUI extends State<RobotUI> {
       );
   }
 
-  void _onDataReceived(Uint8List data) {
+  /*void _onDataReceived(Uint8List data) {
     // Allocate buffer for parsed data
     int backspacesCounter = 0;
     data.forEach((byte) {
@@ -138,6 +138,6 @@ class _RobotUI extends State<RobotUI> {
 
     setState(() {
     });
-  }
+  }*/
 
 }
