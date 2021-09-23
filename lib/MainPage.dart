@@ -1,19 +1,17 @@
 import 'dart:async';
-
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
-// import 'package:mdp3004/BluetoothBroadcastState.dart';
-import 'package:scoped_model/scoped_model.dart';
-
-import './BackgroundCollectedPage.dart';
+import 'package:mdp3004/GridArena.dart';
 import './BackgroundCollectingTask.dart';
 import './ChatPage.dart';
 import './DiscoveryPage.dart';
 import './SelectBondedDevicePage.dart';
 import 'BluetoothConnection.dart';
+import 'package:retry/retry.dart';
 
 
-// import './helpers/LineChart.dart';
+
 
 class MainPage extends StatefulWidget {
   @override
@@ -39,7 +37,7 @@ class _MainPage extends State<MainPage> {
 
   BackgroundCollectingTask? _collectingTask;
 
-  bool _autoAcceptPairingRequests = false;
+
 
   @override
   void initState() {
@@ -96,20 +94,14 @@ class _MainPage extends State<MainPage> {
     super.dispose();
   }
 
-  void getConnection() async {
-    await Broadcast.setInstance(await BluetoothStateBroadcastWrapper.create(server.address));
-    connection = BluetoothStateBroadcastWrapper.connection;
-    //listenToStream();
-
-  }
-
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Flutter Bluetooth Serial'),
+        title: const Text('MDP Android Group 15'),
       ),
+
       body: Container(
         child: ListView(
           children: <Widget>[
@@ -135,7 +127,7 @@ class _MainPage extends State<MainPage> {
             ),
             ListTile(
               title: const Text('Bluetooth status'),
-              subtitle: isConnected? Text('Live chat with ' + serverAddress.toString())
+              subtitle: Broadcast.instance!=null? Text('Live chat with ' + serverAddress.toString())
                   : Text('Disconnected'),
               trailing: ElevatedButton(
                 child: const Text('Settings'),
@@ -154,37 +146,14 @@ class _MainPage extends State<MainPage> {
               onLongPress: null,
             ),
 
+
             Divider(),
-            ListTile(title: const Text('Devices discovery and connection')),
-            SwitchListTile(
-              title: const Text('Auto-try specific pin when pairing'),
-              subtitle: const Text('Pin 1234'),
-              value: _autoAcceptPairingRequests,
-              onChanged: (bool value) {
-                setState(() {
-                  _autoAcceptPairingRequests = value;
-                });
-                if (value) {
-                  FlutterBluetoothSerial.instance.setPairingRequestHandler(
-                      (BluetoothPairingRequest request) {
-                    print("Trying to auto-pair with Pin 1234");
-                    if (request.pairingVariant == PairingVariant.Pin) {
-                      return Future.value("1234");
-                    }
-                    return Future.value(null);
-                  });
-                } else {
-                  FlutterBluetoothSerial.instance
-                      .setPairingRequestHandler(null);
-                }
-              },
-            ),
             ListTile(
               title: ElevatedButton(
                   child: const Text('Explore discovered devices'),
                   onPressed: () async {
                     final BluetoothDevice? selectedDevice =
-                        await Navigator.of(context).push(
+                    await Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (context) {
                           return DiscoveryPage();
@@ -201,10 +170,10 @@ class _MainPage extends State<MainPage> {
             ),
             ListTile(
               title: ElevatedButton(
-                child: const Text('Connect to paired device to chat'),
+                child: const Text('Connect to paired device'),
                 onPressed: () async {
                   final BluetoothDevice? selectedDevice =
-                      await Navigator.of(context).push(
+                  await Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (context) {
                         return SelectBondedDevicePage(checkAvailability: false);
@@ -233,17 +202,62 @@ class _MainPage extends State<MainPage> {
               title: ElevatedButton(
                 child: const Text('Chat Page'),
                 onPressed: ()  {
-                    _startChat(context, server!);
-                  },
+                  _startChat(context, server!);
+                },
+              ),
+            ),
+            ListTile(
+              title: ElevatedButton(
+                child: const Text('Grid Page'),
+                onPressed: ()  {
+                  Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) {
+                          return GridArena();
+                        },
+                      )
+                  );
+                },
               ),
             ),
             ListTile(
               title: ElevatedButton(
                 child: const Text('Connection status'),
                 onPressed: ()  {
+                  print("Print Server: $server");
                   print("Is connected?: " + isConnected.toString());
                   print("Connection Status: " + connection.toString());
+                  print("Broadcast instance is bonded?:");
+                  //print(Broadcast.instance);
+                  print(Broadcast.instance!=null?.toString());
+                  //(BluetoothStateBroadcastWrapper.connection);
+                  print("Server address: $serverAddress");
 
+                  var c1 = BluetoothStateBroadcastWrapper.connection;
+                  print("C1 connection is:");
+                  print(c1);
+
+                },
+              ),
+            ),
+            ListTile(
+              title: ElevatedButton(
+                child: const Text('Reconnect'),
+                onPressed: ()  async {
+                  while(!isConnected) {
+                    await Future.delayed(const Duration(milliseconds: 2000));
+                    getConnection();
+                    print("Retrying...");
+                    await Future.delayed(const Duration(milliseconds: 4000));
+                  }
+                  /*if(isConnected){
+                    getConnection();
+                  }*/
+                  /*else
+                    {print("Already connected!");}
+                  setState(() {
+
+                  });*/
                 },
               ),
             ),
@@ -271,7 +285,7 @@ class _MainPage extends State<MainPage> {
       if (connection == null){
         getConnection();
       } else {
-        //listenToStream();
+        listenToStream();
       }
 
     } catch (e) {
@@ -280,27 +294,15 @@ class _MainPage extends State<MainPage> {
 
   }
 
-  //   BluetoothConnection.toAddress(server.address).then((_connection) {
-  //
-  //     connection = _connection;
-  //     print('Connected to the device');
-  //     print('Connection is: $connection');
-  //     print('Connection address: ' + server.address);
-  //
-  //     setState(() {
-  //       isConnecting = false;
-  //       isDisconnecting = false;
-  //       print("Connection is: " + connection.toString());
-  //       getConnection(server.address);
-  //     });
-  //   }).catchError((error) {
-  //     print('Cannot connect, exception occured');
-  //     print(error);
-  //   });
-  // }
 
-  /*void listenToStream() {
+  void getConnection() async {
+    await Broadcast.setInstance(await BluetoothStateBroadcastWrapper.create(server.address));
+    connection = BluetoothStateBroadcastWrapper.connection;
+    setState(() {
+    });
+  }
 
+  void listenToStream() {
     setState(() {
       isConnecting = false;
       isDisconnecting = false;
@@ -317,33 +319,38 @@ class _MainPage extends State<MainPage> {
       if (this.mounted) {
         setState(() {});
       }
-
-    });*/
-
+    });
+  }
 
   void _disconnect(BuildContext context, BluetoothDevice server) {
-       // Avoid memory leak (`setState` after dispose) and disconnect
+    // Avoid memory leak (`setState` after dispose) and disconnect
     print("Disconnect button is pressed, isConnected status:");
     print(isConnected);
     print("Connection is: " + connection.toString());
     print("Server is: " + server.toString());
 
-      if (isConnected) {
-        isDisconnecting = true;
-        connection?.dispose();
-        connection = null;
-      }
-      setState(() {
+    //Broadcast.instance.dispose();
+    //BluetoothStateBroadcastWrapper.connection.dispose();
+    Broadcast.setInstance(null);
+    print("Broadcast instance is:");
+    print(Broadcast.instance);
 
-      });
+    if (isConnected) {
+      isDisconnecting = true;
+      connection?.dispose();
+      connection = null;
+    }
+    setState(() {
 
-      print("After disconnecting:");
-      print(server.bondState);
-      print("Connection is $connection");
+    });
+
+    print("After disconnecting:");
+
+    print(server.bondState);
+    print("Connection is $connection");
   }
 
   void _startChat(BuildContext context, BluetoothDevice server) {
-
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) {
@@ -353,32 +360,37 @@ class _MainPage extends State<MainPage> {
     );
   }
 
-  Future<void> _startBackgroundTask(
-    BuildContext context,
-    BluetoothDevice server,
-  ) async {
-    try {
-      _collectingTask = await BackgroundCollectingTask.connect(server);
-      await _collectingTask!.start();
-    } catch (ex) {
-      _collectingTask?.cancel();
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: const Text('Error occured while connecting'),
-            content: Text("${ex.toString()}"),
-            actions: <Widget>[
-              new TextButton(
-                child: new Text("Close"),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-          );
-        },
-      );
+
+  void _onDataReceived(Uint8List data) {
+    // Allocate buffer for parsed data
+    int backspacesCounter = 0;
+    data.forEach((byte) {
+      if (byte == 8 || byte == 127) {
+        backspacesCounter++;
+      }
+    });
+    Uint8List buffer = Uint8List(data.length - backspacesCounter);
+    int bufferIndex = buffer.length;
+
+    // Apply backspace control character
+    backspacesCounter = 0;
+    for (int i = data.length - 1; i >= 0; i--) {
+      if (data[i] == 8 || data[i] == 127) {
+        backspacesCounter++;
+      } else {
+        if (backspacesCounter > 0) {
+          backspacesCounter--;
+        } else {
+          buffer[--bufferIndex] = data[i];
+        }
+      }
     }
+
+    // Create message if there is new line character
+    String dataString = String.fromCharCodes(buffer);
+
+    setState(() {
+
+    });
   }
 }
