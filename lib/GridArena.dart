@@ -287,7 +287,7 @@ class GridArena extends StatefulWidget {
                  ),
 
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(16.0, 8.0, 0.0, 8.0),
+                  padding: const EdgeInsets.fromLTRB(10.0, 8.0, 0.0, 8.0),
                   child: Container(
                     child: Text("("+
                         getRobotCoordinates()["x"].toString()+" , "+
@@ -302,12 +302,12 @@ class GridArena extends StatefulWidget {
                 ),
 
                 Padding(
-                  padding: const EdgeInsets.all(8.0),
+                  padding: const EdgeInsets.all(5.0),
                   child: Text(robotCurrentDirection),
                 ),
 
                 Padding(
-                  padding: const EdgeInsets.all(8.0),
+                  padding: const EdgeInsets.all(5.0),
                   child: Text("(" + robotIndex.toString() + ")"),
 
                 ),
@@ -337,7 +337,7 @@ class GridArena extends StatefulWidget {
                  child: Padding(
                    padding: const EdgeInsets.all(8.0),
                    child: Container(
-                      height: MediaQuery.of(context).size.height*.4,
+                      height: MediaQuery.of(context).size.height*.7,
                       //width: MediaQuery.of(context).size.width*.7,
                      child: GridView.count(
                        childAspectRatio: 1,
@@ -572,8 +572,9 @@ class GridArena extends StatefulWidget {
         }
 
         try {
-          Obstacle data = Obstacle.updateDirection(obstacles[dataString.split(',')[1]]!, dataString.split(',')[3].toString());
-          obstacles.update(int.parse(dataString.split(',')[1]), (value) => data);
+          print("Try");
+          Obstacle updatedObstacle = Obstacle.updateDirection(obstacles[int.parse(dataString.split(',')[1])]!, dataString.split(',')[3].toString());
+          obstacles.update(int.parse(dataString.split(',')[1]), (value) => updatedObstacle);
 
         } catch (e) {
           print(e);
