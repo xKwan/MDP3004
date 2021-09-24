@@ -41,7 +41,7 @@ class _ChatPage extends State<ChatPage> {
   final ScrollController listScrollController = new ScrollController();
 
   bool isConnecting = true;
-  bool get isConnected => (connection!=null ? true : false);
+  bool get isConnected => (Broadcast.instance !=null ? true : false);
   // set isConnected(connection) => isConnected = connection;
 
   bool isDisconnecting = false;
@@ -53,10 +53,11 @@ class _ChatPage extends State<ChatPage> {
   void initState() {
     super.initState();
 
+    print(FlutterBluetoothSerial.instance.getBondStateForAddress("48:A4:72:73:20:11").toString());
     print("chatinit");
     print(connection);
     try{
-      if (connection == null){
+      if (isConnected == false){
         getConnection();
       } else {
         listenToStream();
@@ -80,17 +81,22 @@ class _ChatPage extends State<ChatPage> {
 
     setState(() {
       isConnecting = false;
-      isDisconnecting = false;
+      // isDisconnecting = false;
     });
 
     Broadcast.instance.btStateStream.listen(_onDataReceived).onDone(() {
 
-      if (isDisconnecting) {
-        print('Disconnecting locally!');
-        // dispose();
-      } else {
-        print('Disconnected remotely!');
-      }
+
+        print("DISCONNECT");
+        if (Broadcast.isDisconnected == disconnectedBy.LOCAL) {
+          print('Disconnecting locally!');
+          // dispose();
+        } else {
+            print('Disconnected remotely!');
+            Broadcast.setDisconnection("REMOTE");
+            Broadcast.setInstance(null);
+            // connection = null;
+        }
       if (this.mounted) {
         setState(() {});
       }

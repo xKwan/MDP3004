@@ -4,6 +4,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'package:rxdart/rxdart.dart';
 
+enum disconnectedBy {
+  REMOTE, LOCAL, UNKNOWN
+}
+
 class BluetoothStateBroadcastWrapper {
 
   static var connection;
@@ -42,7 +46,10 @@ class BluetoothStateBroadcastWrapper {
     print("private");
     if (connection != null) {
       print("btcon");
-      _sub = connection.input.listen((obj) => _stateStreamController.sink.add(obj));
+      _sub = connection.input.listen((obj) => _stateStreamController.sink.add(obj)).onDone(() {
+        dispose();
+        print("DC");
+      });
 
     }
   }
@@ -56,6 +63,7 @@ class BluetoothStateBroadcastWrapper {
 
     _stateStreamController?.close();
     _sub?.cancel();
+    connection?.input?.listen()?.close();
     connection = null;
     //TODO: Close connection
 
@@ -67,11 +75,22 @@ class BluetoothStateBroadcastWrapper {
 class Broadcast extends ChangeNotifier {
 
   static var instance;
+  static var isDisconnected = disconnectedBy.REMOTE;
 
   static Future<BluetoothStateBroadcastWrapper> setInstance(broadcast) async {
     instance = await broadcast;
     return instance;
   }
+
+  static void setDisconnection(con) {
+    if (con == "LOCAL")
+      isDisconnected = disconnectedBy.LOCAL;
+    else
+      isDisconnected = disconnectedBy.REMOTE;
+
+}
+
+
 
 }
 
