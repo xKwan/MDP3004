@@ -31,12 +31,16 @@ class _GridArenaState extends State<GridArena>
   var _action = action.UNKNOWN;
   double robotAngle = 0;
   var robotCurrentDirection = "0";
+  bool isStarted = false;
 
   Border _border = Border();
   var _cards = new Map();
 
   Map<int, Obstacle> obstacles = {};
   var data = "";
+
+  String receivedText = "";
+  String sentText = "";
 
   static final clientID = 0;
   var connection = BluetoothStateBroadcastWrapper.connection;
@@ -379,6 +383,12 @@ class _GridArenaState extends State<GridArena>
                               //   _index.remove(index);
                               if (_action == action.PLACE) {
                                 robotIndex = index;
+                                if(robotCurrentDirection == '0'){
+                                  robotCurrentDirection = "N";
+                                }
+                                var text = ("ROBOT," + getRobotCoordinates()["x"].toString() + ","
+                                    + getRobotCoordinates()["y"].toString() + "," + robotCurrentDirection);
+                                _sendMessage(text);
                               }
                             })
                           },
@@ -435,6 +445,58 @@ class _GridArenaState extends State<GridArena>
                   child: Container(
                     child: Column(
                       children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            SizedBox(
+                              child: Text(
+                                "Received: " + receivedText,
+                              ),
+                            ),
+                            SizedBox(
+                              child: Text(
+                                "Sent: " + sentText,
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        SizedBox(height: 10),
+                        Text("Robot moving?: " + isStarted.toString()),
+                        Divider(thickness: 2),
+
+                        IntrinsicHeight(
+                          child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                ElevatedButton.icon(
+                                  onPressed: () {
+                                    _sendMessage('STM: start');
+                                    isStarted = true;
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                      primary: Colors.green),
+                                  icon: Icon(Icons.play_arrow),
+                                  label: Text('Start'),
+                                ),
+                                VerticalDivider(width: 10.0, thickness: 2),
+                                ElevatedButton.icon(
+                                  onPressed: () {
+                                    //_sendMessage('STM: stop');
+                                    if(isStarted == true)
+                                      {
+                                        confirmStopDialog(context);
+                                      }
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                      primary: Colors.red),
+                                  icon: Icon(Icons.stop_circle),
+                                  label: Text('Stop'),
+                                ),
+                              ]),
+                        ),
+                        Divider(height: 30, thickness: 2),
+
                         IntrinsicHeight(
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -444,8 +506,9 @@ class _GridArenaState extends State<GridArena>
                                   onPressed: () {
                                     print('Forward Left');
                                     forwardLeft();
-                                    /*_sendMessage('f');
-                                     var text = _encodeString('f');
+                                    _sendMessage('STM: tl');
+                                    getSentText('Turn Left');
+                                     /*var text = _encodeString('f');
                                      _onDataReceived(text);*/
                                   },
                                   style: ElevatedButton.styleFrom(
@@ -461,9 +524,10 @@ class _GridArenaState extends State<GridArena>
                                   onPressed: () {
                                     print('Forward');
                                     moveForward();
-                                    _sendMessage('f');
-                                    var text = _encodeString('f');
-                                    _onDataReceived(text);
+                                    _sendMessage('STM: f');
+                                    getSentText('Forward');
+                                    /*var text = _encodeString('f');
+                                    _onDataReceived(text);*/
                                   },
                                   style: ElevatedButton.styleFrom(
                                       //fixedSize: Size(240, 80),
@@ -478,8 +542,9 @@ class _GridArenaState extends State<GridArena>
                                   onPressed: () {
                                     print('Forward Right');
                                     forwardRight();
-                                    /*_sendMessage('f');
-                                     var text = _encodeString('f');
+                                    _sendMessage('STM: tr');
+                                    getSentText('Turn Right');
+                                     /*var text = _encodeString('f');
                                      _onDataReceived(text);*/
                                   },
                                   style: ElevatedButton.styleFrom(
@@ -537,14 +602,14 @@ class _GridArenaState extends State<GridArena>
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
-                              SizedBox(
+                              /*SizedBox(
                                 child: ElevatedButton.icon(
                                   onPressed: () {
                                     print('Reverse Left');
                                     reverseLeft();
-                                    /*_sendMessage('f');
+                                    *//*_sendMessage('f');
                                      var text = _encodeString('f');
-                                     _onDataReceived(text);*/
+                                     _onDataReceived(text);*//*
                                   },
                                   style: ElevatedButton.styleFrom(
                                       //fixedSize: Size(240, 80),
@@ -553,7 +618,7 @@ class _GridArenaState extends State<GridArena>
                                   label: Text('Rev Left'),
                                 ),
                               ),
-                              VerticalDivider(width: 10.0, thickness: 2),
+                              VerticalDivider(width: 10.0, thickness: 2),*/
                               SizedBox(
                                 child: ElevatedButton.icon(
                                   onPressed: () {
@@ -570,15 +635,15 @@ class _GridArenaState extends State<GridArena>
                                   label: Text('Reverse'),
                                 ),
                               ),
-                              VerticalDivider(width: 10.0, thickness: 2),
+                              /*VerticalDivider(width: 10.0, thickness: 2),
                               SizedBox(
                                 child: ElevatedButton.icon(
                                   onPressed: () {
                                     print('Reverse Right');
                                     reverseRight();
-                                    /*_sendMessage('f');
+                                    *//*_sendMessage('f');
                                      var text = _encodeString('f');
-                                     _onDataReceived(text);*/
+                                     _onDataReceived(text);*//*
                                   },
                                   style: ElevatedButton.styleFrom(
                                       //fixedSize: Size(240, 80),
@@ -587,7 +652,7 @@ class _GridArenaState extends State<GridArena>
                                       Icon(Icons.subdirectory_arrow_right_rounded),
                                   label: Text('Rev Right'),
                                 ),
-                              ),
+                              ),*/
                             ],
                           ),
                         ),
@@ -602,32 +667,7 @@ class _GridArenaState extends State<GridArena>
                              )
                          ),*/
                         Divider(height: 30, thickness: 2),
-                        IntrinsicHeight(
-                          child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
-                                ElevatedButton.icon(
-                                  onPressed: () {
-                                    _sendMessage('STM: start');
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                      primary: Colors.green),
-                                  icon: Icon(Icons.play_arrow),
-                                  label: Text('Start'),
-                                ),
-                                VerticalDivider(width: 10.0, thickness: 2),
-                                ElevatedButton.icon(
-                                  onPressed: () {
-                                    _sendMessage('STM: stop');
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                      primary: Colors.red),
-                                  icon: Icon(Icons.stop_circle),
-                                  label: Text('Stop'),
-                                ),
-                              ]),
-                        ),
-                        Divider(height: 30, thickness: 2),
+
                       ],
                     ),
                   ),
@@ -669,7 +709,9 @@ class _GridArenaState extends State<GridArena>
     print("dataString");
     print(dataString);
 
+
     setState(() {
+      getReceivedText(dataString);
       //messages.add(_Message(1, dataString));
       /*print(robotIndex);
       if(dataString == 'f'){
@@ -734,6 +776,7 @@ class _GridArenaState extends State<GridArena>
         }
       }
     });
+    print("RECEIVED: $dataString");
     return dataString;
   }
 
@@ -750,9 +793,13 @@ class _GridArenaState extends State<GridArena>
         connection!.output.add(Uint8List.fromList(utf8.encode(text)));
         await connection!.output.allSent;
 
-        setState(() {
-          messages.add(_Message(clientID, text));
-        });
+        if(mounted){
+          setState(() {
+            getSentText(text);
+            messages.add(_Message(clientID, text));
+          });
+        }
+
 
         Future.delayed(Duration(milliseconds: 333)).then((_) {
           listScrollController.animateTo(
@@ -765,6 +812,20 @@ class _GridArenaState extends State<GridArena>
         setState(() {});
       }
     }
+  }
+
+  getSentText(text) {
+    setState(() {
+      sentText = text;
+    });
+    return sentText;
+  }
+
+  getReceivedText(text) {
+    setState(() {
+      receivedText = text;
+    });
+    return receivedText;
   }
 
   moveForward() {
@@ -947,10 +1008,45 @@ class _GridArenaState extends State<GridArena>
     print("$x, $y, $direction");
 
     setState(() {
-      robotIndex = x + 5 * (y);
+      robotIndex = x + (_columns * (y));
       robotCurrentDirection = direction;
       setRobotDirection(direction);
     });
+  }
+
+  void confirmStopDialog(BuildContext context) {
+    showDialog(
+        context: context,
+        barrierDismissible: false, // disables popup to close if tapped outside popup (need a button to close)
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Row(
+              children: [
+                Icon(Icons.warning),
+                Text("Are you sure?"),
+              ],
+            ),
+            content: Text("By pressing confirm, you are stopping the robot operations. Continue?"),
+            //buttons?
+            actions: <Widget>[
+              TextButton(
+                child: Text("Confirm"),
+                onPressed: () {
+                  if(isStarted == true){
+                    _sendMessage("STM: stop");
+                    isStarted = false;
+                  }
+                  Navigator.of(context).pop();
+                }, //closes popup
+              ),
+              TextButton(
+                child: Text("Cancel"),
+                onPressed: () { Navigator.of(context).pop(); }, //closes popup
+              ),
+            ],
+          );
+        }
+    );
   }
 }
 
