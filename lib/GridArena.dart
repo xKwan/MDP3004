@@ -23,8 +23,8 @@ class GridArena extends StatefulWidget {
 
 class _GridArenaState extends State<GridArena>
     with AutomaticKeepAliveClientMixin<GridArena> {
-  int _columns = 16;
-  int _rows = 16;
+  int _columns = 5;
+  int _rows = 5;
 
   List<int> _index = [];
   int robotIndex = -1;
@@ -32,6 +32,11 @@ class _GridArenaState extends State<GridArena>
   double robotAngle = 0;
   var robotCurrentDirection = "0";
   bool isStarted = false;
+
+  var imaginaryNorth = 0;
+  var imaginarySouth = 0;
+  var imaginaryEast = 0;
+  var imaginaryWest = 0;
 
   Border _border = Border();
   var _cards = new Map();
@@ -440,30 +445,33 @@ class _GridArenaState extends State<GridArena>
               ),
 
               Divider(thickness: 2),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  SizedBox(
+                    child: Text(
+                      "Received: " + receivedText,
+                    ),
+                  ),
+                  SizedBox(
+                    child: Text(
+                      "Sent: " + sentText,
+                    ),
+                  ),
+                ],
+              ),
+
+              SizedBox(height: 10),
+              Text("Robot moving?: " + isStarted.toString()),
+              Divider(height:10, thickness: 2),
+
               Expanded(
                 child: SingleChildScrollView(
                   child: Container(
                     child: Column(
                       children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            SizedBox(
-                              child: Text(
-                                "Received: " + receivedText,
-                              ),
-                            ),
-                            SizedBox(
-                              child: Text(
-                                "Sent: " + sentText,
-                              ),
-                            ),
-                          ],
-                        ),
 
-                        SizedBox(height: 10),
-                        Text("Robot moving?: " + isStarted.toString()),
-                        Divider(thickness: 2),
+
 
                         IntrinsicHeight(
                           child: Row(
@@ -828,10 +836,57 @@ class _GridArenaState extends State<GridArena>
     return receivedText;
   }
 
+  createImaginaryNorthGrid(){
+    imaginaryNorth += 1;
+    _rows += 1;
+    _columns += 1;
+  }
+
+  removeImaginaryNorthGrid(){
+    //move robot back on real grid
+    //if on real grid, update index
+    imaginaryNorth -=1;
+    _rows -= 1;
+    _columns -= 1;
+  }
+
+  createImaginarySouthGrid(){
+    var imaginaryX;
+    var imaginaryY;
+
+    setState(() {
+      imaginarySouth +=1;
+      imaginaryX = (getRobotCoordinates()["x"]!)!;
+      imaginaryY = (getRobotCoordinates()["y"]!)!;
+      _rows += 1;
+      _columns += 1;
+      robotIndex = (imaginaryX+((_columns)*imaginaryY));
+      robotIndex = (robotIndex+_columns);
+    });
+  }
+
+  removeImaginarySouthGrid(){
+    var imaginaryX;
+    var imaginaryY;
+
+    imaginarySouth -= 1;
+    imaginaryX = (getRobotCoordinates()["x"]!)!;
+    imaginaryY = (getRobotCoordinates()["y"]!)!;
+    _rows -= 1;
+    _columns -= 1;
+    robotIndex = (imaginaryX + ((_columns) * imaginaryY));
+  }
+
+
   moveForward() {
+    var imaginaryX;
+    var imaginaryY;
+
     setState(() {
       if(robotCurrentDirection == "N"){
-        if(robotIndex < _columns);
+        if(robotIndex < _columns){
+          createImaginaryNorthGrid();
+        }
         else {
           robotIndex = robotIndex - _columns;
         }
@@ -846,9 +901,19 @@ class _GridArenaState extends State<GridArena>
       }
 
       else if(robotCurrentDirection == "S"){
-        if (robotIndex >= (_columns*(_rows-1)));
+        if (robotIndex >= (_columns*(_rows-1))){
+          createImaginarySouthGrid();
+        }
+
+
         else {
-          robotIndex = (robotIndex+_columns);
+          if(imaginaryNorth > 0){
+            removeImaginaryNorthGrid();
+          }
+          else{
+            robotIndex = (robotIndex+_columns);
+          }
+
         }
         print(robotIndex);
       }
@@ -857,17 +922,28 @@ class _GridArenaState extends State<GridArena>
         if (robotIndex%_columns != 0) {
           robotIndex = robotIndex-1;
         }
-
       }
     });
   }
 
   moveReverse() {
+    var imaginaryX;
+    var imaginaryY;
+
     setState(() {
       if(robotCurrentDirection == "N"){
-        if(robotIndex >= _columns*(_rows-1));
+        if(robotIndex >= _columns*(_rows-1)){
+          createImaginarySouthGrid();
+        }
         else {
-          robotIndex = robotIndex + _columns;
+          if(imaginaryNorth > 0){
+            imaginaryNorth -=1;
+            _rows -= 1;
+            _columns -= 1;
+          }
+          else{
+            robotIndex = robotIndex + _columns;
+          }
         }
         print(robotIndex);
       }
@@ -881,8 +957,13 @@ class _GridArenaState extends State<GridArena>
       }
 
       else if(robotCurrentDirection == "S"){
-        if (robotIndex < _columns);
+        if (robotIndex < _columns){
+          createImaginaryNorthGrid();
+        }
         else {
+          if(imaginarySouth > 0){
+            removeImaginarySouthGrid();
+          }
           robotIndex = (robotIndex-_columns);
         }
         print(robotIndex);
