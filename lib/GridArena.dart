@@ -836,18 +836,12 @@ class _GridArenaState extends State<GridArena>
     return receivedText;
   }
 
+  //if robot go out of bounds, generate extra row and col
+  //"imaginary" grids that not supposed to exist
   createImaginaryNorthGrid(){
     imaginaryNorth += 1;
     _rows += 1;
     _columns += 1;
-  }
-
-  removeImaginaryNorthGrid(){
-    //move robot back on real grid
-    //if on real grid, update index
-    imaginaryNorth -=1;
-    _rows -= 1;
-    _columns -= 1;
   }
 
   createImaginarySouthGrid(){
@@ -865,6 +859,41 @@ class _GridArenaState extends State<GridArena>
     });
   }
 
+  createImaginaryWestGrid(){
+    var imaginaryX;
+    var imaginaryY;
+
+    setState(() {
+      imaginaryWest +=1;
+      imaginaryX = (getRobotCoordinates()["x"]!)!;
+      imaginaryY = (getRobotCoordinates()["y"]!)!;
+      _rows += 1;
+      _columns += 1;
+      robotIndex = (imaginaryX+((_columns)*imaginaryY));
+    });
+  }
+
+  createImaginaryEastGrid(){
+    var imaginaryX;
+    var imaginaryY;
+
+    setState(() {
+      imaginaryEast +=1;
+      imaginaryX = (getRobotCoordinates()["x"]!)!;
+      imaginaryY = (getRobotCoordinates()["y"]!)!;
+      _rows += 1;
+      _columns += 1;
+      robotIndex = (imaginaryX+((_columns)*imaginaryY)) + 1;
+    });
+  }
+  //move robot back on real grid
+  //if on real grid, update index
+  removeImaginaryNorthGrid(){
+    imaginaryNorth -=1;
+    _rows -= 1;
+    _columns -= 1;
+  }
+
   removeImaginarySouthGrid(){
     var imaginaryX;
     var imaginaryY;
@@ -877,17 +906,41 @@ class _GridArenaState extends State<GridArena>
     robotIndex = (imaginaryX + ((_columns) * imaginaryY));
   }
 
-
-  moveForward() {
+  removeImaginaryWestGrid(){
     var imaginaryX;
     var imaginaryY;
 
+    imaginaryWest -= 1;
+    imaginaryX = (getRobotCoordinates()["x"]!)!;
+    imaginaryY = (getRobotCoordinates()["y"]!)!;
+    _rows -= 1;
+    _columns -= 1;
+    robotIndex = (imaginaryX + ((_columns) * imaginaryY));
+  }
+
+  removeImaginaryEastGrid(){
+    var imaginaryX;
+    var imaginaryY;
+
+    imaginaryEast -= 1;
+    imaginaryX = (getRobotCoordinates()["x"]!)!;
+    imaginaryY = (getRobotCoordinates()["y"]!)!;
+    _rows -= 1;
+    _columns -= 1;
+    robotIndex = (imaginaryX + ((_columns) * imaginaryY));
+    robotIndex = robotIndex-1;
+  }
+
+  moveForward() {
     setState(() {
       if(robotCurrentDirection == "N"){
         if(robotIndex < _columns){
           createImaginaryNorthGrid();
         }
         else {
+          if(imaginarySouth > 0){
+            removeImaginarySouthGrid();
+          }
           robotIndex = robotIndex - _columns;
         }
         print(robotIndex);
@@ -895,7 +948,15 @@ class _GridArenaState extends State<GridArena>
 
       else if(robotCurrentDirection == "E"){
         if (robotIndex%_columns != _columns-1) {
-          robotIndex = robotIndex+1;
+          if(imaginaryWest > 0){
+            removeImaginaryWestGrid();
+          }
+          else{
+            robotIndex = robotIndex+1;
+          }
+        }
+        else{
+          createImaginaryEastGrid();
         }
         print(robotIndex);
       }
@@ -920,16 +981,22 @@ class _GridArenaState extends State<GridArena>
 
       else if(robotCurrentDirection == "W"){
         if (robotIndex%_columns != 0) {
-          robotIndex = robotIndex-1;
+          if (imaginaryEast > 0){
+            removeImaginaryEastGrid();
+          }
+          else{
+            robotIndex = robotIndex-1;
+          }
+
+        }
+        else{
+          createImaginaryWestGrid();
         }
       }
     });
   }
 
   moveReverse() {
-    var imaginaryX;
-    var imaginaryY;
-
     setState(() {
       if(robotCurrentDirection == "N"){
         if(robotIndex >= _columns*(_rows-1)){
@@ -949,9 +1016,16 @@ class _GridArenaState extends State<GridArena>
       }
 
       else if(robotCurrentDirection == "E"){
-        if (robotIndex%_columns < 1);
+        if (robotIndex%_columns < 1){
+          createImaginaryWestGrid();
+        }
         else {
-          robotIndex = robotIndex-1;
+          if (imaginaryEast > 0){
+            removeImaginaryEastGrid();
+          }
+          else{
+            robotIndex = robotIndex-1;
+          }
         }
         print(robotIndex);
       }
@@ -970,9 +1044,16 @@ class _GridArenaState extends State<GridArena>
       }
 
       else if(robotCurrentDirection == "W"){
-        if (robotIndex%_columns == _columns-1);
+        if (robotIndex%_columns == _columns-1){
+          createImaginaryEastGrid();
+        }
         else {
-          robotIndex = robotIndex+1;
+          if(imaginaryWest > 0){
+            removeImaginaryWestGrid();
+          }
+          else{
+            robotIndex = robotIndex+1;
+          }
         }
       }
     });
