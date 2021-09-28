@@ -200,7 +200,12 @@ class _MainPage extends State<MainPage> {
               title: ElevatedButton(
                 child: const Text('Chat Page'),
                 onPressed: ()  {
-                  _startChat(context, server!);
+                  if(!isConnected){
+                    showConnectionDialog(context);
+                  }
+                  else{
+                    _startChat(context, server!);
+                  }
                 },
               ),
             ),
@@ -271,6 +276,34 @@ class _MainPage extends State<MainPage> {
       ),
     );
   }
+
+
+  void showConnectionDialog(BuildContext context) {
+    showDialog(
+        context: context,
+        barrierDismissible: false, // disables popup to close if tapped outside popup (need a button to close)
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Row(
+              children: [
+                Icon(Icons.warning),
+                Text("Not connected!"),
+              ],
+            ),
+            content: Text("Please check your connection and try again"),
+            //buttons?
+            actions: <Widget>[
+              TextButton(
+                child: Text("Close"),
+                onPressed: () { Navigator.of(context).pop(); }, //closes popup
+              ),
+            ],
+          );
+        }
+    );
+  }
+
+
 
   void _establishConnection(BuildContext context, BluetoothDevice server) {
     isConnecting = true;
