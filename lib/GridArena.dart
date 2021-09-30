@@ -99,13 +99,13 @@ class _GridArenaState extends State<GridArena>
                     //Else check if obstacle has been placed
                     _index.contains(index)
                         ? obstacles[index]!.isDiscovered
-                        ? Expanded(
-                          child: Image.asset(
-                            'assets/id'+obstacles[index]!.id.toString()+'.png'))
-                        : Text(obstacles[index]!.id.toString(),
-                            style: TextStyle(color: Colors.white))
+                            ? Expanded(
+                                child: Image.asset('assets/id' +
+                                    obstacles[index]!.id.toString() +
+                                    '.png'))
+                            : Text(obstacles[index]!.id.toString(),
+                                style: TextStyle(color: Colors.white))
                         : null,
-
           ),
       onWillAccept: (data) => true,
       onAccept: (data) {
@@ -181,16 +181,15 @@ class _GridArenaState extends State<GridArena>
           height: 100,
           width: 100,
           child: Center(
-             child:
-                  _index.contains(index)
-                      ? Draggable<Obstacle>(
-                          data:
-                              Obstacle.updateAction(obstacles[index]!, action.REMOVE),
-                          child: dragTarget(context, index),
-                          feedback: Material(
-                              child: Icon(Icons.view_in_ar, color: Colors.black)),
-                        )
-                      : dragTarget(context, index),
+            child: _index.contains(index)
+                ? Draggable<Obstacle>(
+                    data:
+                        Obstacle.updateAction(obstacles[index]!, action.REMOVE),
+                    child: dragTarget(context, index),
+                    feedback: Material(
+                        child: Icon(Icons.view_in_ar, color: Colors.black)),
+                  )
+                : dragTarget(context, index),
           ),
         ),
       );
@@ -211,6 +210,20 @@ class _GridArenaState extends State<GridArena>
       cord["y"] = (ob.index / _columns).floor();
     }
     return cord;
+  }
+
+  int getObstacleIndex(Map<String, int> cord) {
+    int index = -1;
+
+    if (!(cord["x"]! >= _columns) && !(cord["y"]! >= _rows)) {
+      try {
+        index = cord["x"]! + (cord["y"]! * _columns!);
+      } catch (e) {
+        print(e);
+      }
+    }
+
+    return index;
   }
 
   @override
@@ -332,11 +345,14 @@ class _GridArenaState extends State<GridArena>
               onAccept: (data) {
                 setState(() {
                   if (data.action == action.REMOVE) {
-
-                    _sendMessage("SUB, " + data.index.toString() + ", (" +
-                        getObstacleCoordinates(obstacles[data.index]!)["x"].toString() +
+                    _sendMessage("SUB, " +
+                        data.index.toString() +
+                        ", (" +
+                        getObstacleCoordinates(obstacles[data.index]!)["x"]
+                            .toString() +
                         ", " +
-                        getObstacleCoordinates(obstacles[data.index]!)["y"].toString() +
+                        getObstacleCoordinates(obstacles[data.index]!)["y"]
+                            .toString() +
                         ")");
 
                     _index.remove(data.index);
@@ -383,8 +399,6 @@ class _GridArenaState extends State<GridArena>
                                                   .localOffsetFromOrigin.dx) {
                                         Obstacle.updateDirection(
                                             obstacles[index]!, "S");
-
-
                                       } else if (updates
                                                   .localOffsetFromOrigin.dx <
                                               0 &&
@@ -393,54 +407,58 @@ class _GridArenaState extends State<GridArena>
                                                   .localOffsetFromOrigin.dx) {
                                         Obstacle.updateDirection(
                                             obstacles[index]!, "W");
-
-
                                       } else if (updates
                                               .localOffsetFromOrigin.dy >
                                           0) {
                                         Obstacle.updateDirection(
                                             obstacles[index]!, "E");
-
-
                                       } else if (updates
                                               .localOffsetFromOrigin.dy <
                                           0) {
                                         Obstacle.updateDirection(
                                             obstacles[index]!, "N");
-
                                       }
                                     })
                                   },
-
-                              onLongPressEnd: (details) =>
-                              {
-                                obstacles[index]!.direction == "N" ?
-                                    _sendMessage("FACE, $index, (" +
-                                    getObstacleCoordinates(obstacles[index]!)["x"].toString() +
-                                    ", " +
-                                    getObstacleCoordinates(obstacles[index]!)["y"].toString() +
-                                    "), N") :
-
-                                obstacles[index]!.direction == "S" ?
-                                    _sendMessage("FACE, $index, (" +
-                                        getObstacleCoordinates(obstacles[index]!)["x"].toString() +
-                                        ", " +
-                                        getObstacleCoordinates(obstacles[index]!)["y"].toString() +
-                                        "), S") :
-
-                                obstacles[index]!.direction == "E" ?
-                                    _sendMessage("FACE, $index, (" +
-                                        getObstacleCoordinates(obstacles[index]!)["x"].toString() +
-                                        ", " +
-                                        getObstacleCoordinates(obstacles[index]!)["y"].toString() +
-                                        "), E") :
-                                obstacles[index]!.direction == "W" ?
-                                    _sendMessage("FACE, $index, (" +
-                                        getObstacleCoordinates(obstacles[index]!)["x"].toString() +
-                                        ", " +
-                                        getObstacleCoordinates(obstacles[index]!)["y"].toString() +
-                                        "), W") : null
-                              },
+                              onLongPressEnd: (details) => {
+                                    obstacles[index]!.direction == "N"
+                                        ? _sendMessage("FACE, $index, (" +
+                                            getObstacleCoordinates(obstacles[index]!)["x"]
+                                                .toString() +
+                                            ", " +
+                                            getObstacleCoordinates(obstacles[index]!)["y"]
+                                                .toString() +
+                                            "), N")
+                                        : obstacles[index]!.direction == "S"
+                                            ? _sendMessage("FACE, $index, (" +
+                                                getObstacleCoordinates(
+                                                        obstacles[index]!)["x"]
+                                                    .toString() +
+                                                ", " +
+                                                getObstacleCoordinates(
+                                                        obstacles[index]!)["y"]
+                                                    .toString() +
+                                                "), S")
+                                            : obstacles[index]!.direction == "E"
+                                                ? _sendMessage("FACE, $index, (" +
+                                                    getObstacleCoordinates(obstacles[index]!)["x"]
+                                                        .toString() +
+                                                    ", " +
+                                                    getObstacleCoordinates(obstacles[index]!)["y"]
+                                                        .toString() +
+                                                    "), E")
+                                                : obstacles[index]!.direction ==
+                                                        "W"
+                                                    ? _sendMessage("FACE, $index, (" +
+                                                        getObstacleCoordinates(obstacles[index]!)["x"]
+                                                            .toString() +
+                                                        ", " +
+                                                        getObstacleCoordinates(
+                                                                obstacles[index]!)["y"]
+                                                            .toString() +
+                                                        "), W")
+                                                    : null
+                                  },
                               child: rebuildCard(context, index)),
                         );
                       }),
@@ -600,43 +618,55 @@ class _GridArenaState extends State<GridArena>
         }
       }*/
 
-      print(dataString.split(',')[0]);
+/*
+      DATASTRING FORMAT
+      0                1  2   3   4
+      TARGET/OBSTACLE, X, Y, ID, FACE
+
+      */
+
+      Map<String, int> cord = {};
+      int index = -1;
+
       if (dataString.split(',')[0] == "ROBOT") {
         dataString = dataString.toUpperCase();
         print("Received ROBOT Command");
         setRobotLocation(int.parse(dataString.split(',')[1]),
             int.parse(dataString.split(',')[2]), dataString.split(',')[3]);
       } else if (dataString.split(',')[0] == "TARGET") {
-        if (obstacles[dataString.split(',')[1]] != null) {
-          Obstacle data = Obstacle.updateId(
-              obstacles[dataString.split(',')[1]]!,
-              obstacles[dataString.split(',')[2]]);
-          data = Obstacle.updateDiscovery(data, true);
-          obstacles.update(
-              int.parse(dataString.split(',')[1]), (value) => data);
+        //TODO: GET INDEX
+        cord["x"] = int.parse(dataString.split(',')[1]);
+        cord["y"] = int.parse(dataString.split(',')[2]);
 
-          print(obstacles[1]!.isDiscovered+"DISCOVERY");
-        } else {
-          Obstacle data = new Obstacle(
-              id: int.parse(dataString.split(',')[2]),
-              index: int.parse(dataString.split(',')[1]),
-              action: action.UNKNOWN);
+        index = getObstacleIndex(cord);
 
-          data = Obstacle.updateDiscovery(data, true);
+        print("INDEX: $index");
+        if (index != -1) {
+          if (obstacles[index] != null) {
+            Obstacle data =
+                Obstacle.updateId(obstacles[index]!, dataString.split(',')[3]);
+            data = Obstacle.updateDiscovery(data, true);
+            obstacles.update(index, (value) => data);
+          } else {
+            Obstacle data = new Obstacle(
+                id: int.parse(dataString.split(',')[3]),
+                index: index,
+                action: action.UNKNOWN);
 
-          _index.add(int.parse(dataString.split(',')[1]));
-          obstacles.addAll({int.parse(dataString.split(',')[1]): data});
-        }
+            data = Obstacle.updateDiscovery(data, true);
 
-        try {
-          print("Try");
-          Obstacle updatedObstacle = Obstacle.updateDirection(
-              obstacles[int.parse(dataString.split(',')[1])]!,
-              dataString.split(',')[3].toString());
-          obstacles.update(
-              int.parse(dataString.split(',')[1]), (value) => updatedObstacle);
-        } catch (e) {
-          print(e);
+            _index.add(index);
+            obstacles.addAll({index: data});
+          }
+
+          try {
+            print("Try");
+            Obstacle updatedObstacle = Obstacle.updateDirection(
+                obstacles[index]!, dataString.split(',')[4].toString());
+            obstacles.update(index, (value) => updatedObstacle);
+          } catch (e) {
+            print(e);
+          }
         }
       }
     });
