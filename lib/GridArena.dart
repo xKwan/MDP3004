@@ -819,11 +819,18 @@ class _GridArenaState extends State<GridArena>
     print("Received message to update robot location");
     print("$x, $y, $direction");
 
-    setState(() {
-      robotIndex = x + 5 * (y);
-      robotCurrentDirection = direction;
-      setRobotDirection(direction);
-    });
+    if (x<_columns && y<_rows){
+      setState(() {
+        robotIndex = x + _columns * (y);
+        robotCurrentDirection = direction;
+        setRobotDirection(direction);
+      });
+    } else {
+      setState(() {
+        robotIndex = -1;
+      });
+    }
+
   }
 }
 
