@@ -23,8 +23,8 @@ class GridArena extends StatefulWidget {
 
 class _GridArenaState extends State<GridArena>
     with AutomaticKeepAliveClientMixin<GridArena> {
-  int _columns = 5;
-  int _rows = 7;
+  int _columns = 20;
+  int _rows = 20;
 
   List<int> _index = [];
   int robotIndex = -1;
@@ -365,106 +365,147 @@ class _GridArenaState extends State<GridArena>
         resizeToAvoidBottomInset: false,
         body: Container(
           child: Column(
+
             children: [
               Container(
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Container(
-                    height: MediaQuery.of(context).size.height * .7,
-                    //width: MediaQuery.of(context).size.width*.7,
-                    child: GridView.count(
-                      childAspectRatio: 1,
-                      crossAxisCount: _columns,
-                      children: List.generate(_rows * _columns, (index) {
-                        return InkWell(
-                          onTap: () => {
-                            setState(() {
-                              print(index);
-                              // if (_action == action.ADD)
-                              //    _index.add(index);
-                              // else if (_action == action.REMOVE)
-                              //   _index.remove(index);
-                              if (_action == action.PLACE) {
-                                robotIndex = index;
-                              }
-                            })
-                          },
-                          child: GestureDetector(
-                              onLongPressMoveUpdate: (updates) => {
+                //X-AXIS
+                alignment: Alignment.topCenter,
+                child: Row(
+                  children: List.generate(_columns, (index) {
+                      return Padding(
+                            padding: index == 0 ? EdgeInsets.only(top:5, left: 450/_rows)
+                                : EdgeInsets.only(top:5, left: 245/_columns),
+                          child: Text(index.toString(),
+                          style: TextStyle(
+                            fontSize: 12 / (_columns/7)
+                          ),
+                        ),
+                      );
+                    })
+
+                )
+              ),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    //Y-AXIS
+                      child: Column(
+                        children: List.generate(_rows, (index) {
+                            return Padding(
+                                padding: index == 0 ? EdgeInsets.only(top:200/_columns ,left: 5)
+                                    : EdgeInsets.only(left: 5, top: 245/_rows),
+                                child: Text((index).toString(),
+                                  style: TextStyle(
+                                      fontSize: 12 / (_columns/7)
+                                  ),
+                                ),
+                            );
+                          })
+                      )
+
+                  ),
+                  Container(
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Container(
+                        height: MediaQuery.of(context).size.height * .7,
+                        width: MediaQuery.of(context).size.width * .9,
+                        child: GridView.count(
+                          childAspectRatio: 1,
+                          crossAxisCount: _columns,
+                          children: List.generate(_rows * _columns, (index) {
+                            return InkWell(
+                              onTap: () => {
+                                setState(() {
+                                  print(index);
+                                  // if (_action == action.ADD)
+                                  //    _index.add(index);
+                                  // else if (_action == action.REMOVE)
+                                  //   _index.remove(index);
+                                  if (_action == action.PLACE) {
+                                    robotIndex = index;
+                                  }
+                                })
+                              },
+                              child: GestureDetector(
+                                  onLongPressMoveUpdate: (updates) => {
                                     setState(() {
                                       if (updates.localOffsetFromOrigin.dx >
-                                              0 &&
+                                          0 &&
                                           updates.localOffsetFromOrigin.dy! >
                                               updates
                                                   .localOffsetFromOrigin.dx) {
                                         Obstacle.updateDirection(
                                             obstacles[index]!, "S");
                                       } else if (updates
-                                                  .localOffsetFromOrigin.dx <
-                                              0 &&
+                                          .localOffsetFromOrigin.dx <
+                                          0 &&
                                           updates.localOffsetFromOrigin.dy! >
                                               updates
                                                   .localOffsetFromOrigin.dx) {
                                         Obstacle.updateDirection(
                                             obstacles[index]!, "W");
                                       } else if (updates
-                                              .localOffsetFromOrigin.dy >
+                                          .localOffsetFromOrigin.dy >
                                           0) {
                                         Obstacle.updateDirection(
                                             obstacles[index]!, "E");
                                       } else if (updates
-                                              .localOffsetFromOrigin.dy <
+                                          .localOffsetFromOrigin.dy <
                                           0) {
                                         Obstacle.updateDirection(
                                             obstacles[index]!, "N");
                                       }
                                     })
                                   },
-                              onLongPressEnd: (details) => {
+                                  onLongPressEnd: (details) => {
                                     obstacles[index]!.direction == "N"
                                         ? _sendMessage("FACE, $index, (" +
-                                            getObstacleCoordinates(obstacles[index]!)["x"]
-                                                .toString() +
-                                            ", " +
-                                            getObstacleCoordinates(obstacles[index]!)["y"]
-                                                .toString() +
-                                            "), N")
+                                        getObstacleCoordinates(obstacles[index]!)["x"]
+                                            .toString() +
+                                        ", " +
+                                        getObstacleCoordinates(obstacles[index]!)["y"]
+                                            .toString() +
+                                        "), N")
                                         : obstacles[index]!.direction == "S"
-                                            ? _sendMessage("FACE, $index, (" +
-                                                getObstacleCoordinates(
-                                                        obstacles[index]!)["x"]
-                                                    .toString() +
-                                                ", " +
-                                                getObstacleCoordinates(
-                                                        obstacles[index]!)["y"]
-                                                    .toString() +
-                                                "), S")
-                                            : obstacles[index]!.direction == "E"
-                                                ? _sendMessage("FACE, $index, (" +
-                                                    getObstacleCoordinates(obstacles[index]!)["x"]
-                                                        .toString() +
-                                                    ", " +
-                                                    getObstacleCoordinates(obstacles[index]!)["y"]
-                                                        .toString() +
-                                                    "), E")
-                                                : obstacles[index]!.direction ==
-                                                        "W"
-                                                    ? _sendMessage("FACE, $index, (" +
-                                                        getObstacleCoordinates(obstacles[index]!)["x"]
-                                                            .toString() +
-                                                        ", " +
-                                                        getObstacleCoordinates(
-                                                                obstacles[index]!)["y"]
-                                                            .toString() +
-                                                        "), W")
-                                                    : null
+                                        ? _sendMessage("FACE, $index, (" +
+                                        getObstacleCoordinates(
+                                            obstacles[index]!)["x"]
+                                            .toString() +
+                                        ", " +
+                                        getObstacleCoordinates(
+                                            obstacles[index]!)["y"]
+                                            .toString() +
+                                        "), S")
+                                        : obstacles[index]!.direction == "E"
+                                        ? _sendMessage("FACE, $index, (" +
+                                        getObstacleCoordinates(obstacles[index]!)["x"]
+                                            .toString() +
+                                        ", " +
+                                        getObstacleCoordinates(obstacles[index]!)["y"]
+                                            .toString() +
+                                        "), E")
+                                        : obstacles[index]!.direction ==
+                                        "W"
+                                        ? _sendMessage("FACE, $index, (" +
+                                        getObstacleCoordinates(obstacles[index]!)["x"]
+                                            .toString() +
+                                        ", " +
+                                        getObstacleCoordinates(
+                                            obstacles[index]!)["y"]
+                                            .toString() +
+                                        "), W")
+                                        : null
                                   },
-                              child: rebuildCard(context, index)),
-                        );
-                      }),
+                                  child: rebuildCard(context, index)),
+                            );
+                          }),
+                        ),
+                      ),
                     ),
-                  ),
-                ),
+                  )
+                ],
               ),
               SizedBox(height: 30.0),
               Expanded(
