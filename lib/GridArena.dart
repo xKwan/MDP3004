@@ -107,27 +107,29 @@ class _GridArenaState extends State<GridArena>
                     :
                     //Else check if obstacle has been placed
                     _index.contains(index)
-                        ? Text(obstacles[index]!.id.toString(),
+                        ? obstacles[index]!.isDiscovered
+                        ? Expanded(
+                          child: Image.asset(
+                            'assets/id'+obstacles[index]!.id.toString()+'.png'))
+                        : Text(obstacles[index]!.id.toString(),
                             style: TextStyle(color: Colors.white))
                         : null,
+
           ),
       onWillAccept: (data) => true,
       onAccept: (data) {
         setState(() {
           if (data.action == action.ADD) {
-            if (!_index.contains(index)) {
-              _index.add(index);
-              data = Obstacle.updateId(data, obstacles.entries.length + 1);
-              data = Obstacle.updateIndex(data, index);
-              obstacles.addAll({index: data});
-              print(obstacles);
+            _index.add(index);
+            data = Obstacle.updateIndex(data, index);
+            obstacles.addAll({index: data});
+            print(obstacles);
 
-              _sendMessage("ADD, $index, (" +
-                  getObstacleCoordinates(obstacles[index]!)["x"].toString() +
-                  ", " +
-                  getObstacleCoordinates(obstacles[index]!)["y"].toString() +
-                  ")");
-            }
+            _sendMessage("ADD, $index, (" +
+                getObstacleCoordinates(obstacles[index]!)["x"].toString() +
+                ", " +
+                getObstacleCoordinates(obstacles[index]!)["y"].toString() +
+                ")");
           }
         });
       });
@@ -156,9 +158,9 @@ class _GridArenaState extends State<GridArena>
 
   Widget rebuildCard(BuildContext context, index) => Card(
         color: (_index.contains(index)) ? Colors.blueGrey : Colors.white,
-        elevation: 5,
+        elevation: 10,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(0),
+          borderRadius: BorderRadius.circular(10.0),
         ),
         child: Container(
           decoration: BoxDecoration(
@@ -166,7 +168,6 @@ class _GridArenaState extends State<GridArena>
                       //Check if obstacle exists
                       _index.contains(index))
                   ?
-
                   //If exists, is the obstacle facing up?
                   obstacles[index]!.direction == "N"
                       ? Border(top: BorderSide(width: 5, color: Colors.red))
@@ -193,15 +194,16 @@ class _GridArenaState extends State<GridArena>
           height: 100,
           width: 100,
           child: Center(
-            child: _index.contains(index)
-                ? Draggable<Obstacle>(
-                    data:
-                        Obstacle.updateAction(obstacles[index]!, action.REMOVE),
-                    child: dragTarget(context, index),
-                    feedback: Material(
-                        child: Icon(Icons.view_in_ar, color: Colors.black)),
-                  )
-                : dragTarget(context, index),
+             child:
+                  _index.contains(index)
+                      ? Draggable<Obstacle>(
+                          data:
+                              Obstacle.updateAction(obstacles[index]!, action.REMOVE),
+                          child: dragTarget(context, index),
+                          feedback: Material(
+                              child: Icon(Icons.view_in_ar, color: Colors.black)),
+                        )
+                      : dragTarget(context, index),
           ),
         ),
       );
@@ -299,7 +301,7 @@ class _GridArenaState extends State<GridArena>
 
                         //Place Obstacle
                         Draggable<Obstacle>(
-                          data: new Obstacle(action: action.ADD),
+                          data: new Obstacle(id: obstID++, action: action.ADD),
                           child: Container(
                               decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(10)),
@@ -344,11 +346,16 @@ class _GridArenaState extends State<GridArena>
               onAccept: (data) {
                 setState(() {
                   if (data.action == action.REMOVE) {
+
+                    _sendMessage("SUB, " + data.index.toString() + ", (" +
+                        getObstacleCoordinates(obstacles[data.index]!)["x"].toString() +
+                        ", " +
+                        getObstacleCoordinates(obstacles[data.index]!)["y"].toString() +
+                        ")");
+
                     _index.remove(data.index);
                     obstacles.remove(data.index);
                     print(obstacles);
-
-                    _sendMessage("SUB, " + data.index.toString());
                   }
                 });
               }),
@@ -433,9 +440,39 @@ class _GridArenaState extends State<GridArena>
                                             obstacles[index]!, "N");
 
                                         _sendMessage("FACE, $index, N");
-                                      }
+                                        }
                                     })
                                   },
+
+                              onLongPressEnd: (details) =>
+                              {
+                                obstacles[index]!.direction == "N" ?
+                                    _sendMessage("FACE, $index, (" +
+                                    getObstacleCoordinates(obstacles[index]!)["x"].toString() +
+                                    ", " +
+                                    getObstacleCoordinates(obstacles[index]!)["y"].toString() +
+                                    "), N") :
+
+                                obstacles[index]!.direction == "S" ?
+                                    _sendMessage("FACE, $index, (" +
+                                        getObstacleCoordinates(obstacles[index]!)["x"].toString() +
+                                        ", " +
+                                        getObstacleCoordinates(obstacles[index]!)["y"].toString() +
+                                        "), S") :
+
+                                obstacles[index]!.direction == "E" ?
+                                    _sendMessage("FACE, $index, (" +
+                                        getObstacleCoordinates(obstacles[index]!)["x"].toString() +
+                                        ", " +
+                                        getObstacleCoordinates(obstacles[index]!)["y"].toString() +
+                                        "), E") :
+                                obstacles[index]!.direction == "W" ?
+                                    _sendMessage("FACE, $index, (" +
+                                        getObstacleCoordinates(obstacles[index]!)["x"].toString() +
+                                        ", " +
+                                        getObstacleCoordinates(obstacles[index]!)["y"].toString() +
+                                        "), W") : null
+                              },
                               child: rebuildCard(context, index)),
                         );
                       }),
@@ -761,13 +798,19 @@ class _GridArenaState extends State<GridArena>
           Obstacle data = Obstacle.updateId(
               obstacles[dataString.split(',')[1]]!,
               obstacles[dataString.split(',')[2]]);
+          data = Obstacle.updateDiscovery(data, true);
           obstacles.update(
               int.parse(dataString.split(',')[1]), (value) => data);
+
+          print(obstacles[1]!.isDiscovered+"DISCOVERY");
         } else {
           Obstacle data = new Obstacle(
               id: int.parse(dataString.split(',')[2]),
               index: int.parse(dataString.split(',')[1]),
               action: action.UNKNOWN);
+
+          data = Obstacle.updateDiscovery(data, true);
+
           _index.add(int.parse(dataString.split(',')[1]));
           obstacles.addAll({int.parse(dataString.split(',')[1]): data});
         }
@@ -784,7 +827,6 @@ class _GridArenaState extends State<GridArena>
         }
       }
     });
-    print("RECEIVED: $dataString");
     return dataString;
   }
 
@@ -1217,9 +1259,10 @@ class Obstacle {
   var id;
   var direction;
   var action;
+  bool discovered = false;
 
   // get oid => this.id;
-  // get dir => this.direction;
+  get isDiscovered => this.discovered;
 
   static Obstacle updateAction(Obstacle obstacle, action) {
     obstacle.action = action;
@@ -1241,5 +1284,11 @@ class Obstacle {
     return obstacle;
   }
 
-  Obstacle({this.id, this.index, this.direction, required this.action});
+  static Obstacle updateDiscovery(Obstacle obstacle, bool discovered) {
+    obstacle.discovered = discovered;
+    return obstacle;
+  }
+
+  Obstacle(
+      {required this.id, this.index, this.direction, required this.action});
 }
