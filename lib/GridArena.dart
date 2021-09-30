@@ -332,11 +332,16 @@ class _GridArenaState extends State<GridArena>
               onAccept: (data) {
                 setState(() {
                   if (data.action == action.REMOVE) {
+
+                    _sendMessage("SUB, " + data.index.toString() + ", (" +
+                        getObstacleCoordinates(obstacles[data.index]!)["x"].toString() +
+                        ", " +
+                        getObstacleCoordinates(obstacles[data.index]!)["y"].toString() +
+                        ")");
+
                     _index.remove(data.index);
                     obstacles.remove(data.index);
                     print(obstacles);
-
-                    _sendMessage("SUB, " + data.index.toString());
                   }
                 });
               }),
@@ -379,7 +384,7 @@ class _GridArenaState extends State<GridArena>
                                         Obstacle.updateDirection(
                                             obstacles[index]!, "S");
 
-                                        _sendMessage("FACE, $index, S");
+
                                       } else if (updates
                                                   .localOffsetFromOrigin.dx <
                                               0 &&
@@ -389,24 +394,53 @@ class _GridArenaState extends State<GridArena>
                                         Obstacle.updateDirection(
                                             obstacles[index]!, "W");
 
-                                        _sendMessage("FACE, $index, W");
+
                                       } else if (updates
                                               .localOffsetFromOrigin.dy >
                                           0) {
                                         Obstacle.updateDirection(
                                             obstacles[index]!, "E");
 
-                                        _sendMessage("FACE, $index, E");
+
                                       } else if (updates
                                               .localOffsetFromOrigin.dy <
                                           0) {
                                         Obstacle.updateDirection(
                                             obstacles[index]!, "N");
 
-                                        _sendMessage("FACE, $index, N");
                                       }
                                     })
                                   },
+
+                              onLongPressEnd: (details) =>
+                              {
+                                obstacles[index]!.direction == "N" ?
+                                    _sendMessage("FACE, $index, (" +
+                                    getObstacleCoordinates(obstacles[index]!)["x"].toString() +
+                                    ", " +
+                                    getObstacleCoordinates(obstacles[index]!)["y"].toString() +
+                                    "), N") :
+
+                                obstacles[index]!.direction == "S" ?
+                                    _sendMessage("FACE, $index, (" +
+                                        getObstacleCoordinates(obstacles[index]!)["x"].toString() +
+                                        ", " +
+                                        getObstacleCoordinates(obstacles[index]!)["y"].toString() +
+                                        "), S") :
+
+                                obstacles[index]!.direction == "E" ?
+                                    _sendMessage("FACE, $index, (" +
+                                        getObstacleCoordinates(obstacles[index]!)["x"].toString() +
+                                        ", " +
+                                        getObstacleCoordinates(obstacles[index]!)["y"].toString() +
+                                        "), E") :
+                                obstacles[index]!.direction == "W" ?
+                                    _sendMessage("FACE, $index, (" +
+                                        getObstacleCoordinates(obstacles[index]!)["x"].toString() +
+                                        ", " +
+                                        getObstacleCoordinates(obstacles[index]!)["y"].toString() +
+                                        "), W") : null
+                              },
                               child: rebuildCard(context, index)),
                         );
                       }),
