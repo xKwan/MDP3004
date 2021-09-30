@@ -125,11 +125,11 @@ class _GridArenaState extends State<GridArena>
             obstacles.addAll({index: data});
             print(obstacles);
 
-            _sendMessage("ADD, $index, (" +
+            _sendMessage("PC:ADD," +
                 getObstacleCoordinates(obstacles[index]!)["x"].toString() +
-                ", " +
-                getObstacleCoordinates(obstacles[index]!)["y"].toString() +
-                ")");
+                "," +
+                getObstacleCoordinates(obstacles[index]!)["y"].toString()
+                );
           }
         });
       });
@@ -359,15 +359,14 @@ class _GridArenaState extends State<GridArena>
               onAccept: (data) {
                 setState(() {
                   if (data.action == action.REMOVE) {
-                    _sendMessage("SUB, " +
+                    _sendMessage("PC:SUB," +
                         data.index.toString() +
-                        ", (" +
+                        "," +
                         getObstacleCoordinates(obstacles[data.index]!)["x"]
                             .toString() +
-                        ", " +
+                        "," +
                         getObstacleCoordinates(obstacles[data.index]!)["y"]
-                            .toString() +
-                        ")");
+                            .toString());
 
                     _index.remove(data.index);
                     obstacles.remove(data.index);
@@ -414,7 +413,7 @@ class _GridArenaState extends State<GridArena>
                                 if(robotCurrentDirection == '0'){
                                   robotCurrentDirection = "N";
                                 }
-                                var text = ("ROBOT," + getRobotCoordinates()["x"].toString() + ","
+                                var text = ("PC:ROBOT," + getRobotCoordinates()["x"].toString() + ","
                                     + getRobotCoordinates()["y"].toString() + "," + robotCurrentDirection);
                                 _sendMessage(text);
                               }
@@ -453,41 +452,41 @@ class _GridArenaState extends State<GridArena>
                                   },
                               onLongPressEnd: (details) => {
                                     obstacles[index]!.direction == "N"
-                                        ? _sendMessage("FACE, $index, (" +
+                                        ? _sendMessage("PC:FACE," +
                                             getObstacleCoordinates(obstacles[index]!)["x"]
                                                 .toString() +
-                                            ", " +
+                                            "," +
                                             getObstacleCoordinates(obstacles[index]!)["y"]
                                                 .toString() +
-                                            "), N")
+                                            ",N")
                                         : obstacles[index]!.direction == "S"
-                                            ? _sendMessage("FACE, $index, (" +
+                                            ? _sendMessage("PC:FACE," +
                                                 getObstacleCoordinates(
                                                         obstacles[index]!)["x"]
                                                     .toString() +
-                                                ", " +
+                                                "," +
                                                 getObstacleCoordinates(
                                                         obstacles[index]!)["y"]
                                                     .toString() +
-                                                "), S")
+                                                ",S")
                                             : obstacles[index]!.direction == "E"
-                                                ? _sendMessage("FACE, $index, (" +
+                                                ? _sendMessage("PC:FACE," +
                                                     getObstacleCoordinates(obstacles[index]!)["x"]
                                                         .toString() +
-                                                    ", " +
+                                                    "," +
                                                     getObstacleCoordinates(obstacles[index]!)["y"]
                                                         .toString() +
-                                                    "), E")
+                                                    ",E")
                                                 : obstacles[index]!.direction ==
                                                         "W"
-                                                    ? _sendMessage("FACE, $index, (" +
+                                                    ? _sendMessage("PC:FACE," +
                                                         getObstacleCoordinates(obstacles[index]!)["x"]
                                                             .toString() +
-                                                        ", " +
+                                                        "," +
                                                         getObstacleCoordinates(
                                                                 obstacles[index]!)["y"]
                                                             .toString() +
-                                                        "), W")
+                                                        ",W")
                                                     : null
                                   },
                               child: rebuildCard(context, index)),
@@ -533,7 +532,7 @@ class _GridArenaState extends State<GridArena>
                               children: [
                                 ElevatedButton.icon(
                                   onPressed: () {
-                                    _sendMessage('STM: start');
+                                    _sendMessage('STM:start');
                                     isStarted = true;
                                   },
                                   style: ElevatedButton.styleFrom(
@@ -544,7 +543,6 @@ class _GridArenaState extends State<GridArena>
                                 VerticalDivider(width: 10.0, thickness: 2),
                                 ElevatedButton.icon(
                                   onPressed: () {
-                                    //_sendMessage('STM: stop');
                                     if(isStarted == true)
                                       {
                                         confirmStopDialog(context);
@@ -568,7 +566,7 @@ class _GridArenaState extends State<GridArena>
                                   onPressed: () {
                                     print('Forward Left');
                                     forwardLeft();
-                                    _sendMessage('STM: tl');
+                                    _sendMessage('STM:tl');
                                     getSentText('Turn Left');
                                      /*var text = _encodeString('f');
                                      _onDataReceived(text);*/
@@ -586,7 +584,7 @@ class _GridArenaState extends State<GridArena>
                                   onPressed: () {
                                     print('Forward');
                                     moveForward();
-                                    _sendMessage('STM: f');
+                                    _sendMessage('STM:f');
                                     getSentText('Forward');
                                     /*var text = _encodeString('f');
                                     _onDataReceived(text);*/
@@ -604,7 +602,7 @@ class _GridArenaState extends State<GridArena>
                                   onPressed: () {
                                     print('Forward Right');
                                     forwardRight();
-                                    _sendMessage('STM: tr');
+                                    _sendMessage('STM:tr');
                                     getSentText('Turn Right');
                                      /*var text = _encodeString('f');
                                      _onDataReceived(text);*/
@@ -629,7 +627,7 @@ class _GridArenaState extends State<GridArena>
                                 onPressed: () {
                                   rotateLeft();
                                   print('Rotate Left');
-                                  _sendMessage('tl');
+                                  _sendMessage('STM:tl');
                                   var text = _encodeString('l');
                                   _onDataReceived(text);
                                 },
@@ -645,7 +643,7 @@ class _GridArenaState extends State<GridArena>
                                 onPressed: () {
                                   rotateRight();
                                   print('Rotate Right');
-                                  _sendMessage('tr');
+                                  _sendMessage('STM:tr');
                                   var text = _encodeString('r');
                                   _onDataReceived(text);
                                 },
@@ -686,7 +684,7 @@ class _GridArenaState extends State<GridArena>
                                   onPressed: () {
                                     moveReverse();
                                     print('Reverse');
-                                    _sendMessage('r');
+                                    _sendMessage('STM:r');
                                     var text = _encodeString('b');
                                     _onDataReceived(text);
                                   },
@@ -941,6 +939,7 @@ class _GridArenaState extends State<GridArena>
       _rows += 1;
       _columns += 1;
       robotIndex = (imaginaryX+((_columns)*imaginaryY));
+
     });
   }
 
@@ -1130,6 +1129,47 @@ class _GridArenaState extends State<GridArena>
     });
   }
 
+ /* moveForward() {
+    setState(() {
+      if(robotCurrentDirection == "N"){
+        robotIndex = robotIndex - _columns;
+      }
+
+      else if(robotCurrentDirection == "E"){
+        robotIndex = robotIndex+1;
+      }
+
+      else if(robotCurrentDirection == "S"){
+        robotIndex = (robotIndex+_columns);
+      }
+
+      else if(robotCurrentDirection == "W"){
+        robotIndex = robotIndex-1;
+      }
+    });
+  }
+
+  moveReverse() {
+    setState(() {
+      if(robotCurrentDirection == "N"){
+        robotIndex = robotIndex + _columns;
+      }
+
+      else if(robotCurrentDirection == "E"){
+        robotIndex = robotIndex-1;
+        }
+
+      else if(robotCurrentDirection == "S"){
+        robotIndex = (robotIndex-_columns);
+      }
+
+      else if(robotCurrentDirection == "W"){
+        robotIndex = robotIndex+1;
+      }
+    });
+  }*/
+
+
   rotateLeft() {
     setState(() {
       if (robotAngle < -6) {
@@ -1266,7 +1306,7 @@ class _GridArenaState extends State<GridArena>
                 child: Text("Confirm"),
                 onPressed: () {
                   if(isStarted == true){
-                    _sendMessage("STM: stop");
+                    _sendMessage("STM:stop");
                     isStarted = false;
                   }
                   Navigator.of(context).pop();
