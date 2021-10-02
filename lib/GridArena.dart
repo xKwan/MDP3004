@@ -324,23 +324,27 @@ class _GridArenaState extends State<GridArena>
                                   Icon(Icons.view_in_ar, color: Colors.black)),
                         ),
 
-                        Padding(
-                          padding:
-                              const EdgeInsets.fromLTRB(20.0, 8.0, 0.0, 8.0),
-                          child: Container(
-                            child: Text(
-                              "Robot coordinates:\n"
-                              "(" +
-                                  getRobotCoordinates()["x"].toString() +
-                                  " , " +
-                                  getRobotCoordinates()["y"].toString() +
-                                  ")" + "  Index: "  + robotIndex.toString() + "  DIR: " + robotCurrentDirection,
-                              /*style: TextStyle(
-                                //fontSize: 25.0,
-                                //fontWeight: FontWeight.bold
-                              ),*/
-                              // maxLines: 2,   // TRY THIS
-                              textAlign: TextAlign.center,
+                        Expanded(
+                          child: FittedBox(
+                            child: Padding(
+                              padding:
+                                  const EdgeInsets.fromLTRB(20.0, 8.0, 0.0, 8.0),
+                              child: Container(
+                                child: Text(
+                                  "Robot coordinates:\n"
+                                  "(" +
+                                      getRobotCoordinates()["x"].toString() +
+                                      " , " +
+                                      getRobotCoordinates()["y"].toString() +
+                                      ")" + "  Index: "  + robotIndex.toString() + "  DIR: " + robotCurrentDirection,
+                                  /*style: TextStyle(
+                                    //fontSize: 25.0,
+                                    //fontWeight: FontWeight.bold
+                                  ),*/
+                                  // maxLines: 2,   // TRY THIS
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
                             ),
                           ),
                         ),
