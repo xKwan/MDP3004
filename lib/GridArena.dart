@@ -23,8 +23,8 @@ class GridArena extends StatefulWidget {
 
 class _GridArenaState extends State<GridArena>
     with AutomaticKeepAliveClientMixin<GridArena> {
-  int _columns = 5;
-  int _rows = 5;
+  int _columns = 20;
+  int _rows = 20;
 
   List<int> _index = [];
   int robotIndex = -1;
@@ -160,7 +160,7 @@ class _GridArenaState extends State<GridArena>
         color: (_index.contains(index)) ? Colors.blueGrey : Colors.white,
         elevation: 10,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10.0),
+          borderRadius: BorderRadius.circular(0.0),
         ),
         child: Container(
           decoration: BoxDecoration(
@@ -326,32 +326,51 @@ class _GridArenaState extends State<GridArena>
 
                         Padding(
                           padding:
-                              const EdgeInsets.fromLTRB(10.0, 8.0, 0.0, 8.0),
+                              const EdgeInsets.fromLTRB(20.0, 8.0, 0.0, 8.0),
                           child: Container(
                             child: Text(
+                              "Robot coordinates:\n"
                               "(" +
                                   getRobotCoordinates()["x"].toString() +
                                   " , " +
                                   getRobotCoordinates()["y"].toString() +
-                                  ")",
-                              style: TextStyle(
-                                fontSize: 25.0,
-                              ),
+                                  ")" + "  Index: "  + robotIndex.toString() + "  DIR: " + robotCurrentDirection,
+                              /*style: TextStyle(
+                                //fontSize: 25.0,
+                                //fontWeight: FontWeight.bold
+                              ),*/
                               // maxLines: 2,   // TRY THIS
                               textAlign: TextAlign.center,
                             ),
                           ),
                         ),
 
-                        Padding(
+                        /*Padding(
                           padding: const EdgeInsets.all(5.0),
                           child: Text(robotCurrentDirection),
-                        ),
+                        ),*/
 
-                        Padding(
+                        /*Padding(
                           padding: const EdgeInsets.all(5.0),
                           child: Text("(" + robotIndex.toString() + ")"),
-                        ),
+                        ),*/
+
+                        Expanded(
+                          child: FittedBox(
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(20.0, 8.0, 0.0, 8.0),
+                              child: Text(
+                                  "Out of bounds \n N: $imaginaryNorth | "
+                                      "S: $imaginarySouth | E: $imaginaryEast | W: $imaginaryWest",
+                                  textAlign: TextAlign.center,
+                                  //style: TextStyle(fontSize: 25),
+
+                            ),
+                            ),
+                          ),
+                        )
+
+
                       ],
                     ),
                   ),
@@ -533,6 +552,7 @@ class _GridArenaState extends State<GridArena>
                                 ElevatedButton.icon(
                                   onPressed: () {
                                     _sendMessage('STM:start');
+                                    createImaginaryObstacleWest();
                                     isStarted = true;
                                   },
                                   style: ElevatedButton.styleFrom(
@@ -566,7 +586,7 @@ class _GridArenaState extends State<GridArena>
                                   onPressed: () {
                                     print('Forward Left');
                                     forwardLeft();
-                                    _sendMessage('STM:tl');
+                                    _sendMessage('tl');
                                     getSentText('Turn Left');
                                      /*var text = _encodeString('f');
                                      _onDataReceived(text);*/
@@ -584,7 +604,7 @@ class _GridArenaState extends State<GridArena>
                                   onPressed: () {
                                     print('Forward');
                                     moveForward();
-                                    _sendMessage('STM:f');
+                                    _sendMessage('f');
                                     getSentText('Forward');
                                     /*var text = _encodeString('f');
                                     _onDataReceived(text);*/
@@ -602,7 +622,7 @@ class _GridArenaState extends State<GridArena>
                                   onPressed: () {
                                     print('Forward Right');
                                     forwardRight();
-                                    _sendMessage('STM:tr');
+                                    _sendMessage('tr');
                                     getSentText('Turn Right');
                                      /*var text = _encodeString('f');
                                      _onDataReceived(text);*/
@@ -627,7 +647,7 @@ class _GridArenaState extends State<GridArena>
                                 onPressed: () {
                                   rotateLeft();
                                   print('Rotate Left');
-                                  _sendMessage('STM:tl');
+                                  _sendMessage('tl');
                                   var text = _encodeString('l');
                                   _onDataReceived(text);
                                 },
@@ -643,7 +663,7 @@ class _GridArenaState extends State<GridArena>
                                 onPressed: () {
                                   rotateRight();
                                   print('Rotate Right');
-                                  _sendMessage('STM:tr');
+                                  _sendMessage('tr');
                                   var text = _encodeString('r');
                                   _onDataReceived(text);
                                 },
@@ -684,7 +704,7 @@ class _GridArenaState extends State<GridArena>
                                   onPressed: () {
                                     moveReverse();
                                     print('Reverse');
-                                    _sendMessage('STM:r');
+                                    _sendMessage('r');
                                     var text = _encodeString('b');
                                     _onDataReceived(text);
                                   },
@@ -905,29 +925,84 @@ class _GridArenaState extends State<GridArena>
     return receivedText;
   }
 
+  //North
   //if robot go out of bounds, generate extra row and col
   //"imaginary" grids that not supposed to exist
   createImaginaryNorthGrid(){
     imaginaryNorth += 1;
+    createImaginaryObstacleNorth();
     _rows += 1;
     _columns += 1;
   }
 
-  createImaginarySouthGrid(){
+  //move robot back on real grid
+  //if on real grid, update index
+  removeImaginaryNorthGrid(){
+    imaginaryNorth -=1;
+    removeImaginaryObstacleNorth();
+    _rows -= 1;
+    _columns -= 1;
+  }
+
+  createImaginaryObstacleNorth(){
+    Obstacle data;
     var imaginaryX;
     var imaginaryY;
 
     setState(() {
-      imaginarySouth +=1;
-      imaginaryX = (getRobotCoordinates()["x"]!)!;
-      imaginaryY = (getRobotCoordinates()["y"]!)!;
-      _rows += 1;
-      _columns += 1;
-      robotIndex = (imaginaryX+((_columns)*imaginaryY));
-      robotIndex = (robotIndex+_columns);
+      print("Preserving obstacles' location");
+      print(obstacles.length);
+      for(int i = 0; i < _index.length; i++){
+
+        imaginaryY = _index[0]~/_rows;
+        imaginaryX = _index[0]%_columns;
+
+        int _updatedIndex = imaginaryX+((_columns+1)*imaginaryY)+(_columns+1);
+
+        data = Obstacle.updateIndex(obstacles[_index[0]]!, _updatedIndex);
+        obstacles.remove(obstacles[_index[0]]);
+        obstacles.addAll({_updatedIndex : data});
+
+        _index.remove(_index[0]);
+        print(_updatedIndex);
+        _index.add(_updatedIndex);
+      }
     });
   }
 
+  removeImaginaryObstacleNorth(){
+    Obstacle data;
+    var imaginaryX;
+    var imaginaryY;
+
+    setState(() {
+      print("Preserving obstacles' location");
+      print(obstacles.length);
+      for(int i = 0; i < _index.length; i++){
+        print("Item " + (i+1).toString());
+        print("Number is:");
+        print(_index[0]);
+
+        print(obstacles[_index[0]]);
+
+        imaginaryY = _index[0]~/_rows;
+        imaginaryX = _index[0]%_columns;
+
+        int _updatedIndex = imaginaryX+((_columns-1)*imaginaryY)-(_columns-1);
+
+        data = Obstacle.updateIndex(obstacles[_index[0]]!, _updatedIndex);
+        obstacles.remove(obstacles[_index[0]]);
+        obstacles.addAll({_updatedIndex : data});
+
+        _index.remove(_index[0]);
+        print(_updatedIndex);
+        _index.add(_updatedIndex);
+      }
+    });
+  }
+  //North
+
+  // West
   createImaginaryWestGrid(){
     var imaginaryX;
     var imaginaryY;
@@ -936,44 +1011,12 @@ class _GridArenaState extends State<GridArena>
       imaginaryWest +=1;
       imaginaryX = (getRobotCoordinates()["x"]!)!;
       imaginaryY = (getRobotCoordinates()["y"]!)!;
+      createImaginaryObstacleWest();
       _rows += 1;
       _columns += 1;
       robotIndex = (imaginaryX+((_columns)*imaginaryY));
 
     });
-  }
-
-  createImaginaryEastGrid(){
-    var imaginaryX;
-    var imaginaryY;
-
-    setState(() {
-      imaginaryEast +=1;
-      imaginaryX = (getRobotCoordinates()["x"]!)!;
-      imaginaryY = (getRobotCoordinates()["y"]!)!;
-      _rows += 1;
-      _columns += 1;
-      robotIndex = (imaginaryX+((_columns)*imaginaryY)) + 1;
-    });
-  }
-  //move robot back on real grid
-  //if on real grid, update index
-  removeImaginaryNorthGrid(){
-    imaginaryNorth -=1;
-    _rows -= 1;
-    _columns -= 1;
-  }
-
-  removeImaginarySouthGrid(){
-    var imaginaryX;
-    var imaginaryY;
-
-    imaginarySouth -= 1;
-    imaginaryX = (getRobotCoordinates()["x"]!)!;
-    imaginaryY = (getRobotCoordinates()["y"]!)!;
-    _rows -= 1;
-    _columns -= 1;
-    robotIndex = (imaginaryX + ((_columns) * imaginaryY));
   }
 
   removeImaginaryWestGrid(){
@@ -983,9 +1026,84 @@ class _GridArenaState extends State<GridArena>
     imaginaryWest -= 1;
     imaginaryX = (getRobotCoordinates()["x"]!)!;
     imaginaryY = (getRobotCoordinates()["y"]!)!;
+    removeImaginaryObstacleWest();
     _rows -= 1;
     _columns -= 1;
     robotIndex = (imaginaryX + ((_columns) * imaginaryY));
+  }
+
+  createImaginaryObstacleWest(){
+    Obstacle data;
+    var imaginaryX;
+    var imaginaryY;
+
+    setState(() {
+      print("Preserving obstacles' location");
+      print(obstacles.length);
+      for(int i = 0; i < _index.length; i++){
+
+        imaginaryY = _index[0]~/_rows;
+        imaginaryX = _index[0]%_columns;
+
+
+        int _updatedIndex = imaginaryX+((_columns+1)*imaginaryY)+1;
+
+        data = Obstacle.updateIndex(obstacles[_index[0]]!, _updatedIndex);
+        obstacles.remove(obstacles[_index[0]]);
+        obstacles.addAll({_updatedIndex : data});
+
+        _index.remove(_index[0]);
+        print(_updatedIndex);
+        _index.add(_updatedIndex);
+      }
+    });
+}
+  removeImaginaryObstacleWest(){
+    Obstacle data;
+    var imaginaryX;
+    var imaginaryY;
+
+    setState(() {
+      print("Preserving obstacles' location");
+      print(obstacles.length);
+      for(int i = 0; i < _index.length; i++){
+        print("Item " + (i+1).toString());
+        print("Number is:");
+        print(_index[0]);
+
+        print(obstacles[_index[0]]);
+
+        imaginaryY = _index[0]~/_rows;
+        imaginaryX = _index[0]%_columns;
+
+        int _updatedIndex = imaginaryX+((_columns-1)*imaginaryY)-1;
+
+        data = Obstacle.updateIndex(obstacles[_index[0]]!, _updatedIndex);
+        obstacles.remove(obstacles[_index[0]]);
+        obstacles.addAll({_updatedIndex : data});
+
+        _index.remove(_index[0]);
+        print(_updatedIndex);
+        _index.add(_updatedIndex);
+      }
+    });
+  }
+  // West
+
+  // East
+  createImaginaryEastGrid(){
+    var imaginaryX;
+    var imaginaryY;
+
+    setState(() {
+      imaginaryEast +=1;
+      imaginaryX = (getRobotCoordinates()["x"]!)!;
+      imaginaryY = (getRobotCoordinates()["y"]!)!;
+      createImaginaryObstacleEast();
+      _rows += 1;
+      _columns += 1;
+      robotIndex = (imaginaryX+((_columns)*imaginaryY)) + 1;
+    });
   }
 
   removeImaginaryEastGrid(){
@@ -995,11 +1113,160 @@ class _GridArenaState extends State<GridArena>
     imaginaryEast -= 1;
     imaginaryX = (getRobotCoordinates()["x"]!)!;
     imaginaryY = (getRobotCoordinates()["y"]!)!;
+    removeImaginaryObstacleEast();
     _rows -= 1;
     _columns -= 1;
     robotIndex = (imaginaryX + ((_columns) * imaginaryY));
     robotIndex = robotIndex-1;
   }
+
+  createImaginaryObstacleEast(){
+    Obstacle data;
+    var imaginaryX;
+    var imaginaryY;
+
+    setState(() {
+      print("Preserving obstacles' location");
+      print(obstacles.length);
+      for(int i = 0; i < _index.length; i++){
+
+        imaginaryY = _index[0]~/_rows;
+        imaginaryX = _index[0]%_columns;
+
+
+        int _updatedIndex = imaginaryX+((_columns+1)*imaginaryY);
+
+        data = Obstacle.updateIndex(obstacles[_index[0]]!, _updatedIndex);
+        obstacles.remove(obstacles[_index[0]]);
+        obstacles.addAll({_updatedIndex : data});
+
+        _index.remove(_index[0]);
+        print(_updatedIndex);
+        _index.add(_updatedIndex);
+      }
+    });
+  }
+
+  removeImaginaryObstacleEast(){
+    Obstacle data;
+    var imaginaryX;
+    var imaginaryY;
+
+    setState(() {
+      print("Preserving obstacles' location");
+      print(obstacles.length);
+      for(int i = 0; i < _index.length; i++){
+        print("Item " + (i+1).toString());
+        print("Number is:");
+        print(_index[0]);
+
+        print(obstacles[_index[0]]);
+
+        imaginaryY = _index[0]~/_rows;
+        imaginaryX = _index[0]%_columns;
+
+        int _updatedIndex = imaginaryX+((_columns-1)*imaginaryY);
+
+        data = Obstacle.updateIndex(obstacles[_index[0]]!, _updatedIndex);
+        obstacles.remove(obstacles[_index[0]]);
+        obstacles.addAll({_updatedIndex : data});
+
+        _index.remove(_index[0]);
+        print(_updatedIndex);
+        _index.add(_updatedIndex);
+      }
+    });
+  }
+  //East
+
+  //South
+  createImaginarySouthGrid(){
+    var imaginaryX;
+    var imaginaryY;
+
+    setState(() {
+      imaginarySouth +=1;
+      imaginaryX = (getRobotCoordinates()["x"]!)!;
+      imaginaryY = (getRobotCoordinates()["y"]!)!;
+      createImaginaryObstacleSouth();
+      _rows += 1;
+      _columns += 1;
+      robotIndex = (imaginaryX+((_columns)*imaginaryY));
+      robotIndex = (robotIndex+_columns);
+    });
+  }
+
+  removeImaginarySouthGrid(){
+    var imaginaryX;
+    var imaginaryY;
+
+    imaginarySouth -= 1;
+    imaginaryX = (getRobotCoordinates()["x"]!)!;
+    imaginaryY = (getRobotCoordinates()["y"]!)!;
+    removeImaginaryObstacleSouth();
+    _rows -= 1;
+    _columns -= 1;
+    robotIndex = (imaginaryX + ((_columns) * imaginaryY));
+  }
+
+  createImaginaryObstacleSouth(){
+    Obstacle data;
+    var imaginaryX;
+    var imaginaryY;
+
+    setState(() {
+      print("Preserving obstacles' location");
+      print(obstacles.length);
+      for(int i = 0; i < _index.length; i++){
+
+        imaginaryY = _index[0]~/_rows;
+        imaginaryX = _index[0]%_columns;
+
+        int _updatedIndex = imaginaryX+((_columns+1)*imaginaryY);
+
+        data = Obstacle.updateIndex(obstacles[_index[0]]!, _updatedIndex);
+        obstacles.remove(obstacles[_index[0]]);
+        obstacles.addAll({_updatedIndex : data});
+
+        _index.remove(_index[0]);
+        print(_updatedIndex);
+        _index.add(_updatedIndex);
+      }
+    });
+  }
+
+  removeImaginaryObstacleSouth(){
+    Obstacle data;
+    var imaginaryX;
+    var imaginaryY;
+
+    setState(() {
+      print("Preserving obstacles' location");
+      print(obstacles.length);
+      for(int i = 0; i < _index.length; i++){
+        print("Item " + (i+1).toString());
+        print("Number is:");
+        print(_index[0]);
+
+        print(obstacles[_index[0]]);
+
+        imaginaryY = _index[0]~/_rows;
+        imaginaryX = _index[0]%_columns;
+
+        int _updatedIndex = imaginaryX+((_columns-1)*imaginaryY);
+
+        data = Obstacle.updateIndex(obstacles[_index[0]]!, _updatedIndex);
+        obstacles.remove(obstacles[_index[0]]);
+        obstacles.addAll({_updatedIndex : data});
+
+        _index.remove(_index[0]);
+        print(_updatedIndex);
+        _index.add(_updatedIndex);
+      }
+    });
+  }
+  //South
+
 
   moveForward() {
     setState(() {
@@ -1074,9 +1341,10 @@ class _GridArenaState extends State<GridArena>
         }
         else {
           if(imaginaryNorth > 0){
-            imaginaryNorth -=1;
+            /*imaginaryNorth -=1;
             _rows -= 1;
-            _columns -= 1;
+            _columns -= 1;*/
+            removeImaginaryNorthGrid();
           }
           else{
             robotIndex = robotIndex + _columns;
