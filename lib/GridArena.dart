@@ -23,8 +23,8 @@ class GridArena extends StatefulWidget {
 
 class _GridArenaState extends State<GridArena>
     with AutomaticKeepAliveClientMixin<GridArena> {
-  int _columns = 20;
-  int _rows = 20;
+  int _columns = 5;
+  int _rows = 5;
 
   List<int> _index = [];
   int robotIndex = -1;
@@ -135,6 +135,8 @@ class _GridArenaState extends State<GridArena>
       });
 
   Widget buildRotateRobot() {
+    if (robotCurrentDirection == "0")
+      robotCurrentDirection = "N";
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -142,7 +144,7 @@ class _GridArenaState extends State<GridArena>
         //Text(robotIndex.toString()),
         Transform.rotate(
           angle: robotAngle,
-          child: Expanded(
+          //child: Expanded(
             child: FittedBox(
               child: Icon(
                 Icons.arrow_upward_sharp,
@@ -150,7 +152,7 @@ class _GridArenaState extends State<GridArena>
                 //size: 20,
               ),
             ),
-          ),
+          //),
         ),
       ],
     );
@@ -445,7 +447,7 @@ class _GridArenaState extends State<GridArena>
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Container(
-                        height: MediaQuery.of(context).size.height * .7,
+                        height: MediaQuery.of(context).size.height * .5,
                         width: MediaQuery.of(context).size.width * .9,
                         child: GridView.count(
                           childAspectRatio: 1,
@@ -579,7 +581,7 @@ class _GridArenaState extends State<GridArena>
                               children: [
                                 ElevatedButton.icon(
                                   onPressed: () {
-                                    _sendMessage('STM:start');
+                                    _sendMessage('PC:start');
                                     createImaginaryObstacleWest();
                                     isStarted = true;
                                   },
@@ -817,7 +819,6 @@ class _GridArenaState extends State<GridArena>
     print("dataString");
     print(dataString);
 
-
     setState(() {
       getReceivedText(dataString);
       //messages.add(_Message(1, dataString));
@@ -901,8 +902,62 @@ class _GridArenaState extends State<GridArena>
           }
         }
       }
+      else {
+        _translateCommands(dataString);
+
+      }
     });
     return dataString;
+  }
+
+  _translateCommands(dataString) async {
+    //print("switch case:");
+    try {
+      switch (dataString) {
+        case "w": // forward
+          moveForward();
+          print("received w");
+          break;
+
+        case "x": // reverse
+          moveReverse();
+          break;
+
+        case "d": // turn right
+          moveForward();
+          await Future.delayed(Duration(milliseconds: 1000));
+          rotateRight();
+          await Future.delayed(Duration(milliseconds: 1000));
+          moveForward();
+          break;
+
+        case "a": // turn left
+          moveForward();
+          await Future.delayed(Duration(milliseconds: 1000));
+          rotateLeft();
+          await Future.delayed(Duration(milliseconds: 1000));
+          moveForward();
+          break;
+
+        case "1": // reverse 20cm
+          moveReverse();
+          await Future.delayed(Duration(milliseconds: 1000));
+          moveReverse();
+          break;
+      }
+
+      if (dataString == "0"){
+        dataString = "10";
+      }
+      if(int.parse(dataString!) > 1 && int.parse(dataString!) < 11){
+        for(int i = 2; i <= int.parse(dataString!); i++){
+          moveForward();
+          await Future.delayed(Duration(milliseconds: 1000));
+        }
+      }
+    } catch(e){
+      print("error parsing received message");
+    }
   }
 
   _encodeString(var text) {
@@ -1609,7 +1664,7 @@ class _GridArenaState extends State<GridArena>
                 child: Text("Confirm"),
                 onPressed: () {
                   if(isStarted == true){
-                    _sendMessage("STM:stop");
+                    _sendMessage("PC:stop");
                     isStarted = false;
                   }
                   Navigator.of(context).pop();
