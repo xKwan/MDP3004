@@ -283,509 +283,537 @@ class _GridArenaState extends State<GridArena>
     final serverName = "Name" ?? "Unknown";
     print('serverName is ' + serverName.toString());
 
-    return Scaffold(
-        appBar: AppBar(
-          automaticallyImplyLeading: false,
-          backgroundColor: Colors.cyan,
-          title: DragTarget<Obstacle>(
-              builder: (context, candidateData, rejectedData) => Container(
-                    alignment: Alignment.centerLeft,
-                    child: Row(
-                      children: <Widget>[
-                        //Change dimension of grid
-                        IconButton(
-                            onPressed: () async => {
-                                  await CustomDialog.showDialog(context)
-                                      .then((gridVal) => setState(() {
-                                            print("Set");
-                                            _columns = gridVal["column"]!;
-                                            _rows = gridVal["row"]!;
-                                          })),
-                                },
-                            icon: Icon(Icons.apps)),
+    return WillPopScope(
+      onWillPop: () async {
+        bool willLeave = false;
+        // show the confirm dialog
+        await showDialog(
+            context: context,
+            builder: (_) => AlertDialog(
+              title: Text('Are you sure want to leave?'),
+              actions: [
+                ElevatedButton(
+                    onPressed: () {
+                      willLeave = true;
+                      Navigator.of(context).pop();
+                    },
+                    child: Text('Yes')),
+                TextButton(
+                    onPressed: () {
+                      willLeave = false;
+                      Navigator.of(context).pop();
+                    },
+                    child: Text('No'))
+              ],
+            ));
+        return willLeave;
+      },
 
-                        //Place robot
-                        IconButton(
-                            onPressed: () => {
-                                  if (_action == action.PLACE)
-                                    _action = action.UNKNOWN
-                                  else
-                                    _action = action.PLACE
-                                },
-                            icon: Icon(Icons.android_rounded)),
 
-                        //Place Obstacle
-                        Draggable<Obstacle>(
-                          data: new Obstacle(id: obstID++, action: action.ADD),
-                          child: Container(
-                              decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(10)),
-                              child: Icon(Icons.view_in_ar)),
-                          feedback: Material(
-                              child:
-                                  Icon(Icons.view_in_ar, color: Colors.black)),
-                        ),
+      child: Scaffold(
+          appBar: AppBar(
+            automaticallyImplyLeading: false,
+            backgroundColor: Colors.cyan,
+            title: DragTarget<Obstacle>(
+                builder: (context, candidateData, rejectedData) => Container(
+                      alignment: Alignment.centerLeft,
+                      child: Row(
+                        children: <Widget>[
+                          //Change dimension of grid
+                          IconButton(
+                              onPressed: () async => {
+                                    await CustomDialog.showDialog(context)
+                                        .then((gridVal) => setState(() {
+                                              print("Set");
+                                              _columns = gridVal["column"]!;
+                                              _rows = gridVal["row"]!;
+                                            })),
+                                  },
+                              icon: Icon(Icons.apps)),
 
-                        Expanded(
-                          child: FittedBox(
-                            child: Padding(
-                              padding:
-                                  const EdgeInsets.fromLTRB(20.0, 8.0, 0.0, 8.0),
-                              child: Container(
-                                child: Text(
-                                  "Robot coordinates:\n"
-                                  "(" +
-                                      getRobotCoordinates()["x"].toString() +
-                                      " , " +
-                                      getRobotCoordinates()["y"].toString() +
-                                      ")" + "  Index: "  + robotIndex.toString() + "  DIR: " + robotCurrentDirection,
-                                  /*style: TextStyle(
-                                    //fontSize: 25.0,
-                                    //fontWeight: FontWeight.bold
-                                  ),*/
-                                  // maxLines: 2,   // TRY THIS
-                                  textAlign: TextAlign.center,
+                          //Place robot
+                          IconButton(
+                              onPressed: () => {
+                                    if (_action == action.PLACE)
+                                      _action = action.UNKNOWN
+                                    else
+                                      _action = action.PLACE
+                                  },
+                              icon: Icon(Icons.android_rounded)),
+
+                          //Place Obstacle
+                          Draggable<Obstacle>(
+                            data: new Obstacle(id: obstID++, action: action.ADD),
+                            child: Container(
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(10)),
+                                child: Icon(Icons.view_in_ar)),
+                            feedback: Material(
+                                child:
+                                    Icon(Icons.view_in_ar, color: Colors.black)),
+                          ),
+
+                          Expanded(
+                            child: FittedBox(
+                              child: Padding(
+                                padding:
+                                    const EdgeInsets.fromLTRB(20.0, 8.0, 0.0, 8.0),
+                                child: Container(
+                                  child: Text(
+                                    "Robot coordinates:\n"
+                                    "(" +
+                                        getRobotCoordinates()["x"].toString() +
+                                        " , " +
+                                        getRobotCoordinates()["y"].toString() +
+                                        ")" + "  Index: "  + robotIndex.toString() + "  DIR: " + robotCurrentDirection,
+                                    /*style: TextStyle(
+                                      //fontSize: 25.0,
+                                      //fontWeight: FontWeight.bold
+                                    ),*/
+                                    // maxLines: 2,   // TRY THIS
+                                    textAlign: TextAlign.center,
+                                  ),
                                 ),
                               ),
                             ),
                           ),
-                        ),
 
-                        /*Padding(
-                          padding: const EdgeInsets.all(5.0),
-                          child: Text(robotCurrentDirection),
-                        ),*/
+                          /*Padding(
+                            padding: const EdgeInsets.all(5.0),
+                            child: Text(robotCurrentDirection),
+                          ),*/
 
-                        /*Padding(
-                          padding: const EdgeInsets.all(5.0),
-                          child: Text("(" + robotIndex.toString() + ")"),
-                        ),*/
+                          /*Padding(
+                            padding: const EdgeInsets.all(5.0),
+                            child: Text("(" + robotIndex.toString() + ")"),
+                          ),*/
 
-                        Expanded(
-                          child: FittedBox(
-                            child: Padding(
-                              padding: const EdgeInsets.fromLTRB(20.0, 8.0, 0.0, 8.0),
-                              child: Text(
-                                  "Out of bounds \n N: $imaginaryNorth | "
-                                      "S: $imaginarySouth | E: $imaginaryEast | W: $imaginaryWest",
-                                  textAlign: TextAlign.center,
-                                  //style: TextStyle(fontSize: 25),
+                          Expanded(
+                            child: FittedBox(
+                              child: Padding(
+                                padding: const EdgeInsets.fromLTRB(20.0, 8.0, 0.0, 8.0),
+                                child: Text(
+                                    "Out of bounds \n N: $imaginaryNorth | "
+                                        "S: $imaginarySouth | E: $imaginaryEast | W: $imaginaryWest",
+                                    textAlign: TextAlign.center,
+                                    //style: TextStyle(fontSize: 25),
 
+                              ),
+                              ),
                             ),
-                            ),
-                          ),
-                        )
+                          )
 
 
-                      ],
-                    ),
-                  ),
-              onWillAccept: (data) => true,
-              onAccept: (data) {
-                setState(() {
-                  if (data.action == action.REMOVE) {
-                    _sendMessage("PC:SUB," +
-                        data.index.toString() +
-                        "," +
-                        getObstacleCoordinates(obstacles[data.index]!)["x"]
-                            .toString() +
-                        "," +
-                        getObstacleCoordinates(obstacles[data.index]!)["y"]
-                            .toString());
-
-                    _index.remove(data.index);
-                    obstacles.remove(data.index);
-                    print(obstacles);
-                  }
-                });
-              }),
-        ),
-        resizeToAvoidBottomInset: false,
-        body: Container(
-          child: Column(
-
-            children: [
-              Container(
-                //X-AXIS
-                alignment: Alignment.topCenter,
-                child: Row(
-                  children: List.generate(_columns, (index) {
-                      return Padding(
-                            padding: index == 0 ? EdgeInsets.only(top:5, left: 450/_rows)
-                                : EdgeInsets.only(top:5, left: 245/_columns),
-                          child: Text(index.toString(),
-                          style: TextStyle(
-                            fontSize: 12 / (_columns/7)
-                          ),
-                        ),
-                      );
-                    })
-
-                )
-              ),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    //Y-AXIS
-                      child: Column(
-                        children: List.generate(_rows, (index) {
-                            return Padding(
-                                padding: index == 0 ? EdgeInsets.only(top:200/_columns ,left: 5)
-                                    : EdgeInsets.only(left: 5, top: 245/_rows),
-                                child: Text((index).toString(),
-                                  style: TextStyle(
-                                      fontSize: 12 / (_columns/7)
-                                  ),
-                                ),
-                            );
-                          })
-                      )
-
-                  ),
-                  Container(
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Container(
-                        height: MediaQuery.of(context).size.height * .5,
-                        width: MediaQuery.of(context).size.width * .9,
-                        child: GridView.count(
-                          childAspectRatio: 1,
-                          crossAxisCount: _columns,
-                          children: List.generate(_rows * _columns, (index) {
-                            return InkWell(
-                              onTap: () => {
-                                setState(() {
-                                  print(index);
-                                  // if (_action == action.ADD)
-                                  //    _index.add(index);
-                                  // else if (_action == action.REMOVE)
-                                  //   _index.remove(index);
-                                  if (_action == action.PLACE) {
-                                    robotIndex = index;
-                                  }
-                                })
-                              },
-                              child: GestureDetector(
-                                  onLongPressMoveUpdate: (updates) => {
-                                    setState(() {
-                                      if (updates.localOffsetFromOrigin.dx >
-                                          0 &&
-                                          updates.localOffsetFromOrigin.dy! >
-                                              updates
-                                                  .localOffsetFromOrigin.dx) {
-                                        Obstacle.updateDirection(
-                                            obstacles[index]!, "S");
-                                      } else if (updates
-                                          .localOffsetFromOrigin.dx <
-                                          0 &&
-                                          updates.localOffsetFromOrigin.dy! >
-                                              updates
-                                                  .localOffsetFromOrigin.dx) {
-                                        Obstacle.updateDirection(
-                                            obstacles[index]!, "W");
-                                      } else if (updates
-                                          .localOffsetFromOrigin.dy >
-                                          0) {
-                                        Obstacle.updateDirection(
-                                            obstacles[index]!, "E");
-                                      } else if (updates
-                                          .localOffsetFromOrigin.dy <
-                                          0) {
-                                        Obstacle.updateDirection(
-                                            obstacles[index]!, "N");
-                                      }
-                                    })
-                                  },
-                                  onLongPressEnd: (details) => {
-                                    obstacles[index]!.direction == "N"
-                                        ? _sendMessage("FACE, $index, (" +
-                                        getObstacleCoordinates(obstacles[index]!)["x"]
-                                            .toString() +
-                                        ", " +
-                                        getObstacleCoordinates(obstacles[index]!)["y"]
-                                            .toString() +
-                                        "), N")
-                                        : obstacles[index]!.direction == "S"
-                                        ? _sendMessage("FACE, $index, (" +
-                                        getObstacleCoordinates(
-                                            obstacles[index]!)["x"]
-                                            .toString() +
-                                        ", " +
-                                        getObstacleCoordinates(
-                                            obstacles[index]!)["y"]
-                                            .toString() +
-                                        "), S")
-                                        : obstacles[index]!.direction == "E"
-                                        ? _sendMessage("FACE, $index, (" +
-                                        getObstacleCoordinates(obstacles[index]!)["x"]
-                                            .toString() +
-                                        ", " +
-                                        getObstacleCoordinates(obstacles[index]!)["y"]
-                                            .toString() +
-                                        "), E")
-                                        : obstacles[index]!.direction ==
-                                        "W"
-                                        ? _sendMessage("FACE, $index, (" +
-                                        getObstacleCoordinates(obstacles[index]!)["x"]
-                                            .toString() +
-                                        ", " +
-                                        getObstacleCoordinates(
-                                            obstacles[index]!)["y"]
-                                            .toString() +
-                                        "), W")
-                                        : null
-                                  },
-                                  child: rebuildCard(context, index)),
-                            );
-                          }),
-                        ),
+                        ],
                       ),
                     ),
+                onWillAccept: (data) => true,
+                onAccept: (data) {
+                  setState(() {
+                    if (data.action == action.REMOVE) {
+                      _sendMessage("PC:SUB," +
+                          data.index.toString() +
+                          "," +
+                          getObstacleCoordinates(obstacles[data.index]!)["x"]
+                              .toString() +
+                          "," +
+                          getObstacleCoordinates(obstacles[data.index]!)["y"]
+                              .toString());
+
+                      _index.remove(data.index);
+                      obstacles.remove(data.index);
+                      print(obstacles);
+                    }
+                  });
+                }),
+          ),
+          resizeToAvoidBottomInset: false,
+          body: Container(
+            child: Column(
+
+              children: [
+                Container(
+                  //X-AXIS
+                  alignment: Alignment.topCenter,
+                  child: Row(
+                    children: List.generate(_columns, (index) {
+                        return Padding(
+                              padding: index == 0 ? EdgeInsets.only(top:5, left: 450/_rows)
+                                  : EdgeInsets.only(top:5, left: 245/_columns),
+                            child: Text(index.toString(),
+                            style: TextStyle(
+                              fontSize: 12 / (_columns/7)
+                            ),
+                          ),
+                        );
+                      })
+
                   )
-                ],
-              ),
+                ),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      //Y-AXIS
+                        child: Column(
+                          children: List.generate(_rows, (index) {
+                              return Padding(
+                                  padding: index == 0 ? EdgeInsets.only(top:200/_columns ,left: 5)
+                                      : EdgeInsets.only(left: 5, top: 245/_rows),
+                                  child: Text((index).toString(),
+                                    style: TextStyle(
+                                        fontSize: 12 / (_columns/7)
+                                    ),
+                                  ),
+                              );
+                            })
+                        )
 
-              Divider(thickness: 2),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  SizedBox(
-                    child: Text(
-                      "Received: " + receivedText,
                     ),
-                  ),
-                  SizedBox(
-                    child: Text(
-                      "Sent: " + sentText,
+                    Container(
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Container(
+                          height: MediaQuery.of(context).size.height * .5,
+                          width: MediaQuery.of(context).size.width * .9,
+                          child: GridView.count(
+                            childAspectRatio: 1,
+                            crossAxisCount: _columns,
+                            children: List.generate(_rows * _columns, (index) {
+                              return InkWell(
+                                onTap: () => {
+                                  setState(() {
+                                    print(index);
+                                    // if (_action == action.ADD)
+                                    //    _index.add(index);
+                                    // else if (_action == action.REMOVE)
+                                    //   _index.remove(index);
+                                    if (_action == action.PLACE) {
+                                      robotIndex = index;
+                                    }
+                                  })
+                                },
+                                child: GestureDetector(
+                                    onLongPressMoveUpdate: (updates) => {
+                                      setState(() {
+                                        if (updates.localOffsetFromOrigin.dx >
+                                            0 &&
+                                            updates.localOffsetFromOrigin.dy! >
+                                                updates
+                                                    .localOffsetFromOrigin.dx) {
+                                          Obstacle.updateDirection(
+                                              obstacles[index]!, "S");
+                                        } else if (updates
+                                            .localOffsetFromOrigin.dx <
+                                            0 &&
+                                            updates.localOffsetFromOrigin.dy! >
+                                                updates
+                                                    .localOffsetFromOrigin.dx) {
+                                          Obstacle.updateDirection(
+                                              obstacles[index]!, "W");
+                                        } else if (updates
+                                            .localOffsetFromOrigin.dy >
+                                            0) {
+                                          Obstacle.updateDirection(
+                                              obstacles[index]!, "E");
+                                        } else if (updates
+                                            .localOffsetFromOrigin.dy <
+                                            0) {
+                                          Obstacle.updateDirection(
+                                              obstacles[index]!, "N");
+                                        }
+                                      })
+                                    },
+                                    onLongPressEnd: (details) => {
+                                      obstacles[index]!.direction == "N"
+                                          ? _sendMessage("FACE, $index, (" +
+                                          getObstacleCoordinates(obstacles[index]!)["x"]
+                                              .toString() +
+                                          ", " +
+                                          getObstacleCoordinates(obstacles[index]!)["y"]
+                                              .toString() +
+                                          "), N")
+                                          : obstacles[index]!.direction == "S"
+                                          ? _sendMessage("FACE, $index, (" +
+                                          getObstacleCoordinates(
+                                              obstacles[index]!)["x"]
+                                              .toString() +
+                                          ", " +
+                                          getObstacleCoordinates(
+                                              obstacles[index]!)["y"]
+                                              .toString() +
+                                          "), S")
+                                          : obstacles[index]!.direction == "E"
+                                          ? _sendMessage("FACE, $index, (" +
+                                          getObstacleCoordinates(obstacles[index]!)["x"]
+                                              .toString() +
+                                          ", " +
+                                          getObstacleCoordinates(obstacles[index]!)["y"]
+                                              .toString() +
+                                          "), E")
+                                          : obstacles[index]!.direction ==
+                                          "W"
+                                          ? _sendMessage("FACE, $index, (" +
+                                          getObstacleCoordinates(obstacles[index]!)["x"]
+                                              .toString() +
+                                          ", " +
+                                          getObstacleCoordinates(
+                                              obstacles[index]!)["y"]
+                                              .toString() +
+                                          "), W")
+                                          : null
+                                    },
+                                    child: rebuildCard(context, index)),
+                              );
+                            }),
+                          ),
+                        ),
+                      ),
+                    )
+                  ],
+                ),
+
+                Divider(thickness: 2),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    SizedBox(
+                      child: Text(
+                        "Received: " + receivedText,
+                      ),
                     ),
-                  ),
-                ],
-              ),
+                    SizedBox(
+                      child: Text(
+                        "Sent: " + sentText,
+                      ),
+                    ),
+                  ],
+                ),
 
-              SizedBox(height: 10),
-              Text("Robot moving?: " + isStarted.toString()),
-              Divider(height:10, thickness: 2),
+                SizedBox(height: 10),
+                Text("Robot moving?: " + isStarted.toString()),
+                Divider(height:10, thickness: 2),
 
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Container(
-                    child: Column(
-                      children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Container(
+                      child: Column(
+                        children: [
 
 
 
-                        IntrinsicHeight(
-                          child: Row(
+                          IntrinsicHeight(
+                            child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  ElevatedButton.icon(
+                                    onPressed: () {
+                                      _sendMessage('PC:start');
+                                      createImaginaryObstacleWest();
+                                      isStarted = true;
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                        primary: Colors.green),
+                                    icon: Icon(Icons.play_arrow),
+                                    label: Text('Start'),
+                                  ),
+                                  VerticalDivider(width: 10.0, thickness: 2),
+                                  ElevatedButton.icon(
+                                    onPressed: () {
+                                      if(isStarted == true)
+                                        {
+                                          confirmStopDialog(context);
+                                        }
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                        primary: Colors.red),
+                                    icon: Icon(Icons.stop_circle),
+                                    label: Text('Stop'),
+                                  ),
+                                ]),
+                          ),
+                          Divider(height: 30, thickness: 2),
+
+                          IntrinsicHeight(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                SizedBox(
+                                  child: ElevatedButton.icon(
+                                    onPressed: () {
+                                      print('Forward Left');
+                                      forwardLeft();
+                                      _sendMessage('tl');
+                                      getSentText('Turn Left');
+                                       /*var text = _encodeString('f');
+                                       _onDataReceived(text);*/
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                        //fixedSize: Size(240, 80),
+                                        primary: Colors.lightBlueAccent),
+                                    icon: Icon(Icons.keyboard_arrow_left_outlined),
+                                    label: Text('Fwd Left'),
+                                  ),
+                                ),
+                                VerticalDivider(width: 10.0, thickness: 2),
+                                SizedBox(
+                                  child: ElevatedButton.icon(
+                                    onPressed: () {
+                                      print('Forward');
+                                      moveForward();
+                                      _sendMessage('f');
+                                      getSentText('Forward');
+                                      /*var text = _encodeString('f');
+                                      _onDataReceived(text);*/
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                        //fixedSize: Size(240, 80),
+                                        primary: Colors.amber[800]),
+                                    icon: Icon(Icons.arrow_upward),
+                                    label: Text('Forward'),
+                                  ),
+                                ),
+                                VerticalDivider(width: 10.0, thickness: 2),
+                                SizedBox(
+                                  child: ElevatedButton.icon(
+                                    onPressed: () {
+                                      print('Forward Right');
+                                      forwardRight();
+                                      _sendMessage('tr');
+                                      getSentText('Turn Right');
+                                       /*var text = _encodeString('f');
+                                       _onDataReceived(text);*/
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                        //fixedSize: Size(240, 80),
+                                        primary: Colors.lightBlueAccent),
+                                    icon: Icon(Icons.keyboard_arrow_right_outlined),
+                                    label: Text('Fwd Right'),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          Divider(height: 30, thickness: 2),
+                          IntrinsicHeight(
+                            child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               children: [
                                 ElevatedButton.icon(
                                   onPressed: () {
-                                    _sendMessage('PC:start');
-                                    createImaginaryObstacleWest();
-                                    isStarted = true;
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                      primary: Colors.green),
-                                  icon: Icon(Icons.play_arrow),
-                                  label: Text('Start'),
-                                ),
-                                VerticalDivider(width: 10.0, thickness: 2),
-                                ElevatedButton.icon(
-                                  onPressed: () {
-                                    if(isStarted == true)
-                                      {
-                                        confirmStopDialog(context);
-                                      }
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                      primary: Colors.red),
-                                  icon: Icon(Icons.stop_circle),
-                                  label: Text('Stop'),
-                                ),
-                              ]),
-                        ),
-                        Divider(height: 30, thickness: 2),
-
-                        IntrinsicHeight(
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              SizedBox(
-                                child: ElevatedButton.icon(
-                                  onPressed: () {
-                                    print('Forward Left');
-                                    forwardLeft();
+                                    rotateLeft();
+                                    print('Rotate Left');
                                     _sendMessage('tl');
-                                    getSentText('Turn Left');
-                                     /*var text = _encodeString('f');
-                                     _onDataReceived(text);*/
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                      //fixedSize: Size(240, 80),
-                                      primary: Colors.lightBlueAccent),
-                                  icon: Icon(Icons.keyboard_arrow_left_outlined),
-                                  label: Text('Fwd Left'),
-                                ),
-                              ),
-                              VerticalDivider(width: 10.0, thickness: 2),
-                              SizedBox(
-                                child: ElevatedButton.icon(
-                                  onPressed: () {
-                                    print('Forward');
-                                    moveForward();
-                                    _sendMessage('f');
-                                    getSentText('Forward');
-                                    /*var text = _encodeString('f');
-                                    _onDataReceived(text);*/
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                      //fixedSize: Size(240, 80),
-                                      primary: Colors.amber[800]),
-                                  icon: Icon(Icons.arrow_upward),
-                                  label: Text('Forward'),
-                                ),
-                              ),
-                              VerticalDivider(width: 10.0, thickness: 2),
-                              SizedBox(
-                                child: ElevatedButton.icon(
-                                  onPressed: () {
-                                    print('Forward Right');
-                                    forwardRight();
-                                    _sendMessage('tr');
-                                    getSentText('Turn Right');
-                                     /*var text = _encodeString('f');
-                                     _onDataReceived(text);*/
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                      //fixedSize: Size(240, 80),
-                                      primary: Colors.lightBlueAccent),
-                                  icon: Icon(Icons.keyboard_arrow_right_outlined),
-                                  label: Text('Fwd Right'),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-
-                        Divider(height: 30, thickness: 2),
-                        IntrinsicHeight(
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              ElevatedButton.icon(
-                                onPressed: () {
-                                  rotateLeft();
-                                  print('Rotate Left');
-                                  _sendMessage('tl');
-                                  var text = _encodeString('l');
-                                  _onDataReceived(text);
-                                },
-                                style: ElevatedButton.styleFrom(
-                                    //fixedSize: Size(240, 80),
-                                    primary: Colors.amber[600]),
-                                icon: Icon(Icons.arrow_back),
-                                label: Text('Rotate Left'),
-                              ),
-                              //SizedBox(width: 10.0),
-                              VerticalDivider(width: 10.0, thickness: 2),
-                              ElevatedButton.icon(
-                                onPressed: () {
-                                  rotateRight();
-                                  print('Rotate Right');
-                                  _sendMessage('tr');
-                                  var text = _encodeString('r');
-                                  _onDataReceived(text);
-                                },
-                                style: ElevatedButton.styleFrom(
-                                    //fixedSize: Size(240, 80),
-                                    primary: Colors.amber[600]),
-                                icon: Icon(Icons.arrow_forward),
-                                label: Text('Rotate Right'),
-                              ),
-                            ],
-                          ),
-                        ),
-                        //SizedBox(height: 30.0),
-                        Divider(height: 30, thickness: 2),
-                        IntrinsicHeight(
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              /*SizedBox(
-                                child: ElevatedButton.icon(
-                                  onPressed: () {
-                                    print('Reverse Left');
-                                    reverseLeft();
-                                    *//*_sendMessage('f');
-                                     var text = _encodeString('f');
-                                     _onDataReceived(text);*//*
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                      //fixedSize: Size(240, 80),
-                                      primary: Colors.blueAccent[800]),
-                                  icon: Icon(Icons.subdirectory_arrow_left_rounded),
-                                  label: Text('Rev Left'),
-                                ),
-                              ),
-                              VerticalDivider(width: 10.0, thickness: 2),*/
-                              SizedBox(
-                                child: ElevatedButton.icon(
-                                  onPressed: () {
-                                    moveReverse();
-                                    print('Reverse');
-                                    _sendMessage('r');
-                                    var text = _encodeString('b');
+                                    var text = _encodeString('l');
                                     _onDataReceived(text);
                                   },
                                   style: ElevatedButton.styleFrom(
                                       //fixedSize: Size(240, 80),
-                                      primary: Colors.amber[800]),
-                                  icon: Icon(Icons.arrow_downward),
-                                  label: Text('Reverse'),
+                                      primary: Colors.amber[600]),
+                                  icon: Icon(Icons.arrow_back),
+                                  label: Text('Rotate Left'),
                                 ),
-                              ),
-                              /*VerticalDivider(width: 10.0, thickness: 2),
-                              SizedBox(
-                                child: ElevatedButton.icon(
+                                //SizedBox(width: 10.0),
+                                VerticalDivider(width: 10.0, thickness: 2),
+                                ElevatedButton.icon(
                                   onPressed: () {
-                                    print('Reverse Right');
-                                    reverseRight();
-                                    *//*_sendMessage('f');
-                                     var text = _encodeString('f');
-                                     _onDataReceived(text);*//*
+                                    rotateRight();
+                                    print('Rotate Right');
+                                    _sendMessage('tr');
+                                    var text = _encodeString('r');
+                                    _onDataReceived(text);
                                   },
                                   style: ElevatedButton.styleFrom(
                                       //fixedSize: Size(240, 80),
-                                      primary: Colors.blueAccent[800]),
-                                  icon:
-                                      Icon(Icons.subdirectory_arrow_right_rounded),
-                                  label: Text('Rev Right'),
+                                      primary: Colors.amber[600]),
+                                  icon: Icon(Icons.arrow_forward),
+                                  label: Text('Rotate Right'),
                                 ),
-                              ),*/
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
+                          //SizedBox(height: 30.0),
+                          Divider(height: 30, thickness: 2),
+                          IntrinsicHeight(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                /*SizedBox(
+                                  child: ElevatedButton.icon(
+                                    onPressed: () {
+                                      print('Reverse Left');
+                                      reverseLeft();
+                                      *//*_sendMessage('f');
+                                       var text = _encodeString('f');
+                                       _onDataReceived(text);*//*
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                        //fixedSize: Size(240, 80),
+                                        primary: Colors.blueAccent[800]),
+                                    icon: Icon(Icons.subdirectory_arrow_left_rounded),
+                                    label: Text('Rev Left'),
+                                  ),
+                                ),
+                                VerticalDivider(width: 10.0, thickness: 2),*/
+                                SizedBox(
+                                  child: ElevatedButton.icon(
+                                    onPressed: () {
+                                      moveReverse();
+                                      print('Reverse');
+                                      _sendMessage('r');
+                                      var text = _encodeString('b');
+                                      _onDataReceived(text);
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                        //fixedSize: Size(240, 80),
+                                        primary: Colors.amber[800]),
+                                    icon: Icon(Icons.arrow_downward),
+                                    label: Text('Reverse'),
+                                  ),
+                                ),
+                                /*VerticalDivider(width: 10.0, thickness: 2),
+                                SizedBox(
+                                  child: ElevatedButton.icon(
+                                    onPressed: () {
+                                      print('Reverse Right');
+                                      reverseRight();
+                                      *//*_sendMessage('f');
+                                       var text = _encodeString('f');
+                                       _onDataReceived(text);*//*
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                        //fixedSize: Size(240, 80),
+                                        primary: Colors.blueAccent[800]),
+                                    icon:
+                                        Icon(Icons.subdirectory_arrow_right_rounded),
+                                    label: Text('Rev Right'),
+                                  ),
+                                ),*/
+                              ],
+                            ),
+                          ),
 
-                        /*ElevatedButton(
-                             onPressed: () {
-                               setRobotLocation(4, 2, "W");
-                             },
-                             child: Text(
-                               "Set Robot Location",
-                               style: TextStyle(color: Colors.white),
-                             )
-                         ),*/
-                        Divider(height: 30, thickness: 2),
+                          /*ElevatedButton(
+                               onPressed: () {
+                                 setRobotLocation(4, 2, "W");
+                               },
+                               child: Text(
+                                 "Set Robot Location",
+                                 style: TextStyle(color: Colors.white),
+                               )
+                           ),*/
+                          Divider(height: 30, thickness: 2),
 
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ],
-          ),
-        ));
+              ],
+            ),
+          )),
+    );
   }
 
   _onDataReceived(Uint8List data) {
@@ -866,7 +894,14 @@ class _GridArenaState extends State<GridArena>
         print("Received ROBOT Command");
         setRobotLocation(int.parse(dataString.split(',')[1]),
             int.parse(dataString.split(',')[2]), dataString.split(',')[3]);
-      } else if (dataString.split(',')[0] == "TARGET") {
+      }
+
+      else if (dataString.split(',')[0].toUpperCase() == "TARGET"){
+        print("Test command");
+        checkRobotCurrentLocation(dataString.split(',')[1]);
+      }
+
+      /*else if (dataString.split(',')[0] == "TARGET") {
         //TODO: GET INDEX
         cord["x"] = int.parse(dataString.split(',')[1]);
         cord["y"] = int.parse(dataString.split(',')[2]);
@@ -901,7 +936,7 @@ class _GridArenaState extends State<GridArena>
             print(e);
           }
         }
-      }
+      }*/
       else {
         _translateCommands(dataString);
 
@@ -909,6 +944,93 @@ class _GridArenaState extends State<GridArena>
     });
     return dataString;
   }
+
+  checkRobotCurrentLocation(id){
+    var x, y, dir;
+    x = getRobotCoordinates()["x"];
+    y = getRobotCoordinates()["y"];
+    dir = robotCurrentDirection;
+
+    if (robotCurrentDirection == "N"){
+      y -= 1;
+      dir = "S";
+      if(y > 0 && y < _rows){
+        _updateObstacles(x, y, dir, id);
+      }
+    }
+
+    else if (robotCurrentDirection == "S"){
+      y += 1;
+      dir = "N";
+      if(y > 0 && y < _rows){
+        _updateObstacles(x, y, dir, id);
+      }
+    }
+
+    else if (robotCurrentDirection == "E"){
+      x += 1;
+      dir = "W";
+      if(x > 0 && x < _columns) {
+        _updateObstacles(x, y, dir, id);
+      }
+    }
+
+    else if (robotCurrentDirection == "W"){
+      x -= 1;
+      dir = "E";
+      //_updateObstacles(x, y, dir, id);
+      if(x > 0 && x < _columns) {
+          _updateObstacles(x, y, dir, id);
+      }
+    }
+  }
+
+  /*_checkObstacleExists(x, y, dir, id){
+    Map<String, int> cord = {}  ;
+    int index = -1;
+    cord["x"] = x;
+    cord["y"] = y;
+    int total = _rows*_columns;
+
+    index = getObstacleIndex(cord);
+    if(obstacles[index] != null){
+      _updateObstacles(x, y, dir, id);
+    }
+  }*/
+
+  _updateObstacles(x, y, dir, id){
+    int index = x + (_columns * y);
+    setState(() {
+      if (obstacles[index] != null) {
+        Obstacle data =
+        Obstacle.updateId(obstacles[index]!, id);
+        data = Obstacle.updateDiscovery(data, true);
+        obstacles.update(index, (value) => data);
+      } else {
+        Obstacle data = new Obstacle(
+            id: int.parse(id),
+            index: index,
+            action: action.UNKNOWN);
+
+        data = Obstacle.updateDiscovery(data, true);
+
+        _index.add(index);
+        obstacles.addAll({index: data});
+      }
+
+      try {
+        print("Try");
+        Obstacle updatedObstacle = Obstacle.updateDirection(
+            obstacles[index]!, dir);
+        obstacles.update(index, (value) => updatedObstacle);
+      } catch (e) {
+        print(e);
+      }
+    });
+
+  }
+
+
 
   _translateCommands(dataString) async {
     //print("switch case:");
