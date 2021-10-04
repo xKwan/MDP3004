@@ -23,8 +23,8 @@ class GridArena extends StatefulWidget {
 
 class _GridArenaState extends State<GridArena>
     with AutomaticKeepAliveClientMixin<GridArena> {
-  int _columns = 5;
-  int _rows = 5;
+  int _columns = 20;
+  int _rows = 20;
 
   List<int> _index = [];
   int robotIndex = -1;
@@ -32,6 +32,7 @@ class _GridArenaState extends State<GridArena>
   double robotAngle = 0;
   var robotCurrentDirection = "0";
   bool isStarted = false;
+  String statusMessage = 'Robot Ready!';
 
   var imaginaryNorth = 0;
   var imaginarySouth = 0;
@@ -128,15 +129,13 @@ class _GridArenaState extends State<GridArena>
             _sendMessage("PC:ADD," +
                 getObstacleCoordinates(obstacles[index]!)["x"].toString() +
                 "," +
-                getObstacleCoordinates(obstacles[index]!)["y"].toString()
-                );
+                getObstacleCoordinates(obstacles[index]!)["y"].toString());
           }
         });
       });
 
   Widget buildRotateRobot() {
-    if (robotCurrentDirection == "0")
-      robotCurrentDirection = "N";
+    if (robotCurrentDirection == "0") robotCurrentDirection = "N";
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -145,13 +144,13 @@ class _GridArenaState extends State<GridArena>
         Transform.rotate(
           angle: robotAngle,
           //child: Expanded(
-            child: FittedBox(
-              child: Icon(
-                Icons.arrow_upward_sharp,
-                color: Colors.red,
-                //size: 20,
-              ),
+          child: FittedBox(
+            child: Icon(
+              Icons.arrow_upward_sharp,
+              color: Colors.red,
+              //size: 20,
             ),
+          ),
           //),
         ),
       ],
@@ -290,26 +289,24 @@ class _GridArenaState extends State<GridArena>
         await showDialog(
             context: context,
             builder: (_) => AlertDialog(
-              title: Text('Are you sure want to leave?'),
-              actions: [
-                ElevatedButton(
-                    onPressed: () {
-                      willLeave = true;
-                      Navigator.of(context).pop();
-                    },
-                    child: Text('Yes')),
-                TextButton(
-                    onPressed: () {
-                      willLeave = false;
-                      Navigator.of(context).pop();
-                    },
-                    child: Text('No'))
-              ],
-            ));
+                  title: Text('Are you sure want to leave?'),
+                  actions: [
+                    ElevatedButton(
+                        onPressed: () {
+                          willLeave = true;
+                          Navigator.of(context).pop();
+                        },
+                        child: Text('Yes')),
+                    TextButton(
+                        onPressed: () {
+                          willLeave = false;
+                          Navigator.of(context).pop();
+                        },
+                        child: Text('No'))
+                  ],
+                ));
         return willLeave;
       },
-
-
       child: Scaffold(
           appBar: AppBar(
             automaticallyImplyLeading: false,
@@ -343,29 +340,34 @@ class _GridArenaState extends State<GridArena>
 
                           //Place Obstacle
                           Draggable<Obstacle>(
-                            data: new Obstacle(id: obstID++, action: action.ADD),
+                            data:
+                                new Obstacle(id: obstID++, action: action.ADD),
                             child: Container(
                                 decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(10)),
                                 child: Icon(Icons.view_in_ar)),
                             feedback: Material(
-                                child:
-                                    Icon(Icons.view_in_ar, color: Colors.black)),
+                                child: Icon(Icons.view_in_ar,
+                                    color: Colors.black)),
                           ),
 
                           Expanded(
                             child: FittedBox(
                               child: Padding(
-                                padding:
-                                    const EdgeInsets.fromLTRB(20.0, 8.0, 0.0, 8.0),
+                                padding: const EdgeInsets.fromLTRB(
+                                    20.0, 8.0, 0.0, 8.0),
                                 child: Container(
                                   child: Text(
                                     "Robot coordinates:\n"
-                                    "(" +
+                                            "(" +
                                         getRobotCoordinates()["x"].toString() +
                                         " , " +
                                         getRobotCoordinates()["y"].toString() +
-                                        ")" + "  Index: "  + robotIndex.toString() + "  DIR: " + robotCurrentDirection,
+                                        ")" +
+                                        "  Index: " +
+                                        robotIndex.toString() +
+                                        "  DIR: " +
+                                        robotCurrentDirection,
                                     /*style: TextStyle(
                                       //fontSize: 25.0,
                                       //fontWeight: FontWeight.bold
@@ -391,19 +393,17 @@ class _GridArenaState extends State<GridArena>
                           Expanded(
                             child: FittedBox(
                               child: Padding(
-                                padding: const EdgeInsets.fromLTRB(20.0, 8.0, 0.0, 8.0),
+                                padding: const EdgeInsets.fromLTRB(
+                                    20.0, 8.0, 0.0, 8.0),
                                 child: Text(
-                                    "Out of bounds \n N: $imaginaryNorth | "
-                                        "S: $imaginarySouth | E: $imaginaryEast | W: $imaginaryWest",
-                                    textAlign: TextAlign.center,
-                                    //style: TextStyle(fontSize: 25),
-
-                              ),
+                                  "Out of bounds \n N: $imaginaryNorth | "
+                                  "S: $imaginarySouth | E: $imaginaryEast | W: $imaginaryWest",
+                                  textAlign: TextAlign.center,
+                                  //style: TextStyle(fontSize: 25),
+                                ),
                               ),
                             ),
                           )
-
-
                         ],
                       ),
                     ),
@@ -430,46 +430,45 @@ class _GridArenaState extends State<GridArena>
           resizeToAvoidBottomInset: false,
           body: Container(
             child: Column(
-
               children: [
                 Container(
-                  //X-AXIS
-                  alignment: Alignment.topCenter,
-                  child: Row(
-                    children: List.generate(_columns, (index) {
-                        return Padding(
-                              padding: index == 0 ? EdgeInsets.only(top:5, left: 450/_rows)
-                                  : EdgeInsets.only(top:5, left: 245/_columns),
-                            child: Text(index.toString(),
-                            style: TextStyle(
-                              fontSize: 12 / (_columns/7)
-                            ),
+                    //X-AXIS
+                    alignment: Alignment.topCenter,
+                    child: Row(
+                        children: List.generate(_columns, (index) {
+                      return Padding(
+                        padding: index == 0
+                            ? EdgeInsets.only(top: 10, left: 450 / _rows)
+                            : EdgeInsets.only(top: 10, left: 245 / _columns),
+                        child: FittedBox(
+                          fit: BoxFit.fitWidth,
+                          child: Text(
+                            "     " + index.toString(),
+                            style: TextStyle(fontSize: 20 / (_columns / 7)),
                           ),
-                        );
-                      })
-
-                  )
-                ),
+                        ),
+                      );
+                    }))),
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Container(
-                      //Y-AXIS
+                        //Y-AXIS
                         child: Column(
-                          children: List.generate(_rows, (index) {
-                              return Padding(
-                                  padding: index == 0 ? EdgeInsets.only(top:200/_columns ,left: 5)
-                                      : EdgeInsets.only(left: 5, top: 245/_rows),
-                                  child: Text((index).toString(),
-                                    style: TextStyle(
-                                        fontSize: 12 / (_columns/7)
-                                    ),
-                                  ),
-                              );
-                            })
-                        )
-
-                    ),
+                            children: List.generate(_rows, (index) {
+                      return Padding(
+                        padding: index == 0
+                            ? EdgeInsets.only(top: 200 / _columns, left: 5)
+                            : EdgeInsets.only(left: 5, top: 245 / _rows),
+                        child: FittedBox(
+                          fit: BoxFit.fitHeight,
+                          child: Text(
+                            (index).toString(),
+                            style: TextStyle(fontSize: 20 / (_columns / 7)),
+                          ),
+                        ),
+                      );
+                    }))),
                     Container(
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
@@ -495,74 +494,81 @@ class _GridArenaState extends State<GridArena>
                                 },
                                 child: GestureDetector(
                                     onLongPressMoveUpdate: (updates) => {
-                                      setState(() {
-                                        if (updates.localOffsetFromOrigin.dx >
-                                            0 &&
-                                            updates.localOffsetFromOrigin.dy! >
-                                                updates
-                                                    .localOffsetFromOrigin.dx) {
-                                          Obstacle.updateDirection(
-                                              obstacles[index]!, "S");
-                                        } else if (updates
-                                            .localOffsetFromOrigin.dx <
-                                            0 &&
-                                            updates.localOffsetFromOrigin.dy! >
-                                                updates
-                                                    .localOffsetFromOrigin.dx) {
-                                          Obstacle.updateDirection(
-                                              obstacles[index]!, "W");
-                                        } else if (updates
-                                            .localOffsetFromOrigin.dy >
-                                            0) {
-                                          Obstacle.updateDirection(
-                                              obstacles[index]!, "E");
-                                        } else if (updates
-                                            .localOffsetFromOrigin.dy <
-                                            0) {
-                                          Obstacle.updateDirection(
-                                              obstacles[index]!, "N");
-                                        }
-                                      })
-                                    },
+                                          setState(() {
+                                            if (updates.localOffsetFromOrigin
+                                                        .dx >
+                                                    0 &&
+                                                updates.localOffsetFromOrigin
+                                                        .dy! >
+                                                    updates
+                                                        .localOffsetFromOrigin
+                                                        .dx) {
+                                              Obstacle.updateDirection(
+                                                  obstacles[index]!, "S");
+                                            } else if (updates
+                                                        .localOffsetFromOrigin
+                                                        .dx <
+                                                    0 &&
+                                                updates.localOffsetFromOrigin
+                                                        .dy! >
+                                                    updates
+                                                        .localOffsetFromOrigin
+                                                        .dx) {
+                                              Obstacle.updateDirection(
+                                                  obstacles[index]!, "W");
+                                            } else if (updates
+                                                    .localOffsetFromOrigin.dy >
+                                                0) {
+                                              Obstacle.updateDirection(
+                                                  obstacles[index]!, "E");
+                                            } else if (updates
+                                                    .localOffsetFromOrigin.dy <
+                                                0) {
+                                              Obstacle.updateDirection(
+                                                  obstacles[index]!, "N");
+                                            }
+                                          })
+                                        },
                                     onLongPressEnd: (details) => {
-                                      obstacles[index]!.direction == "N"
-                                          ? _sendMessage("FACE, $index, (" +
-                                          getObstacleCoordinates(obstacles[index]!)["x"]
-                                              .toString() +
-                                          ", " +
-                                          getObstacleCoordinates(obstacles[index]!)["y"]
-                                              .toString() +
-                                          "), N")
-                                          : obstacles[index]!.direction == "S"
-                                          ? _sendMessage("FACE, $index, (" +
-                                          getObstacleCoordinates(
-                                              obstacles[index]!)["x"]
-                                              .toString() +
-                                          ", " +
-                                          getObstacleCoordinates(
-                                              obstacles[index]!)["y"]
-                                              .toString() +
-                                          "), S")
-                                          : obstacles[index]!.direction == "E"
-                                          ? _sendMessage("FACE, $index, (" +
-                                          getObstacleCoordinates(obstacles[index]!)["x"]
-                                              .toString() +
-                                          ", " +
-                                          getObstacleCoordinates(obstacles[index]!)["y"]
-                                              .toString() +
-                                          "), E")
-                                          : obstacles[index]!.direction ==
-                                          "W"
-                                          ? _sendMessage("FACE, $index, (" +
-                                          getObstacleCoordinates(obstacles[index]!)["x"]
-                                              .toString() +
-                                          ", " +
-                                          getObstacleCoordinates(
-                                              obstacles[index]!)["y"]
-                                              .toString() +
-                                          "), W")
-                                          : null
-                                    },
+                                          obstacles[index]!.direction == "N"
+                                              ? _sendMessage("FACE, $index, (" +
+                                                  getObstacleCoordinates(obstacles[index]!)["x"]
+                                                      .toString() +
+                                                  ", " +
+                                                  getObstacleCoordinates(obstacles[index]!)["y"]
+                                                      .toString() +
+                                                  "), N")
+                                              : obstacles[index]!.direction ==
+                                                      "S"
+                                                  ? _sendMessage("FACE, $index, (" +
+                                                      getObstacleCoordinates(obstacles[index]!)["x"]
+                                                          .toString() +
+                                                      ", " +
+                                                      getObstacleCoordinates(obstacles[index]!)["y"]
+                                                          .toString() +
+                                                      "), S")
+                                                  : obstacles[index]!.direction ==
+                                                          "E"
+                                                      ? _sendMessage("FACE, $index, (" +
+                                                          getObstacleCoordinates(obstacles[index]!)["x"]
+                                                              .toString() +
+                                                          ", " +
+                                                          getObstacleCoordinates(obstacles[index]!)["y"]
+                                                              .toString() +
+                                                          "), E")
+                                                      : obstacles[index]!
+                                                                  .direction ==
+                                                              "W"
+                                                          ? _sendMessage("FACE, $index, (" +
+                                                              getObstacleCoordinates(obstacles[index]!)["x"]
+                                                                  .toString() +
+                                                              ", " +
+                                                              getObstacleCoordinates(
+                                                                      obstacles[index]!)["y"]
+                                                                  .toString() +
+                                                              "), W")
+                                                          : null
+                                        },
                                     child: rebuildCard(context, index)),
                               );
                             }),
@@ -572,7 +578,6 @@ class _GridArenaState extends State<GridArena>
                     )
                   ],
                 ),
-
                 Divider(thickness: 2),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -589,22 +594,29 @@ class _GridArenaState extends State<GridArena>
                     ),
                   ],
                 ),
-
                 SizedBox(height: 10),
-                Text("Robot moving?: " + isStarted.toString()),
-                Divider(height:10, thickness: 2),
-
+                Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      SizedBox(
+                        child: Text(
+                            "Started robot?: " + isStarted.toString()),
+                      ),
+                      SizedBox(
+                        child: Text(
+                            "Status Message: " + statusMessage),
+                      ),
+                    ]),
+                Divider(height: 10, thickness: 2),
                 Expanded(
                   child: SingleChildScrollView(
                     child: Container(
                       child: Column(
                         children: [
-
-
-
                           IntrinsicHeight(
                             child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
                                 children: [
                                   ElevatedButton.icon(
                                     onPressed: () {
@@ -620,10 +632,9 @@ class _GridArenaState extends State<GridArena>
                                   VerticalDivider(width: 10.0, thickness: 2),
                                   ElevatedButton.icon(
                                     onPressed: () {
-                                      if(isStarted == true)
-                                        {
-                                          confirmStopDialog(context);
-                                        }
+                                      if (isStarted == true) {
+                                        confirmStopDialog(context);
+                                      }
                                     },
                                     style: ElevatedButton.styleFrom(
                                         primary: Colors.red),
@@ -645,13 +656,14 @@ class _GridArenaState extends State<GridArena>
                                       forwardLeft();
                                       _sendMessage('tl');
                                       getSentText('Turn Left');
-                                       /*var text = _encodeString('f');
+                                      /*var text = _encodeString('f');
                                        _onDataReceived(text);*/
                                     },
                                     style: ElevatedButton.styleFrom(
                                         //fixedSize: Size(240, 80),
                                         primary: Colors.lightBlueAccent),
-                                    icon: Icon(Icons.keyboard_arrow_left_outlined),
+                                    icon: Icon(
+                                        Icons.keyboard_arrow_left_outlined),
                                     label: Text('Fwd Left'),
                                   ),
                                 ),
@@ -681,13 +693,14 @@ class _GridArenaState extends State<GridArena>
                                       forwardRight();
                                       _sendMessage('tr');
                                       getSentText('Turn Right');
-                                       /*var text = _encodeString('f');
+                                      /*var text = _encodeString('f');
                                        _onDataReceived(text);*/
                                     },
                                     style: ElevatedButton.styleFrom(
                                         //fixedSize: Size(240, 80),
                                         primary: Colors.lightBlueAccent),
-                                    icon: Icon(Icons.keyboard_arrow_right_outlined),
+                                    icon: Icon(
+                                        Icons.keyboard_arrow_right_outlined),
                                     label: Text('Fwd Right'),
                                   ),
                                 ),
@@ -744,9 +757,9 @@ class _GridArenaState extends State<GridArena>
                                     onPressed: () {
                                       print('Reverse Left');
                                       reverseLeft();
-                                      *//*_sendMessage('f');
+                                      */ /*_sendMessage('f');
                                        var text = _encodeString('f');
-                                       _onDataReceived(text);*//*
+                                       _onDataReceived(text);*/ /*
                                     },
                                     style: ElevatedButton.styleFrom(
                                         //fixedSize: Size(240, 80),
@@ -778,9 +791,9 @@ class _GridArenaState extends State<GridArena>
                                     onPressed: () {
                                       print('Reverse Right');
                                       reverseRight();
-                                      *//*_sendMessage('f');
+                                      */ /*_sendMessage('f');
                                        var text = _encodeString('f');
-                                       _onDataReceived(text);*//*
+                                       _onDataReceived(text);*/ /*
                                     },
                                     style: ElevatedButton.styleFrom(
                                         //fixedSize: Size(240, 80),
@@ -804,7 +817,6 @@ class _GridArenaState extends State<GridArena>
                                )
                            ),*/
                           Divider(height: 30, thickness: 2),
-
                         ],
                       ),
                     ),
@@ -894,9 +906,7 @@ class _GridArenaState extends State<GridArena>
         print("Received ROBOT Command");
         setRobotLocation(int.parse(dataString.split(',')[1]),
             int.parse(dataString.split(',')[2]), dataString.split(',')[3]);
-      }
-
-      else if (dataString.split(',')[0].toUpperCase() == "TARGET"){
+      } else if (dataString.split(',')[0].toUpperCase() == "TARGET") {
         print("Test command");
         checkRobotCurrentLocation(dataString.split(',')[1]);
       }
@@ -939,48 +949,41 @@ class _GridArenaState extends State<GridArena>
       }*/
       else {
         _translateCommands(dataString);
-
       }
     });
     return dataString;
   }
 
-  checkRobotCurrentLocation(id){
+  checkRobotCurrentLocation(id) {
     var x, y, dir;
     x = getRobotCoordinates()["x"];
     y = getRobotCoordinates()["y"];
     dir = robotCurrentDirection;
 
-    if (robotCurrentDirection == "N"){
+    if (robotCurrentDirection == "N") {
       y -= 1;
       dir = "S";
-      if(y > 0 && y < _rows){
+      if (y > 0 && y < _rows) {
         _updateObstacles(x, y, dir, id);
       }
-    }
-
-    else if (robotCurrentDirection == "S"){
+    } else if (robotCurrentDirection == "S") {
       y += 1;
       dir = "N";
-      if(y > 0 && y < _rows){
+      if (y > 0 && y < _rows) {
         _updateObstacles(x, y, dir, id);
       }
-    }
-
-    else if (robotCurrentDirection == "E"){
+    } else if (robotCurrentDirection == "E") {
       x += 1;
       dir = "W";
-      if(x > 0 && x < _columns) {
+      if (x > 0 && x < _columns) {
         _updateObstacles(x, y, dir, id);
       }
-    }
-
-    else if (robotCurrentDirection == "W"){
+    } else if (robotCurrentDirection == "W") {
       x -= 1;
       dir = "E";
       //_updateObstacles(x, y, dir, id);
-      if(x > 0 && x < _columns) {
-          _updateObstacles(x, y, dir, id);
+      if (x > 0 && x < _columns) {
+        _updateObstacles(x, y, dir, id);
       }
     }
   }
@@ -998,19 +1001,16 @@ class _GridArenaState extends State<GridArena>
     }
   }*/
 
-  _updateObstacles(x, y, dir, id){
+  _updateObstacles(x, y, dir, id) {
     int index = x + (_columns * y);
     setState(() {
       if (obstacles[index] != null) {
-        Obstacle data =
-        Obstacle.updateId(obstacles[index]!, id);
+        Obstacle data = Obstacle.updateId(obstacles[index]!, id);
         data = Obstacle.updateDiscovery(data, true);
         obstacles.update(index, (value) => data);
       } else {
         Obstacle data = new Obstacle(
-            id: int.parse(id),
-            index: index,
-            action: action.UNKNOWN);
+            id: int.parse(id), index: index, action: action.UNKNOWN);
 
         data = Obstacle.updateDiscovery(data, true);
 
@@ -1020,17 +1020,14 @@ class _GridArenaState extends State<GridArena>
 
       try {
         print("Try");
-        Obstacle updatedObstacle = Obstacle.updateDirection(
-            obstacles[index]!, dir);
+        Obstacle updatedObstacle =
+            Obstacle.updateDirection(obstacles[index]!, dir);
         obstacles.update(index, (value) => updatedObstacle);
       } catch (e) {
         print(e);
       }
     });
-
   }
-
-
 
   _translateCommands(dataString) async {
     //print("switch case:");
@@ -1038,6 +1035,9 @@ class _GridArenaState extends State<GridArena>
       switch (dataString) {
         case "w": // forward
           moveForward();
+          await Future.delayed(Duration(milliseconds: 540));
+          statusMessage = "Robot Ready!";
+
           print("received w");
           break;
 
@@ -1047,37 +1047,42 @@ class _GridArenaState extends State<GridArena>
 
         case "d": // turn right
           moveForward();
-          await Future.delayed(Duration(milliseconds: 1000));
+          await Future.delayed(Duration(milliseconds: 6000));
           rotateRight();
-          await Future.delayed(Duration(milliseconds: 1000));
+          await Future.delayed(Duration(milliseconds: 6000));
           moveForward();
+          await Future.delayed(Duration(milliseconds: 1000));
+          statusMessage = "Robot Ready!";
           break;
 
         case "a": // turn left
           moveForward();
-          await Future.delayed(Duration(milliseconds: 1000));
+          await Future.delayed(Duration(milliseconds: 6000));
           rotateLeft();
-          await Future.delayed(Duration(milliseconds: 1000));
+          await Future.delayed(Duration(milliseconds: 5000));
           moveForward();
+          await Future.delayed(Duration(milliseconds: 1000));
+          statusMessage = "Robot Ready!";
           break;
 
         case "1": // reverse 20cm
           moveReverse();
-          await Future.delayed(Duration(milliseconds: 1000));
+          await Future.delayed(Duration(milliseconds: 540));
           moveReverse();
+          statusMessage = "Robot Ready!";
           break;
       }
 
-      if (dataString == "0"){
+      if (dataString == "0") {
         dataString = "10";
       }
-      if(int.parse(dataString!) > 1 && int.parse(dataString!) < 11){
-        for(int i = 2; i <= int.parse(dataString!); i++){
+      if (int.parse(dataString!) > 1 && int.parse(dataString!) < 11) {
+        for (int i = 2; i <= int.parse(dataString!); i++) {
           moveForward();
-          await Future.delayed(Duration(milliseconds: 1000));
+          await Future.delayed(Duration(milliseconds: 540));
         }
       }
-    } catch(e){
+    } catch (e) {
       print("error parsing received message");
     }
   }
@@ -1095,13 +1100,12 @@ class _GridArenaState extends State<GridArena>
         connection!.output.add(Uint8List.fromList(utf8.encode(text)));
         await connection!.output.allSent;
 
-        if(mounted){
+        if (mounted) {
           setState(() {
             getSentText(text);
             messages.add(_Message(clientID, text));
           });
         }
-
 
         Future.delayed(Duration(milliseconds: 333)).then((_) {
           listScrollController.animateTo(
@@ -1133,7 +1137,7 @@ class _GridArenaState extends State<GridArena>
   //North
   //if robot go out of bounds, generate extra row and col
   //"imaginary" grids that not supposed to exist
-  createImaginaryNorthGrid(){
+  createImaginaryNorthGrid() {
     imaginaryNorth += 1;
     createImaginaryObstacleNorth();
     _rows += 1;
@@ -1142,14 +1146,14 @@ class _GridArenaState extends State<GridArena>
 
   //move robot back on real grid
   //if on real grid, update index
-  removeImaginaryNorthGrid(){
-    imaginaryNorth -=1;
+  removeImaginaryNorthGrid() {
+    imaginaryNorth -= 1;
     removeImaginaryObstacleNorth();
     _rows -= 1;
     _columns -= 1;
   }
 
-  createImaginaryObstacleNorth(){
+  createImaginaryObstacleNorth() {
     Obstacle data;
     var imaginaryX;
     var imaginaryY;
@@ -1157,16 +1161,16 @@ class _GridArenaState extends State<GridArena>
     setState(() {
       print("Preserving obstacles' location");
       print(obstacles.length);
-      for(int i = 0; i < _index.length; i++){
+      for (int i = 0; i < _index.length; i++) {
+        imaginaryY = _index[0] ~/ _rows;
+        imaginaryX = _index[0] % _columns;
 
-        imaginaryY = _index[0]~/_rows;
-        imaginaryX = _index[0]%_columns;
-
-        int _updatedIndex = imaginaryX+((_columns+1)*imaginaryY)+(_columns+1);
+        int _updatedIndex =
+            imaginaryX + ((_columns + 1) * imaginaryY) + (_columns + 1);
 
         data = Obstacle.updateIndex(obstacles[_index[0]]!, _updatedIndex);
         obstacles.remove(obstacles[_index[0]]);
-        obstacles.addAll({_updatedIndex : data});
+        obstacles.addAll({_updatedIndex: data});
 
         _index.remove(_index[0]);
         print(_updatedIndex);
@@ -1175,7 +1179,7 @@ class _GridArenaState extends State<GridArena>
     });
   }
 
-  removeImaginaryObstacleNorth(){
+  removeImaginaryObstacleNorth() {
     Obstacle data;
     var imaginaryX;
     var imaginaryY;
@@ -1183,21 +1187,22 @@ class _GridArenaState extends State<GridArena>
     setState(() {
       print("Preserving obstacles' location");
       print(obstacles.length);
-      for(int i = 0; i < _index.length; i++){
-        print("Item " + (i+1).toString());
+      for (int i = 0; i < _index.length; i++) {
+        print("Item " + (i + 1).toString());
         print("Number is:");
         print(_index[0]);
 
         print(obstacles[_index[0]]);
 
-        imaginaryY = _index[0]~/_rows;
-        imaginaryX = _index[0]%_columns;
+        imaginaryY = _index[0] ~/ _rows;
+        imaginaryX = _index[0] % _columns;
 
-        int _updatedIndex = imaginaryX+((_columns-1)*imaginaryY)-(_columns-1);
+        int _updatedIndex =
+            imaginaryX + ((_columns - 1) * imaginaryY) - (_columns - 1);
 
         data = Obstacle.updateIndex(obstacles[_index[0]]!, _updatedIndex);
         obstacles.remove(obstacles[_index[0]]);
-        obstacles.addAll({_updatedIndex : data});
+        obstacles.addAll({_updatedIndex: data});
 
         _index.remove(_index[0]);
         print(_updatedIndex);
@@ -1205,26 +1210,26 @@ class _GridArenaState extends State<GridArena>
       }
     });
   }
+
   //North
 
   // West
-  createImaginaryWestGrid(){
+  createImaginaryWestGrid() {
     var imaginaryX;
     var imaginaryY;
 
     setState(() {
-      imaginaryWest +=1;
+      imaginaryWest += 1;
       imaginaryX = (getRobotCoordinates()["x"]!)!;
       imaginaryY = (getRobotCoordinates()["y"]!)!;
       createImaginaryObstacleWest();
       _rows += 1;
       _columns += 1;
-      robotIndex = (imaginaryX+((_columns)*imaginaryY));
-
+      robotIndex = (imaginaryX + ((_columns) * imaginaryY));
     });
   }
 
-  removeImaginaryWestGrid(){
+  removeImaginaryWestGrid() {
     var imaginaryX;
     var imaginaryY;
 
@@ -1237,7 +1242,7 @@ class _GridArenaState extends State<GridArena>
     robotIndex = (imaginaryX + ((_columns) * imaginaryY));
   }
 
-  createImaginaryObstacleWest(){
+  createImaginaryObstacleWest() {
     Obstacle data;
     var imaginaryX;
     var imaginaryY;
@@ -1245,25 +1250,24 @@ class _GridArenaState extends State<GridArena>
     setState(() {
       print("Preserving obstacles' location");
       print(obstacles.length);
-      for(int i = 0; i < _index.length; i++){
+      for (int i = 0; i < _index.length; i++) {
+        imaginaryY = _index[0] ~/ _rows;
+        imaginaryX = _index[0] % _columns;
 
-        imaginaryY = _index[0]~/_rows;
-        imaginaryX = _index[0]%_columns;
-
-
-        int _updatedIndex = imaginaryX+((_columns+1)*imaginaryY)+1;
+        int _updatedIndex = imaginaryX + ((_columns + 1) * imaginaryY) + 1;
 
         data = Obstacle.updateIndex(obstacles[_index[0]]!, _updatedIndex);
         obstacles.remove(obstacles[_index[0]]);
-        obstacles.addAll({_updatedIndex : data});
+        obstacles.addAll({_updatedIndex: data});
 
         _index.remove(_index[0]);
         print(_updatedIndex);
         _index.add(_updatedIndex);
       }
     });
-}
-  removeImaginaryObstacleWest(){
+  }
+
+  removeImaginaryObstacleWest() {
     Obstacle data;
     var imaginaryX;
     var imaginaryY;
@@ -1271,21 +1275,21 @@ class _GridArenaState extends State<GridArena>
     setState(() {
       print("Preserving obstacles' location");
       print(obstacles.length);
-      for(int i = 0; i < _index.length; i++){
-        print("Item " + (i+1).toString());
+      for (int i = 0; i < _index.length; i++) {
+        print("Item " + (i + 1).toString());
         print("Number is:");
         print(_index[0]);
 
         print(obstacles[_index[0]]);
 
-        imaginaryY = _index[0]~/_rows;
-        imaginaryX = _index[0]%_columns;
+        imaginaryY = _index[0] ~/ _rows;
+        imaginaryX = _index[0] % _columns;
 
-        int _updatedIndex = imaginaryX+((_columns-1)*imaginaryY)-1;
+        int _updatedIndex = imaginaryX + ((_columns - 1) * imaginaryY) - 1;
 
         data = Obstacle.updateIndex(obstacles[_index[0]]!, _updatedIndex);
         obstacles.remove(obstacles[_index[0]]);
-        obstacles.addAll({_updatedIndex : data});
+        obstacles.addAll({_updatedIndex: data});
 
         _index.remove(_index[0]);
         print(_updatedIndex);
@@ -1293,25 +1297,26 @@ class _GridArenaState extends State<GridArena>
       }
     });
   }
+
   // West
 
   // East
-  createImaginaryEastGrid(){
+  createImaginaryEastGrid() {
     var imaginaryX;
     var imaginaryY;
 
     setState(() {
-      imaginaryEast +=1;
+      imaginaryEast += 1;
       imaginaryX = (getRobotCoordinates()["x"]!)!;
       imaginaryY = (getRobotCoordinates()["y"]!)!;
       createImaginaryObstacleEast();
       _rows += 1;
       _columns += 1;
-      robotIndex = (imaginaryX+((_columns)*imaginaryY)) + 1;
+      robotIndex = (imaginaryX + ((_columns) * imaginaryY)) + 1;
     });
   }
 
-  removeImaginaryEastGrid(){
+  removeImaginaryEastGrid() {
     var imaginaryX;
     var imaginaryY;
 
@@ -1322,10 +1327,10 @@ class _GridArenaState extends State<GridArena>
     _rows -= 1;
     _columns -= 1;
     robotIndex = (imaginaryX + ((_columns) * imaginaryY));
-    robotIndex = robotIndex-1;
+    robotIndex = robotIndex - 1;
   }
 
-  createImaginaryObstacleEast(){
+  createImaginaryObstacleEast() {
     Obstacle data;
     var imaginaryX;
     var imaginaryY;
@@ -1333,17 +1338,15 @@ class _GridArenaState extends State<GridArena>
     setState(() {
       print("Preserving obstacles' location");
       print(obstacles.length);
-      for(int i = 0; i < _index.length; i++){
+      for (int i = 0; i < _index.length; i++) {
+        imaginaryY = _index[0] ~/ _rows;
+        imaginaryX = _index[0] % _columns;
 
-        imaginaryY = _index[0]~/_rows;
-        imaginaryX = _index[0]%_columns;
-
-
-        int _updatedIndex = imaginaryX+((_columns+1)*imaginaryY);
+        int _updatedIndex = imaginaryX + ((_columns + 1) * imaginaryY);
 
         data = Obstacle.updateIndex(obstacles[_index[0]]!, _updatedIndex);
         obstacles.remove(obstacles[_index[0]]);
-        obstacles.addAll({_updatedIndex : data});
+        obstacles.addAll({_updatedIndex: data});
 
         _index.remove(_index[0]);
         print(_updatedIndex);
@@ -1352,7 +1355,7 @@ class _GridArenaState extends State<GridArena>
     });
   }
 
-  removeImaginaryObstacleEast(){
+  removeImaginaryObstacleEast() {
     Obstacle data;
     var imaginaryX;
     var imaginaryY;
@@ -1360,21 +1363,21 @@ class _GridArenaState extends State<GridArena>
     setState(() {
       print("Preserving obstacles' location");
       print(obstacles.length);
-      for(int i = 0; i < _index.length; i++){
-        print("Item " + (i+1).toString());
+      for (int i = 0; i < _index.length; i++) {
+        print("Item " + (i + 1).toString());
         print("Number is:");
         print(_index[0]);
 
         print(obstacles[_index[0]]);
 
-        imaginaryY = _index[0]~/_rows;
-        imaginaryX = _index[0]%_columns;
+        imaginaryY = _index[0] ~/ _rows;
+        imaginaryX = _index[0] % _columns;
 
-        int _updatedIndex = imaginaryX+((_columns-1)*imaginaryY);
+        int _updatedIndex = imaginaryX + ((_columns - 1) * imaginaryY);
 
         data = Obstacle.updateIndex(obstacles[_index[0]]!, _updatedIndex);
         obstacles.remove(obstacles[_index[0]]);
-        obstacles.addAll({_updatedIndex : data});
+        obstacles.addAll({_updatedIndex: data});
 
         _index.remove(_index[0]);
         print(_updatedIndex);
@@ -1382,26 +1385,27 @@ class _GridArenaState extends State<GridArena>
       }
     });
   }
+
   //East
 
   //South
-  createImaginarySouthGrid(){
+  createImaginarySouthGrid() {
     var imaginaryX;
     var imaginaryY;
 
     setState(() {
-      imaginarySouth +=1;
+      imaginarySouth += 1;
       imaginaryX = (getRobotCoordinates()["x"]!)!;
       imaginaryY = (getRobotCoordinates()["y"]!)!;
       createImaginaryObstacleSouth();
       _rows += 1;
       _columns += 1;
-      robotIndex = (imaginaryX+((_columns)*imaginaryY));
-      robotIndex = (robotIndex+_columns);
+      robotIndex = (imaginaryX + ((_columns) * imaginaryY));
+      robotIndex = (robotIndex + _columns);
     });
   }
 
-  removeImaginarySouthGrid(){
+  removeImaginarySouthGrid() {
     var imaginaryX;
     var imaginaryY;
 
@@ -1414,7 +1418,7 @@ class _GridArenaState extends State<GridArena>
     robotIndex = (imaginaryX + ((_columns) * imaginaryY));
   }
 
-  createImaginaryObstacleSouth(){
+  createImaginaryObstacleSouth() {
     Obstacle data;
     var imaginaryX;
     var imaginaryY;
@@ -1422,16 +1426,15 @@ class _GridArenaState extends State<GridArena>
     setState(() {
       print("Preserving obstacles' location");
       print(obstacles.length);
-      for(int i = 0; i < _index.length; i++){
+      for (int i = 0; i < _index.length; i++) {
+        imaginaryY = _index[0] ~/ _rows;
+        imaginaryX = _index[0] % _columns;
 
-        imaginaryY = _index[0]~/_rows;
-        imaginaryX = _index[0]%_columns;
-
-        int _updatedIndex = imaginaryX+((_columns+1)*imaginaryY);
+        int _updatedIndex = imaginaryX + ((_columns + 1) * imaginaryY);
 
         data = Obstacle.updateIndex(obstacles[_index[0]]!, _updatedIndex);
         obstacles.remove(obstacles[_index[0]]);
-        obstacles.addAll({_updatedIndex : data});
+        obstacles.addAll({_updatedIndex: data});
 
         _index.remove(_index[0]);
         print(_updatedIndex);
@@ -1440,7 +1443,7 @@ class _GridArenaState extends State<GridArena>
     });
   }
 
-  removeImaginaryObstacleSouth(){
+  removeImaginaryObstacleSouth() {
     Obstacle data;
     var imaginaryX;
     var imaginaryY;
@@ -1448,21 +1451,21 @@ class _GridArenaState extends State<GridArena>
     setState(() {
       print("Preserving obstacles' location");
       print(obstacles.length);
-      for(int i = 0; i < _index.length; i++){
-        print("Item " + (i+1).toString());
+      for (int i = 0; i < _index.length; i++) {
+        print("Item " + (i + 1).toString());
         print("Number is:");
         print(_index[0]);
 
         print(obstacles[_index[0]]);
 
-        imaginaryY = _index[0]~/_rows;
-        imaginaryX = _index[0]%_columns;
+        imaginaryY = _index[0] ~/ _rows;
+        imaginaryX = _index[0] % _columns;
 
-        int _updatedIndex = imaginaryX+((_columns-1)*imaginaryY);
+        int _updatedIndex = imaginaryX + ((_columns - 1) * imaginaryY);
 
         data = Obstacle.updateIndex(obstacles[_index[0]]!, _updatedIndex);
         obstacles.remove(obstacles[_index[0]]);
-        obstacles.addAll({_updatedIndex : data});
+        obstacles.addAll({_updatedIndex: data});
 
         _index.remove(_index[0]);
         print(_updatedIndex);
@@ -1470,68 +1473,53 @@ class _GridArenaState extends State<GridArena>
       }
     });
   }
-  //South
 
+  //South
 
   moveForward() {
     setState(() {
-      if(robotCurrentDirection == "N"){
-        if(robotIndex < _columns){
+      statusMessage = "Moving Forward...";
+
+      if (robotCurrentDirection == "N") {
+        if (robotIndex < _columns) {
           createImaginaryNorthGrid();
-        }
-        else {
-          if(imaginarySouth > 0){
+        } else {
+          if (imaginarySouth > 0) {
             removeImaginarySouthGrid();
           }
           robotIndex = robotIndex - _columns;
         }
         print(robotIndex);
-      }
-
-      else if(robotCurrentDirection == "E"){
-        if (robotIndex%_columns != _columns-1) {
-          if(imaginaryWest > 0){
+      } else if (robotCurrentDirection == "E") {
+        if (robotIndex % _columns != _columns - 1) {
+          if (imaginaryWest > 0) {
             removeImaginaryWestGrid();
+          } else {
+            robotIndex = robotIndex + 1;
           }
-          else{
-            robotIndex = robotIndex+1;
-          }
-        }
-        else{
+        } else {
           createImaginaryEastGrid();
         }
         print(robotIndex);
-      }
-
-      else if(robotCurrentDirection == "S"){
-        if (robotIndex >= (_columns*(_rows-1))){
+      } else if (robotCurrentDirection == "S") {
+        if (robotIndex >= (_columns * (_rows - 1))) {
           createImaginarySouthGrid();
-        }
-
-
-        else {
-          if(imaginaryNorth > 0){
+        } else {
+          if (imaginaryNorth > 0) {
             removeImaginaryNorthGrid();
+          } else {
+            robotIndex = (robotIndex + _columns);
           }
-          else{
-            robotIndex = (robotIndex+_columns);
-          }
-
         }
         print(robotIndex);
-      }
-
-      else if(robotCurrentDirection == "W"){
-        if (robotIndex%_columns != 0) {
-          if (imaginaryEast > 0){
+      } else if (robotCurrentDirection == "W") {
+        if (robotIndex % _columns != 0) {
+          if (imaginaryEast > 0) {
             removeImaginaryEastGrid();
+          } else {
+            robotIndex = robotIndex - 1;
           }
-          else{
-            robotIndex = robotIndex-1;
-          }
-
-        }
-        else{
+        } else {
           createImaginaryWestGrid();
         }
       }
@@ -1539,70 +1527,59 @@ class _GridArenaState extends State<GridArena>
   }
 
   moveReverse() {
+    statusMessage = "Reversing...";
+
     setState(() {
-      if(robotCurrentDirection == "N"){
-        if(robotIndex >= _columns*(_rows-1)){
+      if (robotCurrentDirection == "N") {
+        if (robotIndex >= _columns * (_rows - 1)) {
           createImaginarySouthGrid();
-        }
-        else {
-          if(imaginaryNorth > 0){
+        } else {
+          if (imaginaryNorth > 0) {
             /*imaginaryNorth -=1;
             _rows -= 1;
             _columns -= 1;*/
             removeImaginaryNorthGrid();
-          }
-          else{
+          } else {
             robotIndex = robotIndex + _columns;
           }
         }
         print(robotIndex);
-      }
-
-      else if(robotCurrentDirection == "E"){
-        if (robotIndex%_columns < 1){
+      } else if (robotCurrentDirection == "E") {
+        if (robotIndex % _columns < 1) {
           createImaginaryWestGrid();
-        }
-        else {
-          if (imaginaryEast > 0){
+        } else {
+          if (imaginaryEast > 0) {
             removeImaginaryEastGrid();
-          }
-          else{
-            robotIndex = robotIndex-1;
+          } else {
+            robotIndex = robotIndex - 1;
           }
         }
         print(robotIndex);
-      }
-
-      else if(robotCurrentDirection == "S"){
-        if (robotIndex < _columns){
+      } else if (robotCurrentDirection == "S") {
+        if (robotIndex < _columns) {
           createImaginaryNorthGrid();
-        }
-        else {
-          if(imaginarySouth > 0){
+        } else {
+          if (imaginarySouth > 0) {
             removeImaginarySouthGrid();
           }
-          robotIndex = (robotIndex-_columns);
+          robotIndex = (robotIndex - _columns);
         }
         print(robotIndex);
-      }
-
-      else if(robotCurrentDirection == "W"){
-        if (robotIndex%_columns == _columns-1){
+      } else if (robotCurrentDirection == "W") {
+        if (robotIndex % _columns == _columns - 1) {
           createImaginaryEastGrid();
-        }
-        else {
-          if(imaginaryWest > 0){
+        } else {
+          if (imaginaryWest > 0) {
             removeImaginaryWestGrid();
-          }
-          else{
-            robotIndex = robotIndex+1;
+          } else {
+            robotIndex = robotIndex + 1;
           }
         }
       }
     });
   }
 
- /* moveForward() {
+  /* moveForward() {
     setState(() {
       if(robotCurrentDirection == "N"){
         robotIndex = robotIndex - _columns;
@@ -1642,8 +1619,9 @@ class _GridArenaState extends State<GridArena>
     });
   }*/
 
-
   rotateLeft() {
+    statusMessage = "Turning Left...";
+
     setState(() {
       if (robotAngle < -6) {
         robotAngle = 0;
@@ -1684,6 +1662,8 @@ class _GridArenaState extends State<GridArena>
   }
 
   rotateRight() {
+    statusMessage = "Turning Right...";
+
     setState(() {
       if (robotAngle > 6) {
         robotAngle = 0;
@@ -1753,7 +1733,7 @@ class _GridArenaState extends State<GridArena>
     print("Received message to update robot location");
     print("$x, $y, $direction");
 
-    if (x<_columns && y<_rows){
+    if (x < _columns && y < _rows) {
       setState(() {
         robotIndex = x + _columns * (y);
         robotCurrentDirection = direction;
@@ -1764,13 +1744,13 @@ class _GridArenaState extends State<GridArena>
         robotIndex = -1;
       });
     }
-
   }
 
   void confirmStopDialog(BuildContext context) {
     showDialog(
         context: context,
-        barrierDismissible: false, // disables popup to close if tapped outside popup (need a button to close)
+        barrierDismissible: false,
+        // disables popup to close if tapped outside popup (need a button to close)
         builder: (BuildContext context) {
           return AlertDialog(
             title: Row(
@@ -1779,13 +1759,14 @@ class _GridArenaState extends State<GridArena>
                 Text("Are you sure?"),
               ],
             ),
-            content: Text("By pressing confirm, you are stopping the robot operations. Continue?"),
+            content: Text(
+                "By pressing confirm, you are stopping the robot operations. Continue?"),
             //buttons?
             actions: <Widget>[
               TextButton(
                 child: Text("Confirm"),
                 onPressed: () {
-                  if(isStarted == true){
+                  if (isStarted == true) {
                     _sendMessage("PC:stop");
                     isStarted = false;
                   }
@@ -1794,12 +1775,13 @@ class _GridArenaState extends State<GridArena>
               ),
               TextButton(
                 child: Text("Cancel"),
-                onPressed: () { Navigator.of(context).pop(); }, //closes popup
+                onPressed: () {
+                  Navigator.of(context).pop();
+                }, //closes popup
               ),
             ],
           );
-        }
-    );
+        });
   }
 }
 
