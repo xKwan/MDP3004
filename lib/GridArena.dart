@@ -5,7 +5,10 @@ import 'dart:math';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mdp3004/helpers/CustomDialog.dart';
+import 'package:mdp3004/helpers/InputField.dart';
 import 'BluetoothConnection.dart';
+import 'helpers/RoundedButton.dart';
+import 'helpers/Util.dart';
 
 enum action { UNKNOWN, ADD, REMOVE, PLACE, RESIZE, BORDER }
 
@@ -23,8 +26,10 @@ class GridArena extends StatefulWidget {
 
 class _GridArenaState extends State<GridArena>
     with AutomaticKeepAliveClientMixin<GridArena> {
-  int _columns = 20;
-  int _rows = 20;
+  int _columns = 5;
+  int _rows = 7;
+  double _height = 0.5;
+  double _updatedHeight = -1;
 
   List<int> _index = [];
   int robotIndex = -1;
@@ -65,6 +70,11 @@ class _GridArenaState extends State<GridArena>
 
   bool get isConnected => (connection != null ? true : false);
   bool isDisconnecting = false;
+
+  final _formKey = GlobalKey<FormState>();
+  int _updatedRow = -1;
+  int _updatedColumn = -1;
+  String error = '';
 
   @override
   bool get wantKeepAlive => true;
@@ -360,16 +370,12 @@ class _GridArenaState extends State<GridArena>
                       child: Row(
                         children: <Widget>[
                           //Change dimension of grid
-                          IconButton(
-                              onPressed: () async => {
-                                    await CustomDialog.showDialog(context)
-                                        .then((gridVal) => setState(() {
-                                              print("Set");
-                                              _columns = gridVal["column"]!;
-                                              _rows = gridVal["row"]!;
-                                            })),
-                                  },
-                              icon: Icon(Icons.apps)),
+                          // IconButton(
+                          //     onPressed: () async => {
+                          //           // changeGridDialog(context)
+                          //           changeGridHeight(context)
+                          //         },
+                          //     icon: Icon(Icons.apps)),
 
                           //Place robot
                           IconButton(
@@ -475,6 +481,24 @@ class _GridArenaState extends State<GridArena>
                 //     }
                   // });
                 // }),
+            actions: [
+              PopupMenuButton<int>(
+                onSelected: (item) => onSelected(context, item),
+                itemBuilder: (context) => [
+
+                  PopupMenuItem<int>(
+                      value: 0,
+                      child: Text('Change dimensions of grid')
+                  ),
+
+                  PopupMenuItem<int>(
+                      value: 1,
+                      child: Text('Change height of grid')
+                  ),
+
+                ]
+              )
+            ],
           ),
           resizeToAvoidBottomInset: false,
           body: Container(
@@ -524,7 +548,7 @@ class _GridArenaState extends State<GridArena>
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Container(
-                          height: MediaQuery.of(context).size.height * .5,
+                          height: MediaQuery.of(context).size.height * _height,
                           width: MediaQuery.of(context).size.width * .9,
                           child: GridView.count(
                             childAspectRatio: 1,
@@ -1878,6 +1902,223 @@ class _GridArenaState extends State<GridArena>
             ],
           );
         });
+  }
+
+  void changeGridDialog(BuildContext context) {
+    showGeneralDialog(
+        barrierLabel: "Barrier",
+        barrierDismissible: true,
+        barrierColor: Colors.black.withOpacity(0.5),
+        transitionDuration: Duration(milliseconds: 700),
+        context: context,
+        pageBuilder: (_, __, ___) {
+          return StatefulBuilder(
+            builder: (context, setState) {
+             return Align(
+              alignment: Alignment.bottomCenter,
+              child: Container(
+                height: 300,
+                  child: SizedBox.expand(
+                      child: Card(
+                       child: Padding(
+                        padding: const EdgeInsets.all(15.0),
+                        child: Column(
+                        children: <Widget>[
+                          InputField(
+                              labelText: "Row",
+                              hintText: "20",
+                              onChanged: (row) {
+                                setState(() {
+                                  _updatedRow = int.parse(row);
+                                });
+                              }
+                          ),
+                          InputField(
+                              labelText: "Column",
+                              hintText: "20",
+                              onChanged: (column) {
+                                setState(() {
+                                  _updatedColumn = int.parse(column);
+                                });
+                              }
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(8),
+                            child: Text(
+                                error,
+                                style:
+                                TextStyle(color: Colors.red,
+                                  fontSize: 14,
+                                )
+                            ),
+                          ),
+
+                          RoundedButton(
+                            text: "OK",
+                            onSubmit: () async {
+                              // if (_formKey.currentState!.validate()){
+
+                                try {
+                                  if(_updatedRow==-1 || _updatedColumn==-1)
+                                    throw Exception("Row and column cannot be empty");
+
+                                  else if(_updatedRow==0 || _updatedColumn==0)
+                                    throw Exception("Row and column cannot be 0");
+
+                                  else if(_updatedRow>20 || _updatedColumn>20)
+                                    throw Exception("Row and column cannot be more than 20");
+
+                                  else if(_updatedRow==1 || _updatedColumn==1)
+                                    throw Exception("Row and column must be more than 1");
+
+
+                                  else {
+                                    setState(() {
+                                    _rows = _updatedRow;
+                                    _columns = _updatedColumn;
+                                    error = 'Updated. Please close dialog box to see the changes.';
+
+                                    });
+                                  }
+
+                                } catch (e) {
+                                  setState(() {
+                                    error = e.toString();
+                                  });
+                                }
+                              // }
+                            },
+
+                          ),
+
+
+                        ]),
+                      ),
+
+                  ),
+                ),
+              ),
+            );
+          });
+        },
+      transitionBuilder: (_, anim, __, child) {
+        return SlideTransition(
+          position: Tween(begin: Offset(0, 1), end: Offset(0, 0)).animate(anim),
+          child: child,
+        );
+      },
+    ).then((val) {
+      setState(() {
+        error = '';
+      });
+    });
+    }
+
+  void changeGridHeight(BuildContext context) {
+    showGeneralDialog(
+      barrierLabel: "Barrier",
+      barrierDismissible: true,
+      barrierColor: Colors.black.withOpacity(0.5),
+      transitionDuration: Duration(milliseconds: 700),
+      context: context,
+      pageBuilder: (_, __, ___) {
+        return StatefulBuilder(
+            builder: (context, setState) {
+              return Align(
+                alignment: Alignment.bottomCenter,
+                child: Container(
+                  height: 300,
+                  child: SizedBox.expand(
+                    child: Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(15.0),
+                        child: Column(
+                            children: <Widget>[
+
+                              InputField(
+                                  labelText: "Height of Grid",
+                                  hintText: ".5",
+                                  onChanged: (height) {
+                                    setState(() {
+                                      _updatedHeight = double.parse(height);
+                                    });
+                                  }
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.all(8),
+                                child: Text(
+                                    error,
+                                    style:
+                                    TextStyle(color: Colors.red,
+                                      fontSize: 14,
+                                    )
+                                ),
+                              ),
+
+                              RoundedButton(
+                                text: "OK",
+                                onSubmit: () async {
+                                  // if (_formKey.currentState!.validate()){
+
+                                  try {
+                                    if(_updatedHeight > 1 || _updatedHeight <= 0)
+                                      throw Exception("Height must be between 0 - 1");
+
+                                    else if(_updatedHeight==-1)
+                                      throw Exception("Height cannot be empty");
+
+
+                                    else {
+                                      setState(() {
+                                        _height = _updatedHeight;
+                                        error = 'Updated. Please close dialog box to see the changes.';
+
+                                      });
+                                    }
+
+                                  } catch (e) {
+                                    setState(() {
+                                      error = e.toString();
+                                    });
+                                  }
+                                  // }
+                                },
+
+                              ),
+
+
+                            ]),
+                      ),
+
+                    ),
+                  ),
+                ),
+              );
+            });
+      },
+      transitionBuilder: (_, anim, __, child) {
+        return SlideTransition(
+          position: Tween(begin: Offset(0, 1), end: Offset(0, 0)).animate(anim),
+          child: child,
+        );
+      },
+    ).then((val) {
+      setState(() {
+        error = '';
+      });
+    });
+  }
+
+  void onSelected(BuildContext context, int item) {
+    switch(item) {
+      case 0:
+        changeGridDialog(context);
+            break;
+      case 1:
+        changeGridHeight(context);
+            break;
+
+    }
   }
 }
 
