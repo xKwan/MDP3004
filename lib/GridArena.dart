@@ -100,40 +100,40 @@ class _GridArenaState extends State<GridArena>
     });
   }
 
-  Widget dragTarget(context, index) => DragTarget<Obstacle>(
-      builder: (context, candidateData, rejectedData) => Container(
-            child:
-                //Check if robot has been placed
-                robotIndex == index
-                    ? buildRotateRobot()
-                    :
-                    //Else check if obstacle has been placed
-                    _index.contains(index)
-                        ? obstacles[index]!.isDiscovered
-                            ? Expanded(
-                                child: Image.asset('assets/id' +
-                                    obstacles[index]!.id.toString() +
-                                    '.png'))
-                            : Text(obstacles[index]!.id.toString(),
-                                style: TextStyle(color: Colors.white))
-                        : null,
-          ),
-      onWillAccept: (data) => true,
-      onAccept: (data) {
-        setState(() {
-          if (data.action == action.ADD) {
-            _index.add(index);
-            data = Obstacle.updateIndex(data, index);
-            obstacles.addAll({index: data});
-            print(obstacles);
-
-            _sendMessage("PC:ADD," +
-                getObstacleCoordinates(obstacles[index]!)["x"].toString() +
-                "," +
-                getObstacleCoordinates(obstacles[index]!)["y"].toString());
-          }
-        });
-      });
+  // Widget dragTarget(context, index) => DragTarget<Obstacle>(
+      // builder: (context, candidateData, rejectedData) => Container(
+      //       child:
+      //           //Check if robot has been placed
+      //           robotIndex == index
+      //               ? buildRotateRobot()
+      //               :
+      //               //Else check if obstacle has been placed
+      //               _index.contains(index)
+      //                   ? obstacles[index]!.isDiscovered
+      //                       ? Expanded(
+      //                           child: Image.asset('assets/id' +
+      //                               obstacles[index]!.id.toString() +
+      //                               '.png'))
+      //                       : Text(obstacles[index]!.id.toString(),
+      //                           style: TextStyle(color: Colors.white))
+      //                   : null,
+      //     ),
+      // onWillAccept: (data) => true,
+      // onAccept: (data) {
+      //   setState(() {
+      //     if (data.action == action.ADD) {
+      //       _index.add(index);
+      //       data = Obstacle.updateIndex(data, index);
+      //       obstacles.addAll({index: data});
+      //       print(obstacles);
+      //
+      //       _sendMessage("PC:ADD," +
+      //           getObstacleCoordinates(obstacles[index]!)["x"].toString() +
+      //           "," +
+      //           getObstacleCoordinates(obstacles[index]!)["y"].toString());
+      //     }
+      //   });
+      // });
 
   Widget buildRotateRobot() {
     if (robotCurrentDirection == "0") robotCurrentDirection = "N";
@@ -196,16 +196,50 @@ class _GridArenaState extends State<GridArena>
           height: 100,
           width: 100,
           child: Center(
-            child: _index.contains(index)
-                ? Draggable<Obstacle>(
-                    data:
-                        Obstacle.updateAction(obstacles[index]!, action.REMOVE),
-                    child: dragTarget(context, index),
-                    feedback: Material(
-                        child: Icon(Icons.view_in_ar, color: Colors.black)),
-                  )
-                : dragTarget(context, index),
+            child: Container(
+                child:
+                  //Check if robot has been placed
+                  robotIndex == index
+                  ? buildRotateRobot()
+                      :
+                  //Else check if obstacle has been placed
+                        _index.contains(index)
+                  ? obstacles[index]!.isDiscovered
+                  ? Expanded(
+                      child: Image.asset('assets/id' +
+                      obstacles[index]!.id.toString() +
+                      '.png'))
+                          : Text(obstacles[index]!.id.toString(),
+                      style: TextStyle(color: Colors.white))
+                      : null,
+                ),
           ),
+              // onWillAccept: (data) => true,
+              // onAccept: (data) {
+              // setState(() {
+              // if (data.action == action.ADD) {
+              // _index.add(index);
+              // data = Obstacle.updateIndex(data, index);
+              // obstacles.addAll({index: data});
+              // print(obstacles);
+              //
+              // _sendMessage("PC:ADD," +
+              // getObstacleCoordinates(obstacles[index]!)["x"].toString() +
+              // "," +
+              // getObstacleCoordinates(obstacles[index]!)["y"].toString());
+              // }
+              // }
+          // Center(
+          //   child: _index.contains(index)
+          //       ? Draggable<Obstacle>(
+          //           data:
+          //               Obstacle.updateAction(obstacles[index]!, action.REMOVE),
+          //           child: dragTarget(context, index),
+          //           feedback: Material(
+          //               child: Icon(Icons.view_in_ar, color: Colors.black)),
+          //         )
+          //       : dragTarget(context, index),
+          // ),
         ),
       );
 
@@ -312,8 +346,10 @@ class _GridArenaState extends State<GridArena>
           appBar: AppBar(
             automaticallyImplyLeading: false,
             backgroundColor: Colors.cyan,
-            title: DragTarget<Obstacle>(
-                builder: (context, candidateData, rejectedData) => Container(
+            title:
+            // DragTarget<Obstacle>(
+            //     builder: (context, candidateData, rejectedData) =>
+                    Container(
                       alignment: Alignment.centerLeft,
                       child: Row(
                         children: <Widget>[
@@ -340,17 +376,28 @@ class _GridArenaState extends State<GridArena>
                               icon: Icon(Icons.android_rounded)),
 
                           //Place Obstacle
-                          Draggable<Obstacle>(
-                            data:
-                                new Obstacle(id: obstID++, action: action.ADD),
-                            child: Container(
-                                decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(10)),
-                                child: Icon(Icons.view_in_ar)),
-                            feedback: Material(
-                                child: Icon(Icons.view_in_ar,
-                                    color: Colors.black)),
-                          ),
+                          IconButton(
+                              onPressed: () => {
+                                if (_action == action.ADD)
+                                  _action = action.REMOVE
+                                else if (_action == action.REMOVE)
+                                  _action = action.UNKNOWN
+                                else
+                                  _action = action.ADD
+                              },
+                              icon: Icon(Icons.view_in_ar,
+                                          color: Colors.white)),
+                          // Draggable<Obstacle>(
+                          //   data:
+                          //       new Obstacle(id: obstID++, action: action.ADD),
+                          //   child: Container(
+                          //       decoration: BoxDecoration(
+                          //           borderRadius: BorderRadius.circular(10)),
+                          //       child: Icon(Icons.view_in_ar)),
+                          //   feedback: Material(
+                          //       child: Icon(Icons.view_in_ar,
+                          //           color: Colors.black)),
+                          // ),
 
                           Expanded(
                             child: FittedBox(
@@ -408,23 +455,23 @@ class _GridArenaState extends State<GridArena>
                         ],
                       ),
                     ),
-                onWillAccept: (data) => true,
-                onAccept: (data) {
-                  setState(() {
-                    if (data.action == action.REMOVE) {
-                      _sendMessage("PC:SUB," +
-                          getObstacleCoordinates(obstacles[data.index]!)["x"]
-                              .toString() +
-                          "," +
-                          getObstacleCoordinates(obstacles[data.index]!)["y"]
-                              .toString());
-
-                      _index.remove(data.index);
-                      obstacles.remove(data.index);
-                      print(obstacles);
-                    }
-                  });
-                }),
+                // onWillAccept: (data) => true,
+                // onAccept: (data) {
+                //   setState(() {
+                //     if (data.action == action.REMOVE) {
+                //       _sendMessage("PC:SUB," +
+                //           getObstacleCoordinates(obstacles[data.index]!)["x"]
+                //               .toString() +
+                //           "," +
+                //           getObstacleCoordinates(obstacles[data.index]!)["y"]
+                //               .toString());
+                //
+                //       _index.remove(data.index);
+                //       obstacles.remove(data.index);
+                //       print(obstacles);
+                //     }
+                  // });
+                // }),
           ),
           resizeToAvoidBottomInset: false,
           body: Container(
@@ -486,7 +533,32 @@ class _GridArenaState extends State<GridArena>
                                     //    _index.add(index);
                                     // else if (_action == action.REMOVE)
                                     //   _index.remove(index);
-                                    if (_action == action.PLACE) {
+                                    if (_action == action.ADD) {
+                                      if(!_index.contains(index)){
+                                        _index.add(index);
+                                        Obstacle data = new Obstacle(id: obstID++, index: index);
+                                        obstacles.addAll({index: data});
+                                        print(obstacles);
+
+                                        _sendMessage("PC:ADD," +
+                                            getObstacleCoordinates(obstacles[index]!)["x"].toString() +
+                                            "," +
+                                            getObstacleCoordinates(obstacles[index]!)["y"].toString());
+                                      }
+                                    }
+                                    else if (_action == action.REMOVE) {
+                                      _sendMessage("PC:SUB," +
+                                          getObstacleCoordinates(obstacles[index]!)["x"]
+                                              .toString() +
+                                          "," +
+                                          getObstacleCoordinates(obstacles[index]!)["y"]
+                                              .toString());
+
+                                      _index.remove(index);
+                                      obstacles.remove(index);
+                                      print(obstacles);
+                                    }
+                                    else if (_action == action.PLACE) {
                                       robotIndex = index;
                                     }
                                   })
@@ -1019,7 +1091,7 @@ class _GridArenaState extends State<GridArena>
         obstacles.update(index, (value) => data);
       } else {
         Obstacle data = new Obstacle(
-            id: int.parse(id), index: index, action: action.UNKNOWN);
+            id: int.parse(id), index: index);
 
         data = Obstacle.updateDiscovery(data, true);
 
@@ -1840,5 +1912,5 @@ class Obstacle {
   }
 
   Obstacle(
-      {required this.id, this.index, this.direction, required this.action});
+      {required this.id, this.index, this.direction});
 }
