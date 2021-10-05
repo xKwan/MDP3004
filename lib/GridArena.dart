@@ -34,7 +34,7 @@ class _GridArenaState extends State<GridArena>
   List<int> _index = [];
   int robotIndex = -1;
   int robotY = 20;
-  int maxRows = 20;
+  int maxRows = 0;
   var _action = action.UNKNOWN;
   double robotAngle = 0;
   var robotCurrentDirection = "0";
@@ -84,6 +84,8 @@ class _GridArenaState extends State<GridArena>
   @override
   void initState() {
     super.initState();
+
+    maxRows = _rows;
 
     try {
       if (connection != null) {
