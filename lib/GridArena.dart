@@ -23,8 +23,8 @@ class GridArena extends StatefulWidget {
 
 class _GridArenaState extends State<GridArena>
     with AutomaticKeepAliveClientMixin<GridArena> {
-  int _columns = 20;
-  int _rows = 20;
+  int _columns = 5;
+  int _rows = 7;
 
   List<int> _index = [];
   int robotIndex = -1;
@@ -33,6 +33,7 @@ class _GridArenaState extends State<GridArena>
   var robotCurrentDirection = "0";
   bool isStarted = false;
   String statusMessage = 'Robot Ready!';
+  List<int> targetIDList = [];
 
   var imaginaryNorth = 0;
   var imaginarySouth = 0;
@@ -412,8 +413,6 @@ class _GridArenaState extends State<GridArena>
                   setState(() {
                     if (data.action == action.REMOVE) {
                       _sendMessage("PC:SUB," +
-                          data.index.toString() +
-                          "," +
                           getObstacleCoordinates(obstacles[data.index]!)["x"]
                               .toString() +
                           "," +
@@ -531,42 +530,42 @@ class _GridArenaState extends State<GridArena>
                                         },
                                     onLongPressEnd: (details) => {
                                           obstacles[index]!.direction == "N"
-                                              ? _sendMessage("FACE, $index, (" +
+                                              ? _sendMessage("PC:FACE," +
                                                   getObstacleCoordinates(obstacles[index]!)["x"]
                                                       .toString() +
-                                                  ", " +
+                                                  "," +
                                                   getObstacleCoordinates(obstacles[index]!)["y"]
                                                       .toString() +
-                                                  "), N")
+                                                  ",N")
                                               : obstacles[index]!.direction ==
                                                       "S"
-                                                  ? _sendMessage("FACE, $index, (" +
+                                                  ? _sendMessage("PC:FACE," +
                                                       getObstacleCoordinates(obstacles[index]!)["x"]
                                                           .toString() +
-                                                      ", " +
+                                                      "," +
                                                       getObstacleCoordinates(obstacles[index]!)["y"]
                                                           .toString() +
-                                                      "), S")
+                                                      ",S")
                                                   : obstacles[index]!.direction ==
                                                           "E"
-                                                      ? _sendMessage("FACE, $index, (" +
+                                                      ? _sendMessage("PC:FACE," +
                                                           getObstacleCoordinates(obstacles[index]!)["x"]
                                                               .toString() +
-                                                          ", " +
+                                                          "," +
                                                           getObstacleCoordinates(obstacles[index]!)["y"]
                                                               .toString() +
-                                                          "), E")
+                                                          ",E")
                                                       : obstacles[index]!
                                                                   .direction ==
                                                               "W"
-                                                          ? _sendMessage("FACE, $index, (" +
+                                                          ? _sendMessage("PC:FACE," +
                                                               getObstacleCoordinates(obstacles[index]!)["x"]
                                                                   .toString() +
-                                                              ", " +
+                                                              "," +
                                                               getObstacleCoordinates(
                                                                       obstacles[index]!)["y"]
                                                                   .toString() +
-                                                              "), W")
+                                                              ",W")
                                                           : null
                                         },
                                     child: rebuildCard(context, index)),
@@ -620,8 +619,8 @@ class _GridArenaState extends State<GridArena>
                                 children: [
                                   ElevatedButton.icon(
                                     onPressed: () {
-                                      _sendMessage('PC:start');
-                                      createImaginaryObstacleWest();
+                                      _sendMessage('PC:START');
+                                      //createImaginaryObstacleWest();
                                       isStarted = true;
                                     },
                                     style: ElevatedButton.styleFrom(
@@ -906,9 +905,12 @@ class _GridArenaState extends State<GridArena>
         print("Received ROBOT Command");
         setRobotLocation(int.parse(dataString.split(',')[1]),
             int.parse(dataString.split(',')[2]), dataString.split(',')[3]);
-      } else if (dataString.split(',')[0].toUpperCase() == "TARGET") {
+      }
+
+      else if (dataString.split(',')[0].toUpperCase() == "TARGET") {
         print("Test command");
-        checkRobotCurrentLocation(dataString.split(',')[1]);
+        int id = checkRobotCurrentLocation(dataString.split(',')[1]);
+        targetIDList.add(id);
       }
 
       /*else if (dataString.split(',')[0] == "TARGET") {
@@ -947,8 +949,15 @@ class _GridArenaState extends State<GridArena>
           }
         }
       }*/
+
       else {
-        _translateCommands(dataString);
+        print("datastring is: $dataString");
+        var char_list = dataString.split(',');
+        print("char_list: $char_list");
+        for(int i = 0; i < char_list.length; i++){
+          print("$i char is: " + char_list[i].toString());
+          _translateCommands(char_list[i]);
+        }
       }
     });
     return dataString;
@@ -961,25 +970,25 @@ class _GridArenaState extends State<GridArena>
     dir = robotCurrentDirection;
 
     if (robotCurrentDirection == "N") {
-      y -= 1;
+      y -= 3;
       dir = "S";
       if (y > 0 && y < _rows) {
         _updateObstacles(x, y, dir, id);
       }
     } else if (robotCurrentDirection == "S") {
-      y += 1;
+      y += 3;
       dir = "N";
       if (y > 0 && y < _rows) {
         _updateObstacles(x, y, dir, id);
       }
     } else if (robotCurrentDirection == "E") {
-      x += 1;
+      x += 3;
       dir = "W";
       if (x > 0 && x < _columns) {
         _updateObstacles(x, y, dir, id);
       }
     } else if (robotCurrentDirection == "W") {
-      x -= 1;
+      x -= 3;
       dir = "E";
       //_updateObstacles(x, y, dir, id);
       if (x > 0 && x < _columns) {
@@ -1033,12 +1042,20 @@ class _GridArenaState extends State<GridArena>
     //print("switch case:");
     try {
       switch (dataString) {
+        case "e": // update obstacles' value
+          int id = targetIDList[0];
+          checkRobotCurrentLocation(id);
+          if (targetIDList[0] != null){
+            targetIDList.remove(targetIDList[0]);
+          }
+          break;
+
         case "w": // forward
           moveForward();
-          await Future.delayed(Duration(milliseconds: 540));
-          statusMessage = "Robot Ready!";
 
           print("received w");
+          await Future.delayed(Duration(milliseconds: 540));
+          statusMessage = "Robot Ready!";
           break;
 
         case "x": // reverse
@@ -1047,21 +1064,23 @@ class _GridArenaState extends State<GridArena>
 
         case "d": // turn right
           moveForward();
-          await Future.delayed(Duration(milliseconds: 6000));
+          await Future.delayed(Duration(milliseconds: 540));
           rotateRight();
-          await Future.delayed(Duration(milliseconds: 6000));
+          //await Future.delayed(Duration(milliseconds: 10000));
+          await Future.delayed(Duration(milliseconds: 540));
           moveForward();
-          await Future.delayed(Duration(milliseconds: 1000));
+          await Future.delayed(Duration(milliseconds: 540));
           statusMessage = "Robot Ready!";
           break;
 
         case "a": // turn left
           moveForward();
-          await Future.delayed(Duration(milliseconds: 6000));
+          await Future.delayed(Duration(milliseconds: 540));
           rotateLeft();
-          await Future.delayed(Duration(milliseconds: 5000));
+          //await Future.delayed(Duration(milliseconds: 8000));
+          await Future.delayed(Duration(milliseconds: 540));
           moveForward();
-          await Future.delayed(Duration(milliseconds: 1000));
+          await Future.delayed(Duration(milliseconds: 540));
           statusMessage = "Robot Ready!";
           break;
 
@@ -1077,9 +1096,9 @@ class _GridArenaState extends State<GridArena>
         dataString = "10";
       }
       if (int.parse(dataString!) > 1 && int.parse(dataString!) < 11) {
-        for (int i = 2; i <= int.parse(dataString!); i++) {
+        for (int i = 1; i <= int.parse(dataString!); i++) {
           moveForward();
-          await Future.delayed(Duration(milliseconds: 540));
+          //await Future.delayed(Duration(milliseconds: 540));
         }
       }
     } catch (e) {
@@ -1767,7 +1786,7 @@ class _GridArenaState extends State<GridArena>
                 child: Text("Confirm"),
                 onPressed: () {
                   if (isStarted == true) {
-                    _sendMessage("PC:stop");
+                    _sendMessage("PC:STOP");
                     isStarted = false;
                   }
                   Navigator.of(context).pop();
