@@ -34,12 +34,14 @@ class _GridArenaState extends State<GridArena>
   List<int> _index = [];
   int robotIndex = -1;
   int robotY = 20;
+  int maxRows = 20;
   var _action = action.UNKNOWN;
   double robotAngle = 0;
   var robotCurrentDirection = "0";
   bool isStarted = false;
   String statusMessage = 'Robot Ready!';
   List<int> targetIDList = [];
+  List<String> storeUpdateObstacleList = [];
 
   var imaginaryNorth = 0;
   var imaginarySouth = 0;
@@ -225,7 +227,7 @@ class _GridArenaState extends State<GridArena>
                       : index % 4 == 0 ?
                             FittedBox(
                               child: Text(" " + (index % _columns).toString() + ", " +
-                                  (19 - (index / _columns).floor()).toString() + " "),
+                                  (maxRows - (index / _columns).floor()).toString() + " "),
                             ) : Text("")
                 ),
           ),
@@ -411,29 +413,31 @@ class _GridArenaState extends State<GridArena>
                           //           color: Colors.black)),
                           // ),
 
-                          FittedBox(
-                            child: Padding(
-                              padding: const EdgeInsets.fromLTRB(
-                                  20.0, 16.0, 0.0, 16.0),
-                              child: Container(
+                          Expanded(
+                            child: FittedBox(
+                              child: Padding(
+                                padding: const EdgeInsets.fromLTRB(
+                                    20.0, 16.0, 0.0, 16.0),
+                                child: Container(
 
-                                child: Text(
-                                  "Robot coordinates:\n"
-                                          "(" +
-                                      getRobotCoordinates()["x"].toString() +
-                                      " , " +
-                                      (19 - robotY).toString() +
-                                      ")" +
-                                      "  Index: " +
-                                      robotIndex.toString() +
-                                      "  DIR: " +
-                                      robotCurrentDirection,
-                                  /*style: TextStyle(
-                                    //fontSize: 25.0,
-                                    //fontWeight: FontWeight.bold
-                                  ),*/
-                                  // maxLines: 2,   // TRY THIS
-                                  textAlign: TextAlign.center,
+                                  child: Text(
+                                    "Robot coordinates:\n"
+                                            "(" +
+                                        getRobotCoordinates()["x"].toString() +
+                                        " , " +
+                                        (maxRows - robotY).toString() +
+                                        ")" +
+                                        "  Index: " +
+                                        robotIndex.toString() +
+                                        "  DIR: " +
+                                        robotCurrentDirection,
+                                    /*style: TextStyle(
+                                      //fontSize: 25.0,
+                                      //fontWeight: FontWeight.bold
+                                    ),*/
+                                    // maxLines: 2,   // TRY THIS
+                                    textAlign: TextAlign.center,
+                                  ),
                                 ),
                               ),
                             ),
@@ -449,15 +453,17 @@ class _GridArenaState extends State<GridArena>
                             child: Text("(" + robotIndex.toString() + ")"),
                           ),*/
 
-                          FittedBox(
-                            child: Padding(
-                              padding: const EdgeInsets.fromLTRB(
-                                  20.0, 16.0, 0.0, 16.0),
-                              child: Text(
-                                "Out of bounds \n N: $imaginaryNorth | "
-                                "S: $imaginarySouth | E: $imaginaryEast | W: $imaginaryWest",
-                                textAlign: TextAlign.center,
-                                //style: TextStyle(fontSize: 25),
+                          Expanded(
+                            child: FittedBox(
+                              child: Padding(
+                                padding: const EdgeInsets.fromLTRB(
+                                    20.0, 16.0, 0.0, 16.0),
+                                child: Text(
+                                  "Out of bounds \n N: $imaginaryNorth | "
+                                  "S: $imaginarySouth | E: $imaginaryEast | W: $imaginaryWest",
+                                  textAlign: TextAlign.center,
+                                  //style: TextStyle(fontSize: 25),
+                                ),
                               ),
                             ),
                           )
@@ -1008,11 +1014,23 @@ class _GridArenaState extends State<GridArena>
             int.parse(dataString.split(',')[2]), dataString.split(',')[3]);
       }
 
-      else if (dataString.split(',')[0].toUpperCase() == "TARGET") {
+      // use this if only 2 parameter
+      /*else if (dataString.split(',')[0].toUpperCase() == "TARGET") {
         print("Test command");
         int id = checkRobotCurrentLocation(dataString.split(',')[1]);
         targetIDList.add(id);
+      }*/
+
+      // use this if 4 parameter to store in a list first
+      else if (dataString.split(',')[0].toUpperCase() == "TARGET"){
+        storeUpdateObstacleList.add(dataString);
+        int i = 0;
+        for (i = 0; i < storeUpdateObstacleList.length; i++){}
+        print("i is $i");
+        print(storeUpdateObstacleList.length);
+        //print("Stored: " + storeUpdateObstacleList[i].toString());
       }
+
 
       /*else if (dataString.split(',')[0] == "TARGET") {
         //TODO: GET INDEX
@@ -1032,7 +1050,8 @@ class _GridArenaState extends State<GridArena>
             Obstacle data = new Obstacle(
                 id: int.parse(dataString.split(',')[3]),
                 index: index,
-                action: action.UNKNOWN);
+                //action: action.UNKNOWN
+            );
 
             data = Obstacle.updateDiscovery(data, true);
 
@@ -1113,20 +1132,21 @@ class _GridArenaState extends State<GridArena>
 
   _updateObstacles(x, y, dir, id) {
     int index = x + (_columns * y);
-    setState(() {
-      if (obstacles[index] != null) {
+    //setState(() {
+      print("executing update obstacles");
+      /*if (obstacles[index] != null) {
         Obstacle data = Obstacle.updateId(obstacles[index]!, id);
         data = Obstacle.updateDiscovery(data, true);
         obstacles.update(index, (value) => data);
-      } else {
+      } else {*/
         Obstacle data = new Obstacle(
-            id: int.parse(id), index: index);
+            id: id, index: index);
 
         data = Obstacle.updateDiscovery(data, true);
 
         _index.add(index);
         obstacles.addAll({index: data});
-      }
+      //}
 
       try {
         print("Try");
@@ -1136,7 +1156,7 @@ class _GridArenaState extends State<GridArena>
       } catch (e) {
         print(e);
       }
-    });
+    //});
   }
 
   _translateCommands(dataString) async {
@@ -1144,11 +1164,27 @@ class _GridArenaState extends State<GridArena>
     try {
       switch (dataString) {
         case "e": // update obstacles' value
-          int id = targetIDList[0];
+
+
+          // use this if we are only receiving target image id
+        /*int id = targetIDList[0];
           checkRobotCurrentLocation(id);
           if (targetIDList[0] != null){
             targetIDList.remove(targetIDList[0]);
-          }
+          }*/
+
+        //this code for receiving "TARGET,X,Y,IMAGE_ID,DIR"
+          //if (storeUpdateObstacleList[0] != null) {
+            print("Updating obstacles");
+            String text = storeUpdateObstacleList[0];
+            int x = int.parse(text.split(',')[1]);
+            int y = int.parse(text.split(',')[2]);
+            int id = int.parse(text.split(',')[3]);
+            String dir = text.split(',')[4];
+            print("$x $y $id $dir");
+            _updateObstacles(x, y, dir, id);
+            storeUpdateObstacleList.remove(text);
+         // }
           break;
 
         case "w": // forward
@@ -1167,7 +1203,7 @@ class _GridArenaState extends State<GridArena>
           moveForward();
           await Future.delayed(Duration(milliseconds: 540));
           rotateRight();
-          //await Future.delayed(Duration(milliseconds: 10000));
+          await Future.delayed(Duration(milliseconds: 10000));
           await Future.delayed(Duration(milliseconds: 540));
           moveForward();
           await Future.delayed(Duration(milliseconds: 540));
@@ -1178,7 +1214,7 @@ class _GridArenaState extends State<GridArena>
           moveForward();
           await Future.delayed(Duration(milliseconds: 540));
           rotateLeft();
-          //await Future.delayed(Duration(milliseconds: 8000));
+          await Future.delayed(Duration(milliseconds: 8000));
           await Future.delayed(Duration(milliseconds: 540));
           moveForward();
           await Future.delayed(Duration(milliseconds: 540));
@@ -1202,7 +1238,7 @@ class _GridArenaState extends State<GridArena>
           //await Future.delayed(Duration(milliseconds: 540));
         }
       }
-    } catch (e) {
+    } catch (g) {
       print("error parsing received message");
     }
   }
@@ -1930,6 +1966,7 @@ class _GridArenaState extends State<GridArena>
                               onChanged: (row) {
                                 setState(() {
                                   _updatedRow = int.parse(row);
+                                  maxRows = _updatedRow-1;
                                 });
                               }
                           ),
@@ -1976,6 +2013,7 @@ class _GridArenaState extends State<GridArena>
                                     setState(() {
                                     _rows = _updatedRow;
                                     _columns = _updatedColumn;
+
                                     error = 'Updated. Please close dialog box to see the changes.';
 
                                     });
