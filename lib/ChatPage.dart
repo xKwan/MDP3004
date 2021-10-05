@@ -37,11 +37,11 @@ class _ChatPage extends State<ChatPage> {
   String _messageBuffer = '';
 
   final TextEditingController textEditingController =
-  new TextEditingController();
+      new TextEditingController();
   final ScrollController listScrollController = new ScrollController();
 
   bool isConnecting = true;
-  bool get isConnected => (connection!=null ? true : false);
+  bool get isConnected => (Broadcast.instance !=null ? true : false);
   // set isConnected(connection) => isConnected = connection;
 
   bool isDisconnecting = false;
@@ -53,11 +53,12 @@ class _ChatPage extends State<ChatPage> {
   void initState() {
     super.initState();
 
+    print(FlutterBluetoothSerial.instance.getBondStateForAddress("48:A4:72:73:20:11").toString());
     print("chatinit");
     print(connection);
     try{
-      if (connection == null){
-        //getConnection();
+      if (isConnected == false){
+        getConnection();
       } else {
         listenToStream();
       }
@@ -73,24 +74,29 @@ class _ChatPage extends State<ChatPage> {
     await Broadcast.setInstance(await BluetoothStateBroadcastWrapper.create(widget.server.address));
     connection = BluetoothStateBroadcastWrapper.connection;
     listenToStream();
-
+    
   }
 
   void listenToStream() {
 
     setState(() {
       isConnecting = false;
-      isDisconnecting = false;
+      // isDisconnecting = false;
     });
 
     Broadcast.instance.btStateStream.listen(_onDataReceived).onDone(() {
 
-      if (isDisconnecting) {
-        print('Disconnecting locally!');
-        // dispose();
-      } else {
-        print('Disconnected remotely!');
-      }
+
+        print("DISCONNECT");
+        if (Broadcast.isDisconnected == disconnectedBy.LOCAL) {
+          print('Disconnecting locally!');
+          // dispose();
+        } else {
+            print('Disconnected remotely!');
+            Broadcast.setDisconnection("REMOTE");
+            Broadcast.setInstance(null);
+            // connection = null;
+        }
       if (this.mounted) {
         setState(() {});
       }
@@ -105,7 +111,7 @@ class _ChatPage extends State<ChatPage> {
         children: <Widget>[
           Container(
             child: Text(
-                    (text) {
+                (text) {
                   return text == '/shrug' ? '¯\\_(ツ)_/¯' : text;
                 }(_message.text.trim()),
                 style: TextStyle(color: Colors.white)),
@@ -114,7 +120,7 @@ class _ChatPage extends State<ChatPage> {
             width: 222.0,
             decoration: BoxDecoration(
                 color:
-                _message.whom == clientID ? Colors.blueAccent : Colors.grey,
+                    _message.whom == clientID ? Colors.blueAccent : Colors.grey,
                 borderRadius: BorderRadius.circular(7.0)),
           ),
         ],
@@ -134,8 +140,8 @@ class _ChatPage extends State<ChatPage> {
           title: (isConnecting
               ? Text('Connecting chat to ' + serverName + '...')
               : isConnected
-              ? Text('Live chat with ' + serverName)
-              : Text('Chat log with ' + serverName))),
+                  ? Text('Live chat with ' + serverName)
+                  : Text('Chat log with ' + serverName))),
       body: SafeArea(
         child: Column(
           children: <Widget>[
@@ -157,8 +163,8 @@ class _ChatPage extends State<ChatPage> {
                         hintText: isConnecting
                             ? 'Wait until connected...'
                             : isConnected
-                            ? 'Type your message...'
-                            : 'Chat got disconnected',
+                                ? 'Type your message...'
+                                : 'Chat got disconnected',
                         hintStyle: const TextStyle(color: Colors.grey),
                       ),
                       enabled: isConnected,
@@ -208,7 +214,7 @@ class _ChatPage extends State<ChatPage> {
 
     // Create message if there is new line character
     String dataString = String.fromCharCodes(buffer);
-
+    
     setState(() {
       messages.add(_Message(1, dataString));
     });
@@ -260,7 +266,7 @@ class _ChatPage extends State<ChatPage> {
     }
   }
 
-// bool isConnected() {
-//   return connection != null && connection?.isConnected;
-// }
+  // bool isConnected() {
+  //   return connection != null && connection?.isConnected;
+  // }
 }

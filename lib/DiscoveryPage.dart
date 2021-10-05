@@ -2,8 +2,10 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
+import 'package:mdp3004/ChatPage.dart';
 
 import './BluetoothDeviceListEntry.dart';
+import 'helpers/Util.dart';
 
 class DiscoveryPage extends StatefulWidget {
   /// If true, discovery starts on page start, otherwise user must press action button.
@@ -20,6 +22,8 @@ class _DiscoveryPage extends State<DiscoveryPage> {
   List<BluetoothDiscoveryResult> results =
   List<BluetoothDiscoveryResult>.empty(growable: true);
   bool isDiscovering = false;
+  bool failure = false;
+  // bool bonded = false;
 
   _DiscoveryPage();
 
@@ -42,25 +46,19 @@ class _DiscoveryPage extends State<DiscoveryPage> {
     _startDiscovery();
   }
 
+
   void _startDiscovery() {
     _streamSubscription =
         FlutterBluetoothSerial.instance.startDiscovery().listen((r) {
           setState(() {
             final existingIndex = results.indexWhere(
                     (element) => element.device.address == r.device.address);
-            if (existingIndex >= 0)
-              results[existingIndex] = r;
-            else{
-              print('Device address is: ' + r.device.address.toString());
-              print('Device name is: ' + r.device.name.toString());
-
-              if(r.device.name == null){
+            if (r.device.name != null)
+            {
+              if (existingIndex >= 0)
                 results[existingIndex] = r;
-              }
               else
-                {
-                  results.add(r);
-                }
+                results.add(r);
             }
           });
         });
@@ -72,7 +70,22 @@ class _DiscoveryPage extends State<DiscoveryPage> {
     });
   }
 
-  // @TODO . One day there should be `_pairDevice` on long tap on something... ;)
+  Future<Widget> failureDialog() async {
+    return failure ? await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        content: Text("Failed to connect to device"),
+        actions: [
+          TextButton(
+              child: Text("Ok", style: TextStyle(color: Colors.grey)),
+              onPressed: () {
+                Navigator.pop(context, false);
+              }),
+
+        ],
+      ),
+    ): null;
+  }
 
   @override
   void dispose() {
@@ -114,25 +127,67 @@ class _DiscoveryPage extends State<DiscoveryPage> {
           return BluetoothDeviceListEntry(
             device: device,
             rssi: result.rssi,
-            onTap: () {
-              Navigator.of(context).pop(result.device);
-            },
-            onLongPress: () async {
+            // onTap: () {
+            //   Navigator.of(context).pop(result.device);
+            // },
+            onTap: () async {
+
+              // FlutterBluetoothSerial.instance.onStateChanged().listen((state) async {
+
               try {
                 bool bonded = false;
+
+
                 if (device.isBonded) {
                   print('Unbonding from ${device.address}...');
                   await FlutterBluetoothSerial.instance
                       .removeDeviceBondWithAddress(address);
-                  print('Unbonding from ${device.address} has succed');
+                  print('Unbonding from ${device.address} has succeed');
+
                 } else {
-                  print('Bonding with ${device.address}...');
-                  bonded = (await FlutterBluetoothSerial.instance
-                      .bondDeviceAtAddress(address))!;
-                  print(
-                      'Bonding with ${device.address} has ${bonded ? 'succed' : 'failed'}.');
+
+                  // do{
+                  // Future.doWhile(() async {
+                    print('Bonding with ${device.address}...');
+                    bonded = (await FlutterBluetoothSerial.instance
+                        .bondDeviceAtAddress(address))!;
+
+                    print(bonded);
+                    print('Bonding with ${device.address} has ${bonded ? 'succeeded' : 'failed'}.');
+
+                    // if(bonded)
+                    //   return false;
+
+                    //   tries++;
+                    //
+                    // } while(!bonded && tries < 11);
+
+
+                    // return true;
+                  // }).then((value) => {
+                    bonded ?
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) {
+                          return ChatPage(server: device);
+                        },
+                      ),
+                    ) :
+                    setState(() {
+                      // failure = true;
+                      Utils.showSnackBar(
+                        context,
+                        text: 'Failed to connect to device.',
+                        color: Colors.grey.withOpacity(0.5),
+                      );
+                    // })
+                  });
+
                 }
+
                 setState(() {
+                  print("setstate");
                   results[results.indexOf(result)] = BluetoothDiscoveryResult(
                       device: BluetoothDevice(
                         name: device.name ?? '',
@@ -144,12 +199,13 @@ class _DiscoveryPage extends State<DiscoveryPage> {
                       ),
                       rssi: result.rssi);
                 });
+
               } catch (ex) {
                 showDialog(
                   context: context,
                   builder: (BuildContext context) {
                     return AlertDialog(
-                      title: const Text('Error occured while bonding'),
+                      title: const Text('Error occurred while bonding'),
                       content: Text("${ex.toString()}"),
                       actions: <Widget>[
                         new TextButton(
@@ -163,6 +219,11 @@ class _DiscoveryPage extends State<DiscoveryPage> {
                   },
                 );
               }
+
+
+              // });
+
+
             },
           );
         },
