@@ -1953,6 +1953,7 @@ class _GridArenaState extends State<GridArena>
              return Align(
               alignment: Alignment.bottomCenter,
               child: Container(
+                margin: MediaQuery.of(context).viewInsets,
                 height: 300,
                   child: SizedBox.expand(
                       child: Card(
@@ -2066,6 +2067,8 @@ class _GridArenaState extends State<GridArena>
                 alignment: Alignment.bottomCenter,
                 child: Container(
                   height: 300,
+                  margin: MediaQuery.of(context).viewInsets,
+
                   child: SizedBox.expand(
                     child: Card(
                       child: Padding(

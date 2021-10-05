@@ -22,6 +22,7 @@ class InputField extends StatelessWidget {
           onChanged: onChanged,
           cursorColor: Colors.teal,
           maxLength: 2,
+          keyboardType: TextInputType.number,
 
           decoration: InputDecoration(
             focusedBorder: UnderlineInputBorder(
