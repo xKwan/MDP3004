@@ -98,7 +98,8 @@ class CustomDialog {
                                         context,
                                         text: 'Please enter a number between 1 to 20.',
                                         color: Colors.white70.withOpacity(0.5),
-                                      );                                    }
+                                      );
+                                    }
                                   } else {
                                     Utils.showSnackBar(
                                       context,
