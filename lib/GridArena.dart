@@ -23,11 +23,12 @@ class GridArena extends StatefulWidget {
 
 class _GridArenaState extends State<GridArena>
     with AutomaticKeepAliveClientMixin<GridArena> {
-  int _columns = 5;
-  int _rows = 7;
+  int _columns = 20;
+  int _rows = 20;
 
   List<int> _index = [];
   int robotIndex = -1;
+  int robotY = 20;
   var _action = action.UNKNOWN;
   double robotAngle = 0;
   var robotCurrentDirection = "0";
@@ -211,7 +212,11 @@ class _GridArenaState extends State<GridArena>
                       '.png'))
                           : Text(obstacles[index]!.id.toString(),
                       style: TextStyle(color: Colors.white))
-                      : null,
+                      : index % 4 == 0 ?
+                            FittedBox(
+                              child: Text(" " + (index % _columns).toString() + ", " +
+                                  (19 - (index / _columns).floor()).toString() + " "),
+                            ) : Text("")
                 ),
           ),
               // onWillAccept: (data) => true,
@@ -248,6 +253,7 @@ class _GridArenaState extends State<GridArena>
     if (robotIndex != -1) {
       cord["x"] = robotIndex % _columns;
       cord["y"] = (robotIndex / _columns).floor();
+      robotY = (robotIndex / _columns).floor();
     }
     return cord;
   }
@@ -399,30 +405,29 @@ class _GridArenaState extends State<GridArena>
                           //           color: Colors.black)),
                           // ),
 
-                          Expanded(
-                            child: FittedBox(
-                              child: Padding(
-                                padding: const EdgeInsets.fromLTRB(
-                                    20.0, 8.0, 0.0, 8.0),
-                                child: Container(
-                                  child: Text(
-                                    "Robot coordinates:\n"
-                                            "(" +
-                                        getRobotCoordinates()["x"].toString() +
-                                        " , " +
-                                        getRobotCoordinates()["y"].toString() +
-                                        ")" +
-                                        "  Index: " +
-                                        robotIndex.toString() +
-                                        "  DIR: " +
-                                        robotCurrentDirection,
-                                    /*style: TextStyle(
-                                      //fontSize: 25.0,
-                                      //fontWeight: FontWeight.bold
-                                    ),*/
-                                    // maxLines: 2,   // TRY THIS
-                                    textAlign: TextAlign.center,
-                                  ),
+                          FittedBox(
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(
+                                  20.0, 16.0, 0.0, 16.0),
+                              child: Container(
+
+                                child: Text(
+                                  "Robot coordinates:\n"
+                                          "(" +
+                                      getRobotCoordinates()["x"].toString() +
+                                      " , " +
+                                      (19 - robotY).toString() +
+                                      ")" +
+                                      "  Index: " +
+                                      robotIndex.toString() +
+                                      "  DIR: " +
+                                      robotCurrentDirection,
+                                  /*style: TextStyle(
+                                    //fontSize: 25.0,
+                                    //fontWeight: FontWeight.bold
+                                  ),*/
+                                  // maxLines: 2,   // TRY THIS
+                                  textAlign: TextAlign.center,
                                 ),
                               ),
                             ),
@@ -438,17 +443,15 @@ class _GridArenaState extends State<GridArena>
                             child: Text("(" + robotIndex.toString() + ")"),
                           ),*/
 
-                          Expanded(
-                            child: FittedBox(
-                              child: Padding(
-                                padding: const EdgeInsets.fromLTRB(
-                                    20.0, 8.0, 0.0, 8.0),
-                                child: Text(
-                                  "Out of bounds \n N: $imaginaryNorth | "
-                                  "S: $imaginarySouth | E: $imaginaryEast | W: $imaginaryWest",
-                                  textAlign: TextAlign.center,
-                                  //style: TextStyle(fontSize: 25),
-                                ),
+                          FittedBox(
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(
+                                  20.0, 16.0, 0.0, 16.0),
+                              child: Text(
+                                "Out of bounds \n N: $imaginaryNorth | "
+                                "S: $imaginarySouth | E: $imaginaryEast | W: $imaginaryWest",
+                                textAlign: TextAlign.center,
+                                //style: TextStyle(fontSize: 25),
                               ),
                             ),
                           )
@@ -481,6 +484,7 @@ class _GridArenaState extends State<GridArena>
                     //X-AXIS
                     alignment: Alignment.topCenter,
                     child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
                         children: List.generate(_columns, (index) {
                       return Padding(
                         padding: index == 0
@@ -489,8 +493,9 @@ class _GridArenaState extends State<GridArena>
                         child: FittedBox(
                           fit: BoxFit.fitWidth,
                           child: Text(
-                            "     " + index.toString(),
-                            style: TextStyle(fontSize: 20 / (_columns / 7)),
+                            //"     " +
+                                index.toString(),
+                            //style: TextStyle(fontSize: 20 / (_columns / 7)),
                           ),
                         ),
                       );
@@ -510,7 +515,7 @@ class _GridArenaState extends State<GridArena>
                           fit: BoxFit.fitHeight,
                           child: Text(
                             (index).toString(),
-                            style: TextStyle(fontSize: 20 / (_columns / 7)),
+                            //style: TextStyle(fontSize: 20 / (_columns / 7)),
                           ),
                         ),
                       );
@@ -788,9 +793,9 @@ class _GridArenaState extends State<GridArena>
                                   onPressed: () {
                                     rotateLeft();
                                     print('Rotate Left');
-                                    _sendMessage('tl');
+                                    /*_sendMessage('tl');
                                     var text = _encodeString('l');
-                                    _onDataReceived(text);
+                                    _onDataReceived(text);*/
                                   },
                                   style: ElevatedButton.styleFrom(
                                       //fixedSize: Size(240, 80),
@@ -804,9 +809,9 @@ class _GridArenaState extends State<GridArena>
                                   onPressed: () {
                                     rotateRight();
                                     print('Rotate Right');
-                                    _sendMessage('tr');
+                                    /*_sendMessage('tr');
                                     var text = _encodeString('r');
-                                    _onDataReceived(text);
+                                    _onDataReceived(text);*/
                                   },
                                   style: ElevatedButton.styleFrom(
                                       //fixedSize: Size(240, 80),
