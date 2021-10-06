@@ -10,7 +10,7 @@ import 'BluetoothConnection.dart';
 import 'helpers/RoundedButton.dart';
 import 'helpers/Util.dart';
 
-enum action { UNKNOWN, ADD, REMOVE, PLACE, RESIZE, BORDER }
+enum action { UNKNOWN, ADD, REMOVE, PLACE, RESIZE, BORDER, SUB }
 
 class _Message {
   int whom;
@@ -385,25 +385,43 @@ class _GridArenaState extends State<GridArena>
                           //Place robot
                           IconButton(
                               onPressed: () => {
-                                    if (_action == action.PLACE)
-                                      _action = action.UNKNOWN
-                                    else
-                                      _action = action.PLACE
+                                    setState(() {
+                                      if (_action == action.PLACE)
+                                        _action = action.SUB;
+                                      else if (_action == action.SUB)
+                                        _action = action.UNKNOWN;
+                                      else
+                                        _action = action.PLACE;
+                                    })
                                   },
-                              icon: Icon(Icons.android_rounded)),
+                              icon: _action == action.PLACE?
+                              Icon(Icons.android_rounded):
+                              _action == action.SUB ?
+                              Icon(Icons.close) :
+                              Icon(Icons.android_rounded,
+                                    color: Colors.blueGrey,)
+                          ),
 
                           //Place Obstacle
                           IconButton(
                               onPressed: () => {
-                                if (_action == action.ADD)
-                                  _action = action.REMOVE
-                                else if (_action == action.REMOVE)
-                                  _action = action.UNKNOWN
-                                else
-                                  _action = action.ADD
+                               setState (() {
+                                 if (_action == action.ADD)
+                                   _action = action.REMOVE;
+                                 else if (_action == action.REMOVE)
+                                   _action = action.UNKNOWN;
+                                 else
+                                   _action = action.ADD;
+                               })
                               },
-                              icon: Icon(Icons.view_in_ar,
-                                          color: Colors.white)),
+                              icon: _action == action.ADD ?
+                              Icon(Icons.view_in_ar,
+                                  color: Colors.white):
+                              _action == action.REMOVE ?
+                              Icon(Icons.close) :
+                              Icon(Icons.view_in_ar,
+                                color: Colors.blueGrey)
+                          ),
                           // Draggable<Obstacle>(
                           //   data:
                           //       new Obstacle(id: obstID++, action: action.ADD),
@@ -522,7 +540,7 @@ class _GridArenaState extends State<GridArena>
                         padding: const EdgeInsets.all(8.0),
                         child: Container(
                           height: MediaQuery.of(context).size.height * _height,
-                          width: MediaQuery.of(context).size.width * .9,
+                          width: MediaQuery.of(context).size.width * .95,
                           child: GridView.count(
                             childAspectRatio: 1,
                             crossAxisCount: _columns,
@@ -562,6 +580,9 @@ class _GridArenaState extends State<GridArena>
                                     }
                                     else if (_action == action.PLACE) {
                                       robotIndex = index;
+                                    }
+                                    else if (_action == action.SUB) {
+                                      robotIndex = -1;
                                     }
                                   })
                                 },
@@ -1290,6 +1311,7 @@ class _GridArenaState extends State<GridArena>
 
         int _updatedIndex =
             imaginaryX + ((_columns + 1) * imaginaryY) + (_columns + 1);
+        // print("$_updatedIndex, $imaginaryX, $imaginaryY, $_rows, $_columns");
 
         data = Obstacle.updateIndex(obstacles[_index[0]]!, _updatedIndex);
         obstacles.remove(obstacles[_index[0]]);
@@ -1982,7 +2004,7 @@ class _GridArenaState extends State<GridArena>
                                     _rows = _updatedRow;
                                     _columns = _updatedColumn;
 
-                                    error = 'Updated. Please close dialog box to see the changes.';
+                                    Navigator.of(context).pop();
 
                                     });
                                   }
@@ -2079,7 +2101,7 @@ class _GridArenaState extends State<GridArena>
                                     else {
                                       setState(() {
                                         _height = _updatedHeight;
-                                        error = 'Updated. Please close dialog box to see the changes.';
+                                        Navigator.of(context).pop();
 
                                       });
                                     }
