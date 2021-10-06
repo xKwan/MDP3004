@@ -28,8 +28,6 @@ class _GridArenaState extends State<GridArena>
     with AutomaticKeepAliveClientMixin<GridArena> {
   int _columns = 20;
   int _rows = 20;
-  int _columns = 5;
-  int _rows = 7;
   double _height = 0.5;
   double _updatedHeight = -1;
 
@@ -515,46 +513,10 @@ class _GridArenaState extends State<GridArena>
           body: Container(
             child: Column(
               children: [
-                Container(
-                    //X-AXIS
-                    alignment: Alignment.topCenter,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                        children: List.generate(_columns, (index) {
-                      return Padding(
-                        padding: index == 0
-                            ? EdgeInsets.only(top: 10, left: 450 / _rows)
-                            : EdgeInsets.only(top: 10, left: 245 / _columns),
-                        child: FittedBox(
-                          fit: BoxFit.fitWidth,
-                          child: Text(
-                            //"     " +
-                                index.toString(),
-                            //style: TextStyle(fontSize: 20 / (_columns / 7)),
-                          ),
-                        ),
-                      );
-                    }))),
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                        //Y-AXIS
-                        child: Column(
-                            children: List.generate(_rows, (index) {
-                      return Padding(
-                        padding: index == 0
-                            ? EdgeInsets.only(top: 200 / _columns, left: 5)
-                            : EdgeInsets.only(left: 5, top: 245 / _rows),
-                        child: FittedBox(
-                          fit: BoxFit.fitHeight,
-                          child: Text(
-                            (index).toString(),
-                            //style: TextStyle(fontSize: 20 / (_columns / 7)),
-                          ),
-                        ),
-                      );
-                    }))),
+
                     Container(
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
