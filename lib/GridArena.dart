@@ -230,7 +230,7 @@ class _GridArenaState extends State<GridArena>
                       : index % 4 == 0 ?
                             FittedBox(
                               child: Text(" " + (index % _columns).toString() + ", " +
-                                  (maxRows - (index / _columns).floor()).toString() + " "),
+                                  (_rows-1 - (index / _columns).floor()).toString() + " "),
                             ) : Text("")
                 ),
           ),
@@ -573,6 +573,8 @@ class _GridArenaState extends State<GridArena>
                                           "," +
                                           getObstacleCoordinates(obstacles[index]!)["y"]
                                               .toString());
+
+                                      print("REMOVE INDEX: $index");
 
                                       _index.remove(index);
                                       obstacles.remove(index);
@@ -1122,32 +1124,65 @@ class _GridArenaState extends State<GridArena>
   }*/
 
   _updateObstacles(x, y, dir, id) {
-    int index = x + (_columns * y);
-    //setState(() {
+    Map<String, int> cord = {"x":x, "y":y};
+    int index = getObstacleIndex(cord);
+    setState(() {
       print("executing update obstacles");
       /*if (obstacles[index] != null) {
         Obstacle data = Obstacle.updateId(obstacles[index]!, id);
         data = Obstacle.updateDiscovery(data, true);
         obstacles.update(index, (value) => data);
       } else {*/
+
+    print("INDEX: $index");
+    if (index != -1) {
+      if (obstacles[index] != null) {
+        Obstacle data = Obstacle.updateId(obstacles[index]!, id);
+        data = Obstacle.updateDiscovery(data, true);
+        obstacles.update(index, (value) => data);
+      } else {
         Obstacle data = new Obstacle(
-            id: id, index: index);
+          id: id,
+          index: index,
+          //action: action.UNKNOWN
+        );
 
         data = Obstacle.updateDiscovery(data, true);
 
         _index.add(index);
         obstacles.addAll({index: data});
-      //}
+      }
 
       try {
         print("Try");
-        Obstacle updatedObstacle =
-            Obstacle.updateDirection(obstacles[index]!, dir);
+        Obstacle updatedObstacle = Obstacle.updateDirection(
+            obstacles[index]!, dir);
         obstacles.update(index, (value) => updatedObstacle);
       } catch (e) {
         print(e);
       }
-    //});
+    }
+
+
+      // if(index != -1 && !_index.contains(index)){
+      //   Obstacle data = new Obstacle(
+      //       id: id, index: index);
+      //
+      //   data = Obstacle.updateDiscovery(data, true);
+      //
+      //   _index.add(index);
+      //   obstacles.addAll({index: data});
+      // }
+      //
+      // try {
+      //   print("Try");
+      //   Obstacle updatedObstacle =
+      //       Obstacle.updateDirection(obstacles[index]!, dir);
+      //   obstacles.update(index, (value) => updatedObstacle);
+      // } catch (e) {
+      //   print(e);
+      // }
+    });
   }
 
   Future<void> _translateCommands(dataString) async {
@@ -1167,20 +1202,24 @@ class _GridArenaState extends State<GridArena>
 
         //this code for receiving "TARGET,X,Y,IMAGE_ID,DIR"
           //if (storeUpdateObstacleList[0] != null) {
-            print("Updating obstacles");
-            print(storeUpdateObstacleList[0]);
-
-            String text = storeUpdateObstacleList[0];
-            int x = int.parse(text.split(',')[1]);
-            int y = int.parse(text.split(',')[2]);
-            int id = int.parse(text.split(',')[3]);
-            String dir = text.split(',')[4];
-            print("$x $y $id $dir");
-            setState(() {
-              _updateObstacles(x, y, dir, id);
-              storeUpdateObstacleList.remove(text);
-            });
          // }
+         //  do {
+         //    if(storeUpdateObstacleList.isNotEmpty) {
+              print("Updating obstacles");
+              print(storeUpdateObstacleList[0]);
+
+              String text = storeUpdateObstacleList[0];
+              int x = int.parse(text.split(',')[1]);
+              int y = int.parse(text.split(',')[2]);
+              int id = int.parse(text.split(',')[3]);
+              String dir = text.split(',')[4];
+              print("$x $y $id $dir");
+              setState(() {
+                _updateObstacles(x, y, dir, id);
+                storeUpdateObstacleList.remove(text);
+              });
+            // }
+          // } while(storeUpdateObstacleList.isEmpty);
           break;
 
         case "w": // forward
