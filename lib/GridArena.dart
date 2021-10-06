@@ -1205,6 +1205,8 @@ class _GridArenaState extends State<GridArena>
          // }
          //  do {
          //    if(storeUpdateObstacleList.isNotEmpty) {
+              await Future.delayed(Duration(milliseconds: 8000));
+
               print("Updating obstacles");
               print(storeUpdateObstacleList[0]);
 
@@ -1218,7 +1220,8 @@ class _GridArenaState extends State<GridArena>
                 _updateObstacles(x, y, dir, id);
                 storeUpdateObstacleList.remove(text);
               });
-            // }
+
+              // }
           // } while(storeUpdateObstacleList.isEmpty);
           break;
 
