@@ -26,6 +26,8 @@ class GridArena extends StatefulWidget {
 
 class _GridArenaState extends State<GridArena>
     with AutomaticKeepAliveClientMixin<GridArena> {
+  int _columns = 20;
+  int _rows = 20;
   int _columns = 5;
   int _rows = 7;
   double _height = 0.5;
