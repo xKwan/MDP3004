@@ -3,7 +3,6 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'package:mdp3004/GridArena.dart';
-import 'package:mdp3004/homepage.dart';
 import './BackgroundCollectingTask.dart';
 import './ChatPage.dart';
 import './DiscoveryPage.dart';
@@ -205,20 +204,19 @@ class _MainPage extends State<MainPage> {
                     showConnectionDialog(context);
                   }
                   else{
-                    //_startChat(context, server!);
-                    _startChat(context);
+                    _startChat(context, server!);
                   }
                 },
               ),
             ),
             ListTile(
               title: ElevatedButton(
-                child: const Text('Robot UI Page'),
+                child: const Text('Grid Page'),
                 onPressed: ()  {
                   Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (context) {
-                          return HomePage();
+                          return GridArena();
                         },
                       )
                   );
@@ -379,11 +377,11 @@ class _MainPage extends State<MainPage> {
     print("Connection is $connection");
   }
 
-  void _startChat(BuildContext context) {
+  void _startChat(BuildContext context, BluetoothDevice server) {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) {
-          return ChatPage();
+          return ChatPage(server: server);
         },
       ),
     );

@@ -9,12 +9,12 @@ import 'BluetoothConnection.dart';
 // import 'BluetoothBroadcastState.dart';
 
 class ChatPage extends StatefulWidget {
-  //final BluetoothDevice server;
-   var connection = BluetoothStateBroadcastWrapper.connection;
+  final BluetoothDevice server;
+  // var connection = BluetoothStateBroadcastWrapper.connection;
   // var broadcast;
 
 
-  //ChatPage({required this.server});
+  ChatPage({required this.server});
 
   @override
   _ChatPage createState() => new _ChatPage();
@@ -49,7 +49,7 @@ class _ChatPage extends State<ChatPage> {
   // _ChatPage(this.server, this.broadcast);
 
 
-  /*@override
+  @override
   void initState() {
     super.initState();
 
@@ -65,28 +65,16 @@ class _ChatPage extends State<ChatPage> {
     } catch (e) {
       print(e);
     }
-  }*/
 
-  @override
-  void initState() {
-    super.initState();
-
-    try {
-      if (connection != null) {
-        listenToStream();
-      }
-    } catch (e) {
-      print(e);
-    }
   }
 
 
-/*  void getConnection() async {
+  void getConnection() async {
     await Broadcast.setInstance(await BluetoothStateBroadcastWrapper.create(widget.server.address));
     connection = BluetoothStateBroadcastWrapper.connection;
     listenToStream();
 
-  }*/
+  }
 
   void listenToStream() {
 
@@ -136,7 +124,7 @@ class _ChatPage extends State<ChatPage> {
       );
     }).toList();
 
-    final serverName = "" ?? "Unknown";
+    final serverName = widget.server.name ?? "Unknown";
     return Scaffold(
       appBar: AppBar(
           leading: IconButton(
@@ -146,8 +134,8 @@ class _ChatPage extends State<ChatPage> {
           title: (isConnecting
               ? Text('Connecting chat to ' + serverName + '...')
               : isConnected
-              ? Text('Chat Log ' + serverName)
-              : Text('Chat Log ' + serverName))),
+              ? Text('Live chat with ' + serverName)
+              : Text('Chat log with ' + serverName))),
       body: SafeArea(
         child: Column(
           children: <Widget>[

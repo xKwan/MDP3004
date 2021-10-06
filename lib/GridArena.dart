@@ -5,10 +5,7 @@ import 'dart:math';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mdp3004/helpers/CustomDialog.dart';
-import 'package:mdp3004/helpers/InputField.dart';
 import 'BluetoothConnection.dart';
-import 'helpers/RoundedButton.dart';
-import 'helpers/Util.dart';
 
 enum action { UNKNOWN, ADD, REMOVE, PLACE, RESIZE, BORDER }
 
@@ -26,22 +23,18 @@ class GridArena extends StatefulWidget {
 
 class _GridArenaState extends State<GridArena>
     with AutomaticKeepAliveClientMixin<GridArena> {
-  int _columns = 5;
-  int _rows = 7;
-  double _height = 0.5;
-  double _updatedHeight = -1;
+  int _columns = 20;
+  int _rows = 20;
 
   List<int> _index = [];
   int robotIndex = -1;
-  int robotY = 0;
-  int maxRows = 0;
+  int robotY = 20;
   var _action = action.UNKNOWN;
   double robotAngle = 0;
   var robotCurrentDirection = "0";
   bool isStarted = false;
   String statusMessage = 'Robot Ready!';
   List<int> targetIDList = [];
-  List<String> storeUpdateObstacleList = [];
 
   var imaginaryNorth = 0;
   var imaginarySouth = 0;
@@ -73,20 +66,12 @@ class _GridArenaState extends State<GridArena>
   bool get isConnected => (connection != null ? true : false);
   bool isDisconnecting = false;
 
-  final _formKey = GlobalKey<FormState>();
-  int _updatedRow = -1;
-  int _updatedColumn = -1;
-  String error = '';
-
   @override
   bool get wantKeepAlive => true;
 
   @override
   void initState() {
     super.initState();
-
-    maxRows = _rows;
-    robotY -= 1 - maxRows -2;
 
     try {
       if (connection != null) {
@@ -230,7 +215,7 @@ class _GridArenaState extends State<GridArena>
                       : index % 4 == 0 ?
                             FittedBox(
                               child: Text(" " + (index % _columns).toString() + ", " +
-                                  (maxRows - (index / _columns).floor()).toString() + " "),
+                                  (19 - (index / _columns).floor()).toString() + " "),
                             ) : Text("")
                 ),
           ),
@@ -375,12 +360,16 @@ class _GridArenaState extends State<GridArena>
                       child: Row(
                         children: <Widget>[
                           //Change dimension of grid
-                          // IconButton(
-                          //     onPressed: () async => {
-                          //           // changeGridDialog(context)
-                          //           changeGridHeight(context)
-                          //         },
-                          //     icon: Icon(Icons.apps)),
+                          IconButton(
+                              onPressed: () async => {
+                                    await CustomDialog.showDialog(context)
+                                        .then((gridVal) => setState(() {
+                                              print("Set");
+                                              _columns = gridVal["column"]!;
+                                              _rows = gridVal["row"]!;
+                                            })),
+                                  },
+                              icon: Icon(Icons.apps)),
 
                           //Place robot
                           IconButton(
@@ -416,31 +405,29 @@ class _GridArenaState extends State<GridArena>
                           //           color: Colors.black)),
                           // ),
 
-                          Expanded(
-                            child: FittedBox(
-                              child: Padding(
-                                padding: const EdgeInsets.fromLTRB(
-                                    20.0, 16.0, 0.0, 16.0),
-                                child: Container(
+                          FittedBox(
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(
+                                  20.0, 16.0, 0.0, 16.0),
+                              child: Container(
 
-                                  child: Text(
-                                    "Robot coordinates:\n"
-                                            "(" +
-                                        getRobotCoordinates()["x"].toString() +
-                                        " , " +
-                                        (maxRows - robotY).toString() +
-                                        ")" +
-                                        "  Index: " +
-                                        robotIndex.toString() +
-                                        "  DIR: " +
-                                        robotCurrentDirection,
-                                    /*style: TextStyle(
-                                      //fontSize: 25.0,
-                                      //fontWeight: FontWeight.bold
-                                    ),*/
-                                    // maxLines: 2,   // TRY THIS
-                                    textAlign: TextAlign.center,
-                                  ),
+                                child: Text(
+                                  "Robot coordinates:\n"
+                                          "(" +
+                                      getRobotCoordinates()["x"].toString() +
+                                      " , " +
+                                      (19 - robotY).toString() +
+                                      ")" +
+                                      "  Index: " +
+                                      robotIndex.toString() +
+                                      "  DIR: " +
+                                      robotCurrentDirection,
+                                  /*style: TextStyle(
+                                    //fontSize: 25.0,
+                                    //fontWeight: FontWeight.bold
+                                  ),*/
+                                  // maxLines: 2,   // TRY THIS
+                                  textAlign: TextAlign.center,
                                 ),
                               ),
                             ),
@@ -456,17 +443,15 @@ class _GridArenaState extends State<GridArena>
                             child: Text("(" + robotIndex.toString() + ")"),
                           ),*/
 
-                          Expanded(
-                            child: FittedBox(
-                              child: Padding(
-                                padding: const EdgeInsets.fromLTRB(
-                                    20.0, 16.0, 0.0, 16.0),
-                                child: Text(
-                                  "Out of bounds \n N: $imaginaryNorth | "
-                                  "S: $imaginarySouth | E: $imaginaryEast | W: $imaginaryWest",
-                                  textAlign: TextAlign.center,
-                                  //style: TextStyle(fontSize: 25),
-                                ),
+                          FittedBox(
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(
+                                  20.0, 16.0, 0.0, 16.0),
+                              child: Text(
+                                "Out of bounds \n N: $imaginaryNorth | "
+                                "S: $imaginarySouth | E: $imaginaryEast | W: $imaginaryWest",
+                                textAlign: TextAlign.center,
+                                //style: TextStyle(fontSize: 25),
                               ),
                             ),
                           )
@@ -490,24 +475,6 @@ class _GridArenaState extends State<GridArena>
                 //     }
                   // });
                 // }),
-            actions: [
-              PopupMenuButton<int>(
-                onSelected: (item) => onSelected(context, item),
-                itemBuilder: (context) => [
-
-                  PopupMenuItem<int>(
-                      value: 0,
-                      child: Text('Change dimensions of grid')
-                  ),
-
-                  PopupMenuItem<int>(
-                      value: 1,
-                      child: Text('Change height of grid')
-                  ),
-
-                ]
-              )
-            ],
           ),
           resizeToAvoidBottomInset: false,
           body: Container(
@@ -557,7 +524,7 @@ class _GridArenaState extends State<GridArena>
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Container(
-                          height: MediaQuery.of(context).size.height * _height,
+                          height: MediaQuery.of(context).size.height * .5,
                           width: MediaQuery.of(context).size.width * .9,
                           child: GridView.count(
                             childAspectRatio: 1,
@@ -1017,23 +984,11 @@ class _GridArenaState extends State<GridArena>
             int.parse(dataString.split(',')[2]), dataString.split(',')[3]);
       }
 
-      // use this if only 2 parameter
-      /*else if (dataString.split(',')[0].toUpperCase() == "TARGET") {
+      else if (dataString.split(',')[0].toUpperCase() == "TARGET") {
         print("Test command");
         int id = checkRobotCurrentLocation(dataString.split(',')[1]);
         targetIDList.add(id);
-      }*/
-
-      // use this if 4 parameter to store in a list first
-      else if (dataString.split(',')[0].toUpperCase() == "TARGET"){
-        storeUpdateObstacleList.add(dataString);
-        int i = 0;
-        for (i = 0; i < storeUpdateObstacleList.length; i++){}
-        print("i is $i");
-        print(storeUpdateObstacleList.length);
-        //print("Stored: " + storeUpdateObstacleList[i].toString());
       }
-
 
       /*else if (dataString.split(',')[0] == "TARGET") {
         //TODO: GET INDEX
@@ -1053,8 +1008,7 @@ class _GridArenaState extends State<GridArena>
             Obstacle data = new Obstacle(
                 id: int.parse(dataString.split(',')[3]),
                 index: index,
-                //action: action.UNKNOWN
-            );
+                action: action.UNKNOWN);
 
             data = Obstacle.updateDiscovery(data, true);
 
@@ -1135,21 +1089,20 @@ class _GridArenaState extends State<GridArena>
 
   _updateObstacles(x, y, dir, id) {
     int index = x + (_columns * y);
-    //setState(() {
-      print("executing update obstacles");
-      /*if (obstacles[index] != null) {
+    setState(() {
+      if (obstacles[index] != null) {
         Obstacle data = Obstacle.updateId(obstacles[index]!, id);
         data = Obstacle.updateDiscovery(data, true);
         obstacles.update(index, (value) => data);
-      } else {*/
+      } else {
         Obstacle data = new Obstacle(
-            id: id, index: index);
+            id: int.parse(id), index: index);
 
         data = Obstacle.updateDiscovery(data, true);
 
         _index.add(index);
         obstacles.addAll({index: data});
-      //}
+      }
 
       try {
         print("Try");
@@ -1159,7 +1112,7 @@ class _GridArenaState extends State<GridArena>
       } catch (e) {
         print(e);
       }
-    //});
+    });
   }
 
   _translateCommands(dataString) async {
@@ -1167,27 +1120,11 @@ class _GridArenaState extends State<GridArena>
     try {
       switch (dataString) {
         case "e": // update obstacles' value
-
-
-          // use this if we are only receiving target image id
-        /*int id = targetIDList[0];
+          int id = targetIDList[0];
           checkRobotCurrentLocation(id);
           if (targetIDList[0] != null){
             targetIDList.remove(targetIDList[0]);
-          }*/
-
-        //this code for receiving "TARGET,X,Y,IMAGE_ID,DIR"
-          //if (storeUpdateObstacleList[0] != null) {
-            print("Updating obstacles");
-            String text = storeUpdateObstacleList[0];
-            int x = int.parse(text.split(',')[1]);
-            int y = int.parse(text.split(',')[2]);
-            int id = int.parse(text.split(',')[3]);
-            String dir = text.split(',')[4];
-            print("$x $y $id $dir");
-            _updateObstacles(x, y, dir, id);
-            storeUpdateObstacleList.remove(text);
-         // }
+          }
           break;
 
         case "w": // forward
@@ -1206,7 +1143,7 @@ class _GridArenaState extends State<GridArena>
           moveForward();
           await Future.delayed(Duration(milliseconds: 540));
           rotateRight();
-          await Future.delayed(Duration(milliseconds: 10000));
+          //await Future.delayed(Duration(milliseconds: 10000));
           await Future.delayed(Duration(milliseconds: 540));
           moveForward();
           await Future.delayed(Duration(milliseconds: 540));
@@ -1217,7 +1154,7 @@ class _GridArenaState extends State<GridArena>
           moveForward();
           await Future.delayed(Duration(milliseconds: 540));
           rotateLeft();
-          await Future.delayed(Duration(milliseconds: 8000));
+          //await Future.delayed(Duration(milliseconds: 8000));
           await Future.delayed(Duration(milliseconds: 540));
           moveForward();
           await Future.delayed(Duration(milliseconds: 540));
@@ -1241,7 +1178,7 @@ class _GridArenaState extends State<GridArena>
           //await Future.delayed(Duration(milliseconds: 540));
         }
       }
-    } catch (g) {
+    } catch (e) {
       print("error parsing received message");
     }
   }
@@ -1941,228 +1878,6 @@ class _GridArenaState extends State<GridArena>
             ],
           );
         });
-  }
-
-  void changeGridDialog(BuildContext context) {
-    showGeneralDialog(
-        barrierLabel: "Barrier",
-        barrierDismissible: true,
-        barrierColor: Colors.black.withOpacity(0.5),
-        transitionDuration: Duration(milliseconds: 700),
-        context: context,
-        pageBuilder: (_, __, ___) {
-          return StatefulBuilder(
-            builder: (context, setState) {
-             return Align(
-              alignment: Alignment.bottomCenter,
-              child: Container(
-                margin: MediaQuery.of(context).viewInsets,
-                height: 300,
-                  child: SizedBox.expand(
-                      child: Card(
-                       child: Padding(
-                        padding: const EdgeInsets.all(15.0),
-                        child: Column(
-                        children: <Widget>[
-                          InputField(
-                              labelText: "Row",
-                              hintText: "20",
-                              onChanged: (row) {
-                                setState(() {
-                                  _updatedRow = int.parse(row);
-                                  maxRows = _updatedRow-1;
-                                });
-                              }
-                          ),
-                          InputField(
-                              labelText: "Column",
-                              hintText: "20",
-                              onChanged: (column) {
-                                setState(() {
-                                  _updatedColumn = int.parse(column);
-                                });
-                              }
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(8),
-                            child: Text(
-                                error,
-                                style:
-                                TextStyle(color: Colors.red,
-                                  fontSize: 14,
-                                )
-                            ),
-                          ),
-
-                          RoundedButton(
-                            text: "OK",
-                            onSubmit: () async {
-                              // if (_formKey.currentState!.validate()){
-
-                                try {
-                                  if(_updatedRow==-1 || _updatedColumn==-1)
-                                    throw Exception("Row and column cannot be empty");
-
-                                  else if(_updatedRow==0 || _updatedColumn==0)
-                                    throw Exception("Row and column cannot be 0");
-
-                                  else if(_updatedRow>20 || _updatedColumn>20)
-                                    throw Exception("Row and column cannot be more than 20");
-
-                                  else if(_updatedRow==1 || _updatedColumn==1)
-                                    throw Exception("Row and column must be more than 1");
-
-
-                                  else {
-                                    setState(() {
-                                    _rows = _updatedRow;
-                                    _columns = _updatedColumn;
-
-                                    error = 'Updated. Please close dialog box to see the changes.';
-
-                                    });
-                                  }
-
-                                } catch (e) {
-                                  setState(() {
-                                    error = e.toString();
-                                  });
-                                }
-                              // }
-                            },
-
-                          ),
-
-
-                        ]),
-                      ),
-
-                  ),
-                ),
-              ),
-            );
-          });
-        },
-      transitionBuilder: (_, anim, __, child) {
-        return SlideTransition(
-          position: Tween(begin: Offset(0, 1), end: Offset(0, 0)).animate(anim),
-          child: child,
-        );
-      },
-    ).then((val) {
-      setState(() {
-        error = '';
-      });
-    });
-    }
-
-  void changeGridHeight(BuildContext context) {
-    showGeneralDialog(
-      barrierLabel: "Barrier",
-      barrierDismissible: true,
-      barrierColor: Colors.black.withOpacity(0.5),
-      transitionDuration: Duration(milliseconds: 700),
-      context: context,
-      pageBuilder: (_, __, ___) {
-        return StatefulBuilder(
-            builder: (context, setState) {
-              return Align(
-                alignment: Alignment.bottomCenter,
-                child: Container(
-                  height: 300,
-                  margin: MediaQuery.of(context).viewInsets,
-
-                  child: SizedBox.expand(
-                    child: Card(
-                      child: Padding(
-                        padding: const EdgeInsets.all(15.0),
-                        child: Column(
-                            children: <Widget>[
-
-                              InputField(
-                                  labelText: "Height of Grid",
-                                  hintText: ".5",
-                                  onChanged: (height) {
-                                    setState(() {
-                                      _updatedHeight = double.parse(height);
-                                    });
-                                  }
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(8),
-                                child: Text(
-                                    error,
-                                    style:
-                                    TextStyle(color: Colors.red,
-                                      fontSize: 14,
-                                    )
-                                ),
-                              ),
-
-                              RoundedButton(
-                                text: "OK",
-                                onSubmit: () async {
-                                  // if (_formKey.currentState!.validate()){
-
-                                  try {
-                                    if(_updatedHeight > 1 || _updatedHeight <= 0)
-                                      throw Exception("Height must be between 0 - 1");
-
-                                    else if(_updatedHeight==-1)
-                                      throw Exception("Height cannot be empty");
-
-
-                                    else {
-                                      setState(() {
-                                        _height = _updatedHeight;
-                                        error = 'Updated. Please close dialog box to see the changes.';
-
-                                      });
-                                    }
-
-                                  } catch (e) {
-                                    setState(() {
-                                      error = e.toString();
-                                    });
-                                  }
-                                  // }
-                                },
-
-                              ),
-
-
-                            ]),
-                      ),
-
-                    ),
-                  ),
-                ),
-              );
-            });
-      },
-      transitionBuilder: (_, anim, __, child) {
-        return SlideTransition(
-          position: Tween(begin: Offset(0, 1), end: Offset(0, 0)).animate(anim),
-          child: child,
-        );
-      },
-    ).then((val) {
-      setState(() {
-        error = '';
-      });
-    });
-  }
-
-  void onSelected(BuildContext context, int item) {
-    switch(item) {
-      case 0:
-        changeGridDialog(context);
-            break;
-      case 1:
-        changeGridHeight(context);
-            break;
-
-    }
   }
 }
 

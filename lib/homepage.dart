@@ -4,7 +4,6 @@ import 'package:mdp3004/SelectBondedDevicePage.dart';
 import 'MainPage.dart';
 import 'Robot_UI.dart';
 import 'ChatPage.dart';
-import 'GridArena.dart';
 
 import 'DiscoveryPage.dart';
 import 'package:flutter/material.dart';
@@ -16,8 +15,6 @@ import './BluetoothDeviceListEntry.dart';
 import 'BluetoothConnection.dart';
 
 class HomePage extends StatefulWidget{
-  //final BluetoothDevice server;
-
   @override
   _HomePageState createState() => _HomePageState();
 }
@@ -41,8 +38,8 @@ class _HomePageState extends State<HomePage> {
   }*/
 
   final List<Widget> _pages = [
-    GridArena(),
-    ChatPage(),
+    MainPage(),
+    RobotUI(),
   ];
 
   void onTabTapped(int index) {
@@ -65,20 +62,19 @@ class _HomePageState extends State<HomePage> {
       bottomNavigationBar: BottomNavigationBar(
         onTap: onTabTapped, // calls onTabTapped function
         currentIndex: _selectedIndex,
-        backgroundColor: Colors.white,
-        selectedItemColor: Colors.deepOrange,
+        selectedItemColor: Colors.blue,
         unselectedItemColor: Colors.grey.shade600,
         selectedLabelStyle: TextStyle(fontWeight: FontWeight.w600),
         unselectedLabelStyle: TextStyle(fontWeight: FontWeight.w600),
         type: BottomNavigationBarType.fixed,
         items: [
           BottomNavigationBarItem(
-            icon: Icon(Icons.android),
-            title: Text("Grid Arena"),
+            icon: Icon(Icons.bluetooth),
+            title: Text("Bluetooth"),
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.chat),
-            title: Text("Chat log"),
+            icon: Icon(Icons.android),
+            title: Text("Robot UI"),
           ),
         ],
       ),
