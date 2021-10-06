@@ -556,7 +556,7 @@ class _GridArenaState extends State<GridArena>
                                     if (_action == action.ADD) {
                                       if(!_index.contains(index)){
                                         _index.add(index);
-                                        Obstacle data = new Obstacle(id: obstID++, index: index);
+                                        Obstacle data = new Obstacle(id: obstacles.length+1, index: index);
                                         obstacles.addAll({index: data});
                                         print(obstacles);
 
@@ -922,7 +922,7 @@ class _GridArenaState extends State<GridArena>
     );
   }
 
-  _onDataReceived(Uint8List data) {
+  _onDataReceived(Uint8List data) async {
     // Allocate buffer for parsed data
     int backspacesCounter = 0;
     data.forEach((byte) {
@@ -953,8 +953,8 @@ class _GridArenaState extends State<GridArena>
     print("dataString");
     print(dataString);
 
-    setState(() {
       getReceivedText(dataString);
+
       //messages.add(_Message(1, dataString));
       /*print(robotIndex);
       if(dataString == 'f'){
@@ -1011,11 +1011,13 @@ class _GridArenaState extends State<GridArena>
 
       // use this if 4 parameter to store in a list first
       else if (dataString.split(',')[0].toUpperCase() == "TARGET"){
-        storeUpdateObstacleList.add(dataString);
-        int i = 0;
-        for (i = 0; i < storeUpdateObstacleList.length; i++){}
-        print("i is $i");
-        print(storeUpdateObstacleList.length);
+        setState(() {
+          storeUpdateObstacleList.add(dataString);
+          int i = 0;
+          for (i = 0; i < storeUpdateObstacleList.length; i++){}
+          print("i is $i");
+          print(storeUpdateObstacleList.length);
+        });
         //print("Stored: " + storeUpdateObstacleList[i].toString());
       }
 
@@ -1064,10 +1066,11 @@ class _GridArenaState extends State<GridArena>
         print("char_list: $char_list");
         for(int i = 0; i < char_list.length; i++){
           print("$i char is: " + char_list[i].toString());
-          _translateCommands(char_list[i]);
+          await _translateCommands(char_list[i]);
+          print("next command");
         }
       }
-    });
+
     return dataString;
   }
 
@@ -1147,8 +1150,9 @@ class _GridArenaState extends State<GridArena>
     //});
   }
 
-  _translateCommands(dataString) async {
-    //print("switch case:");
+  Future<void> _translateCommands(dataString) async {
+    print("switch case:");
+    print("e".runtimeType);
     try {
       switch (dataString) {
         case "e": // update obstacles' value
@@ -1164,14 +1168,18 @@ class _GridArenaState extends State<GridArena>
         //this code for receiving "TARGET,X,Y,IMAGE_ID,DIR"
           //if (storeUpdateObstacleList[0] != null) {
             print("Updating obstacles");
+            print(storeUpdateObstacleList[0]);
+
             String text = storeUpdateObstacleList[0];
             int x = int.parse(text.split(',')[1]);
             int y = int.parse(text.split(',')[2]);
             int id = int.parse(text.split(',')[3]);
             String dir = text.split(',')[4];
             print("$x $y $id $dir");
-            _updateObstacles(x, y, dir, id);
-            storeUpdateObstacleList.remove(text);
+            setState(() {
+              _updateObstacles(x, y, dir, id);
+              storeUpdateObstacleList.remove(text);
+            });
          // }
           break;
 
@@ -1180,11 +1188,15 @@ class _GridArenaState extends State<GridArena>
 
           print("received w");
           await Future.delayed(Duration(milliseconds: 540));
-          statusMessage = "Robot Ready!";
+          setState(() {
+            statusMessage = "Robot Ready!";
+          });
           break;
 
         case "x": // reverse
           moveReverse();
+          await Future.delayed(Duration(milliseconds: 540));
+
           break;
 
         case "d": // turn right
@@ -1192,42 +1204,56 @@ class _GridArenaState extends State<GridArena>
           await Future.delayed(Duration(milliseconds: 540));
           rotateRight();
           await Future.delayed(Duration(milliseconds: 10000));
-          await Future.delayed(Duration(milliseconds: 540));
+          // await Future.delayed(Duration(milliseconds: 540));
           moveForward();
           await Future.delayed(Duration(milliseconds: 540));
-          statusMessage = "Robot Ready!";
+          setState(() {
+            statusMessage = "Robot Ready!";
+          });
           break;
 
         case "a": // turn left
+
           moveForward();
           await Future.delayed(Duration(milliseconds: 540));
           rotateLeft();
           await Future.delayed(Duration(milliseconds: 8000));
-          await Future.delayed(Duration(milliseconds: 540));
+          // await Future.delayed(Duration(milliseconds: 540));
           moveForward();
           await Future.delayed(Duration(milliseconds: 540));
-          statusMessage = "Robot Ready!";
+          setState(() {
+            statusMessage = "Robot Ready!";
+          });
           break;
 
         case "1": // reverse 20cm
           moveReverse();
           await Future.delayed(Duration(milliseconds: 540));
           moveReverse();
-          statusMessage = "Robot Ready!";
+          await Future.delayed(Duration(milliseconds: 540));
+
+          setState(() {
+            statusMessage = "Robot Ready!";
+          });
           break;
+
       }
 
       if (dataString == "0") {
         dataString = "10";
       }
-      if (int.parse(dataString!) > 1 && int.parse(dataString!) < 11) {
-        for (int i = 1; i <= int.parse(dataString!); i++) {
-          moveForward();
-          //await Future.delayed(Duration(milliseconds: 540));
+      if(num.tryParse(dataString) != null) {
+        print("num found");
+        if (int.parse(dataString!) > 1 && int.parse(dataString!) < 11) {
+          for (int i = 1; i <= int.parse(dataString!); i++) {
+            moveForward();
+            await Future.delayed(Duration(milliseconds: 540));
+          }
         }
       }
-    } catch (g) {
-      print("error parsing received message");
+
+    } catch (e) {
+      print("error parsing received message:" + e.toString());
     }
   }
 
