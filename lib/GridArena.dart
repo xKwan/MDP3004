@@ -564,6 +564,7 @@ class _GridArenaState extends State<GridArena>
                                             getObstacleCoordinates(obstacles[index]!)["x"].toString() +
                                             "," +
                                             getObstacleCoordinates(obstacles[index]!)["y"].toString());
+
                                       }
                                     }
                                     else if (_action == action.REMOVE) {
@@ -719,9 +720,11 @@ class _GridArenaState extends State<GridArena>
                                 children: [
                                   ElevatedButton.icon(
                                     onPressed: () {
-                                      _sendMessage('PC:START');
-                                      //createImaginaryObstacleWest();
-                                      isStarted = true;
+                                      if (isStarted == false) {
+                                        _sendMessage('PC:START');
+                                        //createImaginaryObstacleWest();
+                                        isStarted = true;
+                                      }
                                     },
                                     style: ElevatedButton.styleFrom(
                                         primary: Colors.green),
@@ -1019,9 +1022,23 @@ class _GridArenaState extends State<GridArena>
         setState(() {
           storeUpdateObstacleList.add(dataString);
           int i = 0;
-          for (i = 0; i < storeUpdateObstacleList.length; i++){}
-          print("i is $i");
-          print(storeUpdateObstacleList.length);
+          // for (i = 0; i < storeUpdateObstacleList.length; i++){}
+          // print("i is $i");
+          // print(storeUpdateObstacleList.length);
+          print("Updating obstacles");
+          print(storeUpdateObstacleList[0]);
+
+          String text = storeUpdateObstacleList[0];
+          int x = int.parse(text.split(',')[1]);
+          int y = int.parse(text.split(',')[2]);
+          int id = int.parse(text.split(',')[3]);
+          String dir = text.split(',')[4];
+          print("$x $y $id $dir");
+          setState(() {
+            _updateObstacles(x, y, dir, id);
+            storeUpdateObstacleList.remove(text);
+          });
+
         });
         //print("Stored: " + storeUpdateObstacleList[i].toString());
       }
@@ -1080,6 +1097,7 @@ class _GridArenaState extends State<GridArena>
         }
         setState(() {
           statusMessage = "Robot Ready!";
+          isStarted = false;
         });
       }
 
@@ -1257,19 +1275,19 @@ class _GridArenaState extends State<GridArena>
          //    if(storeUpdateObstacleList.isNotEmpty) {
             await Future.delayed(Duration(milliseconds: 500));
 
-            print("Updating obstacles");
-            print(storeUpdateObstacleList[0]);
-
-            String text = storeUpdateObstacleList[0];
-            int x = int.parse(text.split(',')[1]);
-            int y = int.parse(text.split(',')[2]);
-            int id = int.parse(text.split(',')[3]);
-            String dir = text.split(',')[4];
-            print("$x $y $id $dir");
-            setState(() {
-              _updateObstacles(x, y, dir, id);
-              storeUpdateObstacleList.remove(text);
-            });
+            // print("Updating obstacles");
+            // print(storeUpdateObstacleList[0]);
+            //
+            // String text = storeUpdateObstacleList[0];
+            // int x = int.parse(text.split(',')[1]);
+            // int y = int.parse(text.split(',')[2]);
+            // int id = int.parse(text.split(',')[3]);
+            // String dir = text.split(',')[4];
+            // print("$x $y $id $dir");
+            // setState(() {
+            //   _updateObstacles(x, y, dir, id);
+            //   storeUpdateObstacleList.remove(text);
+            // });
             await Future.delayed(Duration(milliseconds: 8700));
 
 
@@ -1370,6 +1388,7 @@ class _GridArenaState extends State<GridArena>
   void _sendMessage(String text) async {
     text = text.trim();
     textEditingController.clear();
+
 
     if (text.length > 0) {
       try {
@@ -2046,6 +2065,7 @@ class _GridArenaState extends State<GridArena>
                 onPressed: () {
                   if (isStarted == true) {
                     _sendMessage("PC:STOP");
+
                     isStarted = false;
                   }
                   Navigator.of(context).pop();

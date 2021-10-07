@@ -139,6 +139,7 @@ class _ChatPage extends State<ChatPage> {
     final serverName = "" ?? "Unknown";
     return Scaffold(
       appBar: AppBar(
+          automaticallyImplyLeading: false,
           leading: IconButton(
             icon: Icon(Icons.arrow_back, color: Colors.white),
             onPressed: () => Navigator.of(context).pop(context),
