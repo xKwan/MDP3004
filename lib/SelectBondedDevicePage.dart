@@ -121,6 +121,7 @@ class _SelectBondedDevicePage extends State<SelectBondedDevicePage> {
         .toList();
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: Text('Select device'),
         actions: <Widget>[
           _isDiscovering

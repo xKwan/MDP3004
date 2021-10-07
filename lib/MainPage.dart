@@ -98,6 +98,7 @@ class _MainPage extends State<MainPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+          automaticallyImplyLeading: false,
         title: const Text('MDP Android Group 15'),
       ),
 
@@ -161,9 +162,9 @@ class _MainPage extends State<MainPage> {
                     );
 
                     if (selectedDevice != null) {
-                      print('Discovery -> selected ' + selectedDevice.address);
+                      //print('Discovery -> selected ' + selectedDevice.address);
                     } else {
-                      print('Discovery -> no device selected');
+                      //print('Discovery -> no device selected');
                     }
                   }),
             ),
@@ -181,18 +182,18 @@ class _MainPage extends State<MainPage> {
                   );
 
                   if (selectedDevice != null) {
-                    print('Connect -> selected ' + selectedDevice.address);
+                    //print('Connect -> selected ' + selectedDevice.address);
 
-                    print(isConnected);
+                    //print(isConnected);
                     server = selectedDevice;
                     serverAddress = selectedDevice.address;
                     _establishConnection(context, server!);
-                    print("Establishing connection...");
-                    print(isConnected);
+                    //print("Establishing connection...");
+                    //print(isConnected);
 
                     //_startChat(context, selectedDevice);
                   } else {
-                    print('Connect -> no device selected');
+                    //print('Connect -> no device selected');
                   }
                 },
               ),
@@ -229,18 +230,18 @@ class _MainPage extends State<MainPage> {
               title: ElevatedButton(
                 child: const Text('Connection status'),
                 onPressed: ()  {
-                  print("Print Server: $server");
-                  print("Is connected?: " + isConnected.toString());
-                  print("Connection Status: " + connection.toString());
-                  print("Broadcast instance is bonded?:");
-                  //print(Broadcast.instance);
-                  print(Broadcast.instance!=null?.toString());
+                  //print("//print Server: $server");
+                  //print("Is connected?: " + isConnected.toString());
+                  //print("Connection Status: " + connection.toString());
+                  //print("Broadcast instance is bonded?:");
+                  ////print(Broadcast.instance);
+                  //print(Broadcast.instance!=null?.toString());
                   //(BluetoothStateBroadcastWrapper.connection);
-                  print("Server address: $serverAddress");
+                  //print("Server address: $serverAddress");
 
                   var c1 = BluetoothStateBroadcastWrapper.connection;
-                  print("C1 connection is:");
-                  print(c1);
+                  //print("C1 connection is:");
+                  //print(c1);
 
                 },
               ),
@@ -255,7 +256,8 @@ class _MainPage extends State<MainPage> {
                   }
 
                   else
-                    {print("Already connected!");}
+                    {//print("Already connected!")
+                       }
                   setState(() {
 
                   });
@@ -266,9 +268,9 @@ class _MainPage extends State<MainPage> {
               title: ElevatedButton(
                 child: const Text('Disconnect'),
                 onPressed: ()  {
-                  print("Before" + isConnected.toString());
+                  //print("Before" + isConnected.toString());
                   _disconnect(context, server!);
-                  print("After" + isConnected.toString());
+                  //print("After" + isConnected.toString());
                 },
               ),
             ),
@@ -318,7 +320,7 @@ class _MainPage extends State<MainPage> {
       }
 
     } catch (e) {
-      print(e);
+      //print(e);
     }
 
   }
@@ -340,10 +342,10 @@ class _MainPage extends State<MainPage> {
     Broadcast.instance.btStateStream.listen(_onDataReceived).onDone(() {
 
       if (isDisconnecting) {
-        print('Disconnecting locally!');
+        //print('Disconnecting locally!');
         // dispose();
       } else {
-        print('Disconnected remotely!');
+        //print('Disconnected remotely!');
       }
       if (this.mounted) {
         setState(() {});
@@ -353,16 +355,16 @@ class _MainPage extends State<MainPage> {
 
   void _disconnect(BuildContext context, BluetoothDevice server) {
     // Avoid memory leak (`setState` after dispose) and disconnect
-    print("Disconnect button is pressed, isConnected status:");
-    print(isConnected);
-    print("Connection is: " + connection.toString());
-    print("Server is: " + server.toString());
+    //print("Disconnect button is pressed, isConnected status:");
+    //print(isConnected);
+    //print("Connection is: " + connection.toString());
+    //print("Server is: " + server.toString());
 
     //Broadcast.instance.dispose();
     //BluetoothStateBroadcastWrapper.connection.dispose();
     Broadcast.setInstance(null);
-    print("Broadcast instance is:");
-    print(Broadcast.instance);
+    //print("Broadcast instance is:");
+    //print(Broadcast.instance);
 
     if (isConnected) {
       isDisconnecting = true;
@@ -373,9 +375,9 @@ class _MainPage extends State<MainPage> {
 
     });
 
-    print("After disconnecting:");
+    //print("After disconnecting:");
 
-    print(server.bondState);
+    //print(server.bondState);
     print("Connection is $connection");
   }
 

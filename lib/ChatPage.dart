@@ -53,8 +53,8 @@ class _ChatPage extends State<ChatPage> {
   void initState() {
     super.initState();
 
-    print("chatinit");
-    print(connection);
+    //print("chatinit");
+    //print(connection);
     try{
       if (connection == null){
         //getConnection();
@@ -63,7 +63,7 @@ class _ChatPage extends State<ChatPage> {
       }
 
     } catch (e) {
-      print(e);
+      //print(e);
     }
   }*/
 
@@ -76,7 +76,7 @@ class _ChatPage extends State<ChatPage> {
         listenToStream();
       }
     } catch (e) {
-      print(e);
+      //print(e);
     }
   }
 
@@ -98,10 +98,10 @@ class _ChatPage extends State<ChatPage> {
     Broadcast.instance.btStateStream.listen(_onDataReceived).onDone(() {
 
       if (isDisconnecting) {
-        print('Disconnecting locally!');
+        //print('Disconnecting locally!');
         // dispose();
       } else {
-        print('Disconnected remotely!');
+        //print('Disconnected remotely!');
       }
       if (this.mounted) {
         setState(() {});

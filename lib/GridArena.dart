@@ -93,7 +93,7 @@ class _GridArenaState extends State<GridArena>
         listenToStream();
       }
     } catch (e) {
-      print(e);
+      //print(e);
     }
   }
 
@@ -105,10 +105,10 @@ class _GridArenaState extends State<GridArena>
 
     Broadcast.instance.btStateStream.listen(_onDataReceived).onDone(() {
       if (isDisconnecting) {
-        print('Disconnecting locally!');
+        //print('Disconnecting locally!');
         // dispose();
       } else {
-        print('Disconnected remotely!');
+        //print('Disconnected remotely!');
       }
       if (this.mounted) {
         setState(() {});
@@ -141,7 +141,7 @@ class _GridArenaState extends State<GridArena>
       //       _index.add(index);
       //       data = Obstacle.updateIndex(data, index);
       //       obstacles.addAll({index: data});
-      //       print(obstacles);
+      //       //print(obstacles);
       //
       //       _sendMessage("PC:ADD," +
       //           getObstacleCoordinates(obstacles[index]!)["x"].toString() +
@@ -241,7 +241,7 @@ class _GridArenaState extends State<GridArena>
               // _index.add(index);
               // data = Obstacle.updateIndex(data, index);
               // obstacles.addAll({index: data});
-              // print(obstacles);
+              // //print(obstacles);
               //
               // _sendMessage("PC:ADD," +
               // getObstacleCoordinates(obstacles[index]!)["x"].toString() +
@@ -289,7 +289,7 @@ class _GridArenaState extends State<GridArena>
       try {
         index = cord["x"]! + (cord["y"]! * _columns!);
       } catch (e) {
-        print(e);
+        //print(e);
       }
     }
 
@@ -336,7 +336,7 @@ class _GridArenaState extends State<GridArena>
     }).toList();
 
     final serverName = "Name" ?? "Unknown";
-    print('serverName is ' + serverName.toString());
+    //print('serverName is ' + serverName.toString());
 
     return WillPopScope(
       onWillPop: () async {
@@ -504,7 +504,7 @@ class _GridArenaState extends State<GridArena>
                 //
                 //       _index.remove(data.index);
                 //       obstacles.remove(data.index);
-                //       print(obstacles);
+                //       //print(obstacles);
                 //     }
                   // });
                 // }),
@@ -548,7 +548,7 @@ class _GridArenaState extends State<GridArena>
                               return InkWell(
                                 onTap: () => {
                                   setState(() {
-                                    print(index);
+                                    //print(index);
                                     // if (_action == action.ADD)
                                     //    _index.add(index);
                                     // else if (_action == action.REMOVE)
@@ -558,7 +558,7 @@ class _GridArenaState extends State<GridArena>
                                         _index.add(index);
                                         Obstacle data = new Obstacle(id: obstacles.length+1, index: index);
                                         obstacles.addAll({index: data});
-                                        print(obstacles);
+                                        //print(obstacles);
 
                                         _sendMessage("PC:ADD," +
                                             getObstacleCoordinates(obstacles[index]!)["x"].toString() +
@@ -575,11 +575,11 @@ class _GridArenaState extends State<GridArena>
                                           getObstacleCoordinates(obstacles[index]!)["y"]
                                               .toString());
 
-                                      print("REMOVE INDEX: $index");
+                                      //print("REMOVE INDEX: $index");
 
                                       _index.remove(index);
                                       obstacles.remove(index);
-                                      print(obstacles);
+                                      //print(obstacles);
                                     }
                                     else if (_action == action.PLACE) {
                                       robotIndex = index;
@@ -754,7 +754,7 @@ class _GridArenaState extends State<GridArena>
                                 SizedBox(
                                   child: ElevatedButton.icon(
                                     onPressed: () {
-                                      print('Forward Left');
+                                      //print('Forward Left');
                                       forwardLeft();
                                       _sendMessage('tl');
                                       getSentText('Turn Left');
@@ -773,7 +773,7 @@ class _GridArenaState extends State<GridArena>
                                 SizedBox(
                                   child: ElevatedButton.icon(
                                     onPressed: () {
-                                      print('Forward');
+                                      //print('Forward');
                                       moveForward();
                                       _sendMessage('f');
                                       getSentText('Forward');
@@ -791,7 +791,7 @@ class _GridArenaState extends State<GridArena>
                                 SizedBox(
                                   child: ElevatedButton.icon(
                                     onPressed: () {
-                                      print('Forward Right');
+                                      //print('Forward Right');
                                       forwardRight();
                                       _sendMessage('tr');
                                       getSentText('Turn Right');
@@ -818,7 +818,7 @@ class _GridArenaState extends State<GridArena>
                                 ElevatedButton.icon(
                                   onPressed: () {
                                     rotateLeft();
-                                    print('Rotate Left');
+                                    //print('Rotate Left');
                                     /*_sendMessage('tl');
                                     var text = _encodeString('l');
                                     _onDataReceived(text);*/
@@ -834,7 +834,7 @@ class _GridArenaState extends State<GridArena>
                                 ElevatedButton.icon(
                                   onPressed: () {
                                     rotateRight();
-                                    print('Rotate Right');
+                                    //print('Rotate Right');
                                     /*_sendMessage('tr');
                                     var text = _encodeString('r');
                                     _onDataReceived(text);*/
@@ -857,7 +857,7 @@ class _GridArenaState extends State<GridArena>
                                 /*SizedBox(
                                   child: ElevatedButton.icon(
                                     onPressed: () {
-                                      print('Reverse Left');
+                                      //print('Reverse Left');
                                       reverseLeft();
                                       */ /*_sendMessage('f');
                                        var text = _encodeString('f');
@@ -875,7 +875,7 @@ class _GridArenaState extends State<GridArena>
                                   child: ElevatedButton.icon(
                                     onPressed: () {
                                       moveReverse();
-                                      print('Reverse');
+                                      //print('Reverse');
                                       _sendMessage('r');
                                       var text = _encodeString('b');
                                       _onDataReceived(text);
@@ -891,7 +891,7 @@ class _GridArenaState extends State<GridArena>
                                 SizedBox(
                                   child: ElevatedButton.icon(
                                     onPressed: () {
-                                      print('Reverse Right');
+                                      //print('Reverse Right');
                                       reverseRight();
                                       */ /*_sendMessage('f');
                                        var text = _encodeString('f');
@@ -956,20 +956,20 @@ class _GridArenaState extends State<GridArena>
     }
 
     // Create message if there is new line character
-    String dataString = String.fromCharCodes(buffer);
+    String dataString = String.fromCharCodes(buffer).toLowerCase();
 
-    print("dataString");
-    print(dataString);
+    // //print("dataString");
+    // //print(dataString);
 
       getReceivedText(dataString);
 
       //messages.add(_Message(1, dataString));
-      /*print(robotIndex);
+      /*//print(robotIndex);
       if(dataString == 'f'){
         if (robotIndex < _columns);
         else {
           robotIndex = (robotIndex-_columns);
-          print(robotIndex);
+          //print(robotIndex);
         }
       }
 
@@ -977,7 +977,7 @@ class _GridArenaState extends State<GridArena>
         if (robotIndex >= (_columns*(_rows-1)));
         else {
           robotIndex = (robotIndex+_columns);
-          print(robotIndex);
+          //print(robotIndex);
         }
       }
 
@@ -1005,14 +1005,14 @@ class _GridArenaState extends State<GridArena>
 
       if (dataString.split(',')[0] == "ROBOT") {
         dataString = dataString.toUpperCase();
-        print("Received ROBOT Command");
+        //print("Received ROBOT Command");
         setRobotLocation(int.parse(dataString.split(',')[1]),
             int.parse(dataString.split(',')[2]), dataString.split(',')[3]);
       }
 
       // use this if only 2 parameter
       /*else if (dataString.split(',')[0].toUpperCase() == "TARGET") {
-        print("Test command");
+        //print("Test command");
         int id = checkRobotCurrentLocation(dataString.split(',')[1]);
         targetIDList.add(id);
       }*/
@@ -1020,10 +1020,11 @@ class _GridArenaState extends State<GridArena>
       // use this if 4 parameter to store in a list first
       else if (dataString.split(',')[0].toUpperCase() == "TARGET"){
         setState(() {
+          dataString = dataString.toUpperCase();
           storeUpdateObstacleList.add(dataString);
           int i = 0;
           // for (i = 0; i < storeUpdateObstacleList.length; i++){}
-          // print("i is $i");
+          // //print("i is $i");
           // print(storeUpdateObstacleList.length);
           print("Updating obstacles");
           print(storeUpdateObstacleList[0]);
@@ -1273,7 +1274,7 @@ class _GridArenaState extends State<GridArena>
          // }
          //  do {
          //    if(storeUpdateObstacleList.isNotEmpty) {
-            await Future.delayed(Duration(milliseconds: 500));
+            await Future.delayed(Duration(milliseconds: 4000));
 
             // print("Updating obstacles");
             // print(storeUpdateObstacleList[0]);
@@ -1288,7 +1289,7 @@ class _GridArenaState extends State<GridArena>
             //   _updateObstacles(x, y, dir, id);
             //   storeUpdateObstacleList.remove(text);
             // });
-            await Future.delayed(Duration(milliseconds: 8700));
+            // await Future.delayed(Duration(milliseconds: 7500));
 
 
             // }
@@ -1298,37 +1299,37 @@ class _GridArenaState extends State<GridArena>
         case "w": // forward
           moveForward();
           print("received w");
-          await Future.delayed(Duration(milliseconds: 600));
+          await Future.delayed(Duration(milliseconds: 200));
 
           break;
 
         case "x": // reverse
           moveReverse();
-          await Future.delayed(Duration(milliseconds: 550));
+          await Future.delayed(Duration(milliseconds: 540));
 
           break;
 
         case "d": // turn right
           moveForward();
-          await Future.delayed(Duration(milliseconds: 600));
+          await Future.delayed(Duration(milliseconds: 540));
 
           rotateRight();
           // await Future.delayed(Duration(milliseconds: 10000));
-          await Future.delayed(Duration(milliseconds: 6100));
+          await Future.delayed(Duration(milliseconds: 4500));
           moveForward();
-          await Future.delayed(Duration(milliseconds: 600));
+          await Future.delayed(Duration(milliseconds: 540));
 
           break;
 
         case "a": // turn left
 
           moveForward();
-          await Future.delayed(Duration(milliseconds: 600));
+          await Future.delayed(Duration(milliseconds: 540));
           rotateLeft();
           // await Future.delayed(Duration(milliseconds: 8000));
-          await Future.delayed(Duration(milliseconds: 5500));
+          await Future.delayed(Duration(milliseconds: 4500));
           moveForward();
-          await Future.delayed(Duration(milliseconds: 600));
+          await Future.delayed(Duration(milliseconds: 540));
           break;
 
         case "1": // reverse 20cm
@@ -1371,7 +1372,7 @@ class _GridArenaState extends State<GridArena>
         if (int.parse(dataString!) > 1 && int.parse(dataString!) < 11) {
           for (int i = 1; i <= int.parse(dataString!); i++) {
             moveForward();
-            await Future.delayed(Duration(milliseconds: 300));
+            await Future.delayed(Duration(milliseconds: 100));
           }
         }
       }

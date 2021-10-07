@@ -46,18 +46,18 @@ class _ControlsPageState extends State<ControlsPage> with AutomaticKeepAliveClie
   void initState() {
     super.initState();
 
-    print("chatinit");
-    print(connection);
+    ////print("chatinit");
+    ////print(connection);
     try{
       if (connection == null){
-        print("not connected");
+        ////print("not connected");
 
       } else {
         listenToStream();
       }
 
     } catch (e) {
-      print(e);
+      //print(e);
     }
 
   }
@@ -72,10 +72,10 @@ class _ControlsPageState extends State<ControlsPage> with AutomaticKeepAliveClie
     Broadcast.instance.btStateStream.listen(_onDataReceived).onDone(() {
 
       if (isDisconnecting) {
-        print('Disconnecting locally!');
+        //print('Disconnecting locally!');
         // dispose();
       } else {
-        print('Disconnected remotely!');
+        //print('Disconnected remotely!');
       }
       if (this.mounted) {
         setState(() {});
@@ -123,7 +123,7 @@ class _ControlsPageState extends State<ControlsPage> with AutomaticKeepAliveClie
     }).toList();
 
     final serverName = "Name" ?? "Unknown";
-    print('serverName is ' + serverName.toString());
+    //print('serverName is ' + serverName.toString());
     return Scaffold(
       body: SafeArea(
         child: Column(
@@ -141,7 +141,7 @@ class _ControlsPageState extends State<ControlsPage> with AutomaticKeepAliveClie
             Container(
               child: ElevatedButton.icon(
                 onPressed: () {
-                  print('Forward');
+                  //print('Forward');
                   _sendMessage('f');
                   Future.delayed(const Duration(milliseconds: 500), () {
                     var text = _encodeString('State: Moving forward...');
@@ -164,7 +164,7 @@ class _ControlsPageState extends State<ControlsPage> with AutomaticKeepAliveClie
                 children: [
                   ElevatedButton.icon(
                     onPressed: () {
-                      print('Left');
+                      //print('Left');
                       _sendMessage('tl');
                       Future.delayed(const Duration(milliseconds: 500), () {
                         var text = _encodeString('State: Rotating Anti-clockwise...');
@@ -182,7 +182,7 @@ class _ControlsPageState extends State<ControlsPage> with AutomaticKeepAliveClie
 
                   ElevatedButton.icon(
                     onPressed: () {
-                      print('Right');
+                      //print('Right');
                       _sendMessage('tr');
                       Future.delayed(const Duration(milliseconds: 500), () {
                         var text = _encodeString('State: Rotating Clockwise...');
@@ -206,7 +206,7 @@ class _ControlsPageState extends State<ControlsPage> with AutomaticKeepAliveClie
             Container(
               child: ElevatedButton.icon(
                 onPressed: () {
-                  print('Reverse');
+                  //print('Reverse');
                   _sendMessage('r');
                   Future.delayed(const Duration(milliseconds: 500), () {
                     var text = _encodeString('State: Reversing...');
@@ -264,7 +264,7 @@ class _ControlsPageState extends State<ControlsPage> with AutomaticKeepAliveClie
     setState(() {
       messages.add(_Message(1, dataString));
 
-      print("Pagestorage: " + PageStorage.of(context).toString());
+      //print("Pagestorage: " + PageStorage.of(context).toString());
     });
     PageStorage.of(context)?.writeState(
       context,
@@ -274,7 +274,7 @@ class _ControlsPageState extends State<ControlsPage> with AutomaticKeepAliveClie
 
   void _sendMessage(String text) async {
     text = text.trim();
-    print('Received button message $text');
+    //print('Received button message $text');
 
     if (text.length > 0) {
       try {

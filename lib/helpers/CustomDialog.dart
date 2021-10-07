@@ -81,8 +81,8 @@ class CustomDialog {
                                   fontWeight: FontWeight.bold,
                                 )),
                                 onPressed: () async {
-                                  print(_rowController.text);
-                                  print(_columnController.text);
+                                  //print(_rowController.text);
+                                  //print(_columnController.text);
                                   if(_rowController.text!.isNotEmpty && _columnController.text!.isNotEmpty){
                                     try {
                                       if(_rowController.text=="0" || _columnController.text=="0")

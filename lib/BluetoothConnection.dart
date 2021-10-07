@@ -20,17 +20,17 @@ class BluetoothStateBroadcastWrapper {
   static Future<BluetoothStateBroadcastWrapper> create(server) async {
 
     try {
-      print("setconnection");
+      //print("setconnection");
       await setConnection(server).then((con) =>
         print("done")
       );
-      print(connection);
+      //print(connection);
 
     } catch (e){
-      print(e);
+      //print(e);
     }
 
-    print("return");
+    //print("return");
     var instance = BluetoothStateBroadcastWrapper._initState();
     return instance;
   }
@@ -38,10 +38,10 @@ class BluetoothStateBroadcastWrapper {
 
   BluetoothStateBroadcastWrapper._initState() {
 
-    print(connection);
-    print("private");
+    //print(connection);
+    //print("private");
     if (connection != null) {
-      print("btcon");
+      //print("btcon");
       _sub = connection.input.listen((obj) => _stateStreamController.sink.add(obj));
 
     }

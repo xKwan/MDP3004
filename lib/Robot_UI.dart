@@ -24,15 +24,15 @@ class _RobotUI extends State<RobotUI> {
   /*@override
   void initState() {
     super.initState();
-    print("initState");
+    //print("initState");
     try{
       if (connection != null){
         listenToStream();
-        print("entered listen to stream");
+        //print("entered listen to stream");
       }
 
     } catch (e) {
-      print(e);
+      //print(e);
     }
   }
 
@@ -54,10 +54,10 @@ class _RobotUI extends State<RobotUI> {
     Broadcast.instance.btStateStream.listen(_onDataReceived).onDone(() {
 
       if (isDisconnecting) {
-        print('Disconnecting locally!');
+        //print('Disconnecting locally!');
         // dispose();
       } else {
-        print('Disconnected remotely!');
+        //print('Disconnected remotely!');
       }
       if (this.mounted) {
         setState(() {});
@@ -71,6 +71,7 @@ class _RobotUI extends State<RobotUI> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
+          automaticallyImplyLeading: false,
           title: Text('MDP Android Group 15'),
         ),
         body: DefaultTabController(

@@ -51,8 +51,8 @@ class _DiscoveryPage extends State<DiscoveryPage> {
             if (existingIndex >= 0)
               results[existingIndex] = r;
             else{
-              print('Device address is: ' + r.device.address.toString());
-              print('Device name is: ' + r.device.name.toString());
+              //print('Device address is: ' + r.device.address.toString());
+              //print('Device name is: ' + r.device.name.toString());
 
               if(r.device.name == null){
                 results[existingIndex] = r;
@@ -86,6 +86,7 @@ class _DiscoveryPage extends State<DiscoveryPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: isDiscovering
             ? Text('Discovering devices')
             : Text('Discovered devices'),
@@ -121,16 +122,15 @@ class _DiscoveryPage extends State<DiscoveryPage> {
               try {
                 bool bonded = false;
                 if (device.isBonded) {
-                  print('Unbonding from ${device.address}...');
+                  //print('Unbonding from ${device.address}...');
                   await FlutterBluetoothSerial.instance
                       .removeDeviceBondWithAddress(address);
-                  print('Unbonding from ${device.address} has succed');
+                  //print('Unbonding from ${device.address} has succed');
                 } else {
-                  print('Bonding with ${device.address}...');
+                  //print('Bonding with ${device.address}...');
                   bonded = (await FlutterBluetoothSerial.instance
                       .bondDeviceAtAddress(address))!;
-                  print(
-                      'Bonding with ${device.address} has ${bonded ? 'succed' : 'failed'}.');
+                  //print('Bonding with ${device.address} has ${bonded ? 'succed' : 'failed'}.');
                 }
                 setState(() {
                   results[results.indexOf(result)] = BluetoothDiscoveryResult(
