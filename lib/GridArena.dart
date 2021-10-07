@@ -1134,8 +1134,46 @@ class _GridArenaState extends State<GridArena>
   }*/
 
   _updateObstacles(x, y, dir, id) {
-    Map<String, int> cord = {"x":x, "y":y};
-    int index = getObstacleIndex(cord);
+    int index = -1;
+    if (imaginaryEast == 0 && imaginaryWest == 0 && imaginaryNorth == 0 && imaginarySouth == 0) {
+      Map<String, int> cord = {"x":x, "y":y};
+      index = getObstacleIndex(cord);
+    } else {
+      print("$imaginaryNorth, $imaginarySouth, $imaginaryEast, $imaginaryWest");
+      print("$x,$y");
+      if (imaginaryNorth>0){
+        for(int i = 0; i < imaginaryNorth; i++){
+          y++;
+          // index = x + ((_columns - 1) * y) - (_columns - 1);
+        }
+      }
+      if (imaginaryWest>0){
+        for(int i = 0; i < imaginaryWest; i++){
+          x++;
+          // index = x + ((_columns - 1) * y) - 1;
+        }
+      }
+      if (imaginaryEast>0){
+        for(int i = 0; i < imaginaryEast; i++){
+          if (x>20)
+            x--;
+          // index = x + ((_columns - 1) * y); //east
+        }
+      }
+      if (imaginarySouth>0){
+        for(int i = 0; i < imaginarySouth; i++){
+          if (y>20)
+            y--;
+          // index = x + ((_columns - 1) * y); //south
+
+        }
+      }
+      Map<String, int> cord = {"x":x, "y":y};
+      print(cord["x"]);
+      print(cord["y"]);
+      index = getObstacleIndex(cord);
+
+    }
     setState(() {
       print("executing update obstacles");
       /*if (obstacles[index] != null) {
@@ -1147,6 +1185,7 @@ class _GridArenaState extends State<GridArena>
     print("INDEX: $index");
     if (index != -1 && id > 0 && id < 31) {
       if (obstacles[index] != null) {
+
         Obstacle data = Obstacle.updateId(obstacles[index]!, id);
         data = Obstacle.updateDiscovery(data, true);
         obstacles.update(index, (value) => data);
@@ -1172,6 +1211,7 @@ class _GridArenaState extends State<GridArena>
         print(e);
       }
     }
+
 
 
       // if(index != -1 && !_index.contains(index)){
@@ -1230,7 +1270,7 @@ class _GridArenaState extends State<GridArena>
               _updateObstacles(x, y, dir, id);
               storeUpdateObstacleList.remove(text);
             });
-            await Future.delayed(Duration(milliseconds: 7500));
+            await Future.delayed(Duration(milliseconds: 8700));
 
 
             // }
@@ -1240,64 +1280,64 @@ class _GridArenaState extends State<GridArena>
         case "w": // forward
           moveForward();
           print("received w");
-          await Future.delayed(Duration(milliseconds: 540));
+          await Future.delayed(Duration(milliseconds: 600));
 
           break;
 
         case "x": // reverse
           moveReverse();
-          await Future.delayed(Duration(milliseconds: 540));
+          await Future.delayed(Duration(milliseconds: 550));
 
           break;
 
         case "d": // turn right
           moveForward();
-          await Future.delayed(Duration(milliseconds: 540));
+          await Future.delayed(Duration(milliseconds: 600));
 
           rotateRight();
           // await Future.delayed(Duration(milliseconds: 10000));
-          await Future.delayed(Duration(milliseconds: 7500));
+          await Future.delayed(Duration(milliseconds: 6100));
           moveForward();
-          await Future.delayed(Duration(milliseconds: 540));
+          await Future.delayed(Duration(milliseconds: 600));
 
           break;
 
         case "a": // turn left
 
           moveForward();
-          await Future.delayed(Duration(milliseconds: 540));
+          await Future.delayed(Duration(milliseconds: 600));
           rotateLeft();
           // await Future.delayed(Duration(milliseconds: 8000));
-          await Future.delayed(Duration(milliseconds: 7500));
+          await Future.delayed(Duration(milliseconds: 5500));
           moveForward();
-          await Future.delayed(Duration(milliseconds: 540));
+          await Future.delayed(Duration(milliseconds: 600));
           break;
 
         case "1": // reverse 20cm
           moveReverse();
-          await Future.delayed(Duration(milliseconds: 540));
+          await Future.delayed(Duration(milliseconds: 295));
           moveReverse();
-          await Future.delayed(Duration(milliseconds: 540));
+          await Future.delayed(Duration(milliseconds: 295));
           break;
 
         case "j": // reverse 30cm
           for(int i=0; i<3; i++){
             moveReverse();
-            await Future.delayed(Duration(milliseconds: 540));
+            await Future.delayed(Duration(milliseconds: 295));
           }
           break;
 
-        case "l": // reverse 40cm
+        case "k": // reverse 40cm
           for(int i=0; i<4; i++){
             moveReverse();
-            await Future.delayed(Duration(milliseconds: 540));
+            await Future.delayed(Duration(milliseconds: 295));
           }
           break;
 
-        case "k": // reverse 50cm
+        case "l": // reverse 50cm
           for(int i=0; i<5; i++){
             moveReverse();
-            await Future.delayed(Duration(milliseconds: 540));
+            await Future.delayed(Duration(milliseconds: 295));
           }
           break;
 
@@ -1313,7 +1353,7 @@ class _GridArenaState extends State<GridArena>
         if (int.parse(dataString!) > 1 && int.parse(dataString!) < 11) {
           for (int i = 1; i <= int.parse(dataString!); i++) {
             moveForward();
-            await Future.delayed(Duration(milliseconds: 540));
+            await Future.delayed(Duration(milliseconds: 300));
           }
         }
       }
@@ -1773,9 +1813,9 @@ class _GridArenaState extends State<GridArena>
           createImaginarySouthGrid();
         } else {
           if (imaginaryNorth > 0) {
-            /*imaginaryNorth -=1;
-            _rows -= 1;
-            _columns -= 1;*/
+            // imaginaryNorth -=1;
+            // _rows -= 1;
+            // _columns -= 1;
             removeImaginaryNorthGrid();
           } else {
             robotIndex = robotIndex + _columns;
