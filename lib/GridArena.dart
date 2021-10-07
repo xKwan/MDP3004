@@ -678,9 +678,12 @@ class _GridArenaState extends State<GridArena>
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    SizedBox(
-                      child: Text(
-                        "Received: " + receivedText,
+                    FittedBox(
+                      child: SizedBox(
+                        child: Text(
+                          "Received: " + receivedText,
+                          maxLines: 3,
+                        ),
                       ),
                     ),
                     SizedBox(
@@ -1066,11 +1069,18 @@ class _GridArenaState extends State<GridArena>
         print("datastring is: $dataString");
         var char_list = dataString.split(',');
         print("char_list: $char_list");
+
         for(int i = 0; i < char_list.length; i++){
+          setState(() {
+            statusMessage = "Reading Command...";
+          });
           print("$i char is: " + char_list[i].toString());
           await _translateCommands(char_list[i]);
           print("next command");
         }
+        setState(() {
+          statusMessage = "Robot Ready!";
+        });
       }
 
     return dataString;
@@ -1135,7 +1145,7 @@ class _GridArenaState extends State<GridArena>
       } else {*/
 
     print("INDEX: $index");
-    if (index != -1) {
+    if (index != -1 && id > 0 && id < 31) {
       if (obstacles[index] != null) {
         Obstacle data = Obstacle.updateId(obstacles[index]!, id);
         data = Obstacle.updateDiscovery(data, true);
@@ -1205,7 +1215,7 @@ class _GridArenaState extends State<GridArena>
          // }
          //  do {
          //    if(storeUpdateObstacleList.isNotEmpty) {
-              await Future.delayed(Duration(milliseconds: 8000));
+         //      await Future.delayed(Duration(milliseconds: 8000));
 
               print("Updating obstacles");
               print(storeUpdateObstacleList[0]);
@@ -1227,12 +1237,9 @@ class _GridArenaState extends State<GridArena>
 
         case "w": // forward
           moveForward();
-
           print("received w");
           await Future.delayed(Duration(milliseconds: 540));
-          setState(() {
-            statusMessage = "Robot Ready!";
-          });
+
           break;
 
         case "x": // reverse
@@ -1244,14 +1251,13 @@ class _GridArenaState extends State<GridArena>
         case "d": // turn right
           moveForward();
           await Future.delayed(Duration(milliseconds: 540));
+
           rotateRight();
-          await Future.delayed(Duration(milliseconds: 10000));
-          // await Future.delayed(Duration(milliseconds: 540));
+          // await Future.delayed(Duration(milliseconds: 10000));
+          await Future.delayed(Duration(milliseconds: 6000));
           moveForward();
           await Future.delayed(Duration(milliseconds: 540));
-          setState(() {
-            statusMessage = "Robot Ready!";
-          });
+
           break;
 
         case "a": // turn left
@@ -1259,13 +1265,10 @@ class _GridArenaState extends State<GridArena>
           moveForward();
           await Future.delayed(Duration(milliseconds: 540));
           rotateLeft();
-          await Future.delayed(Duration(milliseconds: 8000));
-          // await Future.delayed(Duration(milliseconds: 540));
+          // await Future.delayed(Duration(milliseconds: 8000));
+          await Future.delayed(Duration(milliseconds: 6000));
           moveForward();
           await Future.delayed(Duration(milliseconds: 540));
-          setState(() {
-            statusMessage = "Robot Ready!";
-          });
           break;
 
         case "1": // reverse 20cm
@@ -1273,11 +1276,30 @@ class _GridArenaState extends State<GridArena>
           await Future.delayed(Duration(milliseconds: 540));
           moveReverse();
           await Future.delayed(Duration(milliseconds: 540));
-
-          setState(() {
-            statusMessage = "Robot Ready!";
-          });
           break;
+
+        case "j": // reverse 30cm
+          for(int i=0; i<3; i++){
+            moveReverse();
+            await Future.delayed(Duration(milliseconds: 540));
+          }
+          break;
+
+        case "l": // reverse 40cm
+          for(int i=0; i<4; i++){
+            moveReverse();
+            await Future.delayed(Duration(milliseconds: 540));
+          }
+          break;
+
+        case "k": // reverse 50cm
+          for(int i=0; i<5; i++){
+            moveReverse();
+            await Future.delayed(Duration(milliseconds: 540));
+          }
+          break;
+
+
 
       }
 
@@ -1435,10 +1457,11 @@ class _GridArenaState extends State<GridArena>
       imaginaryWest += 1;
       imaginaryX = (getRobotCoordinates()["x"]!)!;
       imaginaryY = (getRobotCoordinates()["y"]!)!;
+      print("COORD $imaginaryX, $imaginaryY");
       createImaginaryObstacleWest();
       _rows += 1;
       _columns += 1;
-      robotIndex = (imaginaryX + ((_columns) * imaginaryY));
+      robotIndex = (imaginaryX + (_columns * imaginaryY));
     });
   }
 
