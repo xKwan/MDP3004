@@ -1425,7 +1425,16 @@ class _GridArenaState extends State<GridArena>
 
   getReceivedText(text) {
     setState(() {
-      receivedText = text;
+      String text2 = '';
+
+      for(int i = 0; i < text.length; i++){
+        if(i % 32 == 0){
+          text2 += '\n';
+        }
+        text2 += text[i];
+      }
+      print("text2 $text2");
+      receivedText = text2;
     });
     return receivedText;
   }
