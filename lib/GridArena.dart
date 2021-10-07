@@ -1215,23 +1215,25 @@ class _GridArenaState extends State<GridArena>
          // }
          //  do {
          //    if(storeUpdateObstacleList.isNotEmpty) {
-         //      await Future.delayed(Duration(milliseconds: 8000));
+            await Future.delayed(Duration(milliseconds: 500));
 
-              print("Updating obstacles");
-              print(storeUpdateObstacleList[0]);
+            print("Updating obstacles");
+            print(storeUpdateObstacleList[0]);
 
-              String text = storeUpdateObstacleList[0];
-              int x = int.parse(text.split(',')[1]);
-              int y = int.parse(text.split(',')[2]);
-              int id = int.parse(text.split(',')[3]);
-              String dir = text.split(',')[4];
-              print("$x $y $id $dir");
-              setState(() {
-                _updateObstacles(x, y, dir, id);
-                storeUpdateObstacleList.remove(text);
-              });
+            String text = storeUpdateObstacleList[0];
+            int x = int.parse(text.split(',')[1]);
+            int y = int.parse(text.split(',')[2]);
+            int id = int.parse(text.split(',')[3]);
+            String dir = text.split(',')[4];
+            print("$x $y $id $dir");
+            setState(() {
+              _updateObstacles(x, y, dir, id);
+              storeUpdateObstacleList.remove(text);
+            });
+            await Future.delayed(Duration(milliseconds: 7500));
 
-              // }
+
+            // }
           // } while(storeUpdateObstacleList.isEmpty);
           break;
 
@@ -1254,7 +1256,7 @@ class _GridArenaState extends State<GridArena>
 
           rotateRight();
           // await Future.delayed(Duration(milliseconds: 10000));
-          await Future.delayed(Duration(milliseconds: 6000));
+          await Future.delayed(Duration(milliseconds: 7500));
           moveForward();
           await Future.delayed(Duration(milliseconds: 540));
 
@@ -1266,7 +1268,7 @@ class _GridArenaState extends State<GridArena>
           await Future.delayed(Duration(milliseconds: 540));
           rotateLeft();
           // await Future.delayed(Duration(milliseconds: 8000));
-          await Future.delayed(Duration(milliseconds: 6000));
+          await Future.delayed(Duration(milliseconds: 7500));
           moveForward();
           await Future.delayed(Duration(milliseconds: 540));
           break;
