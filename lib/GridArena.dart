@@ -116,40 +116,40 @@ class _GridArenaState extends State<GridArena>
     });
   }
 
-  // Widget dragTarget(context, index) => DragTarget<Obstacle>(
-      // builder: (context, candidateData, rejectedData) => Container(
-      //       child:
-      //           //Check if robot has been placed
-      //           robotIndex == index
-      //               ? buildRotateRobot()
-      //               :
-      //               //Else check if obstacle has been placed
-      //               _index.contains(index)
-      //                   ? obstacles[index]!.isDiscovered
-      //                       ? Expanded(
-      //                           child: Image.asset('assets/id' +
-      //                               obstacles[index]!.id.toString() +
-      //                               '.png'))
-      //                       : Text(obstacles[index]!.id.toString(),
-      //                           style: TextStyle(color: Colors.white))
-      //                   : null,
-      //     ),
-      // onWillAccept: (data) => true,
-      // onAccept: (data) {
-      //   setState(() {
-      //     if (data.action == action.ADD) {
-      //       _index.add(index);
-      //       data = Obstacle.updateIndex(data, index);
-      //       obstacles.addAll({index: data});
-      //       //print(obstacles);
-      //
-      //       _sendMessage("PC:ADD," +
-      //           getObstacleCoordinates(obstacles[index]!)["x"].toString() +
-      //           "," +
-      //           getObstacleCoordinates(obstacles[index]!)["y"].toString());
-      //     }
-      //   });
-      // });
+  Widget dragTarget(context, index) => DragTarget<Obstacle>(
+      builder: (context, candidateData, rejectedData) => Container(
+            child:
+                //Check if robot has been placed
+                robotIndex == index
+                    ? buildRotateRobot()
+                    :
+                    //Else check if obstacle has been placed
+                    _index.contains(index)
+                        ? obstacles[index]!.isDiscovered
+                            ? Expanded(
+                                child: Image.asset('assets/id' +
+                                    obstacles[index]!.id.toString() +
+                                    '.png'))
+                            : Text(obstacles[index]!.id.toString(),
+                                style: TextStyle(color: Colors.white))
+                        : null,
+          ),
+      onWillAccept: (data) => true,
+      onAccept: (data) {
+        setState(() {
+          if (data.action == action.ADD) {
+            _index.add(index);
+            data = Obstacle.updateIndex(data, index);
+            obstacles.addAll({index: data});
+            //print(obstacles);
+
+            _sendMessage("PC:ADD," +
+                getObstacleCoordinates(obstacles[index]!)["x"].toString() +
+                "," +
+                getObstacleCoordinates(obstacles[index]!)["y"].toString());
+          }
+        });
+      });
 
   Widget buildRotateRobot() {
     if (robotCurrentDirection == "0") robotCurrentDirection = "N";
@@ -212,56 +212,66 @@ class _GridArenaState extends State<GridArena>
           height: 100,
           width: 100,
           child: Center(
-            child: Container(
-                child:
-                  //Check if robot has been placed
-                  robotIndex == index
-                  ? buildRotateRobot()
-                      :
-                  //Else check if obstacle has been placed
-                        _index.contains(index)
-                  ? obstacles[index]!.isDiscovered
-                  ? Expanded(
-                      child: Image.asset('assets/id' +
-                      obstacles[index]!.id.toString() +
-                      '.png'))
-                          : Text(obstacles[index]!.id.toString(),
-                      style: TextStyle(color: Colors.white))
-                      : index % 4 == 0 ?
-                            FittedBox(
-                              child: Text(" " + (index % _columns).toString() + ", " +
-                                  (_rows-1 - (index / _columns).floor()).toString() + " "),
-                            ) : Text("")
-                ),
-          ),
-              // onWillAccept: (data) => true,
-              // onAccept: (data) {
-              // setState(() {
-              // if (data.action == action.ADD) {
-              // _index.add(index);
-              // data = Obstacle.updateIndex(data, index);
-              // obstacles.addAll({index: data});
-              // //print(obstacles);
-              //
-              // _sendMessage("PC:ADD," +
-              // getObstacleCoordinates(obstacles[index]!)["x"].toString() +
-              // "," +
-              // getObstacleCoordinates(obstacles[index]!)["y"].toString());
-              // }
-              // }
-          // Center(
-          //   child: _index.contains(index)
-          //       ? Draggable<Obstacle>(
-          //           data:
-          //               Obstacle.updateAction(obstacles[index]!, action.REMOVE),
-          //           child: dragTarget(context, index),
-          //           feedback: Material(
-          //               child: Icon(Icons.view_in_ar, color: Colors.black)),
-          //         )
-          //       : dragTarget(context, index),
+            child: _index.contains(index)
+            ? Draggable<Obstacle>(
+            data:
+            Obstacle.updateAction(obstacles[index]!, action.REMOVE),
+            child: dragTarget(context, index),
+            feedback: Material(
+            child: Icon(Icons.view_in_ar, color: Colors.black)),
+            )
+                : dragTarget(context, index),
+          //   child: Container(
+          //       child:
+          //         //Check if robot has been placed
+          //         robotIndex == index
+          //         ? buildRotateRobot()
+          //             :
+          //         //Else check if obstacle has been placed
+          //               _index.contains(index)
+          //         ? obstacles[index]!.isDiscovered
+          //         ? Expanded(
+          //             child: Image.asset('assets/id' +
+          //             obstacles[index]!.id.toString() +
+          //             '.png'))
+          //                 : Text(obstacles[index]!.id.toString(),
+          //             style: TextStyle(color: Colors.white))
+          //             : index % 4 == 0 ?
+          //                   FittedBox(
+          //                     child: Text(" " + (index % _columns).toString() + ", " +
+          //                         (_rows-1 - (index / _columns).floor()).toString() + " "),
+          //                   ) : Text("")
+          //       ),
           // ),
-        ),
-      );
+
+        //       onWillAccept: (data) => true,
+        //       onAccept: (data) {
+        //       setState(() {
+        //       if (data.action == action.ADD) {
+        //       _index.add(index);
+        //       data = Obstacle.updateIndex(data, index);
+        //       obstacles.addAll({index: data});
+        //       //print(obstacles);
+        //
+        //       _sendMessage("PC:ADD," +
+        //       getObstacleCoordinates(obstacles[index]!)["x"].toString() +
+        //       "," +
+        //       getObstacleCoordinates(obstacles[index]!)["y"].toString());
+        //       }
+        //       }
+        //   Center(
+        //     child: _index.contains(index)
+        //         ? Draggable<Obstacle>(
+        //             data:
+        //                 Obstacle.updateAction(obstacles[index]!, action.REMOVE),
+        //             child: dragTarget(context, index),
+        //             feedback: Material(
+        //                 child: Icon(Icons.view_in_ar, color: Colors.black)),
+        //           )
+        //         : dragTarget(context, index),
+        //   ),
+        // ),
+      )));
 
   Map<String, int> getRobotCoordinates() {
     Map<String, int> cord = {"x": -1, "y": -1};
@@ -368,8 +378,8 @@ class _GridArenaState extends State<GridArena>
             automaticallyImplyLeading: false,
             backgroundColor: Colors.cyan,
             title:
-            // DragTarget<Obstacle>(
-            //     builder: (context, candidateData, rejectedData) =>
+            DragTarget<Obstacle>(
+                builder: (context, candidateData, rejectedData) =>
                     Container(
                       alignment: Alignment.centerLeft,
                       child: Row(
@@ -403,36 +413,36 @@ class _GridArenaState extends State<GridArena>
                           ),
 
                           //Place Obstacle
-                          IconButton(
-                              onPressed: () => {
-                               setState (() {
-                                 if (_action == action.ADD)
-                                   _action = action.REMOVE;
-                                 else if (_action == action.REMOVE)
-                                   _action = action.UNKNOWN;
-                                 else
-                                   _action = action.ADD;
-                               })
-                              },
-                              icon: _action == action.ADD ?
-                              Icon(Icons.view_in_ar,
-                                  color: Colors.white):
-                              _action == action.REMOVE ?
-                              Icon(Icons.close) :
-                              Icon(Icons.view_in_ar,
-                                color: Colors.blueGrey)
-                          ),
-                          // Draggable<Obstacle>(
-                          //   data:
-                          //       new Obstacle(id: obstID++, action: action.ADD),
-                          //   child: Container(
-                          //       decoration: BoxDecoration(
-                          //           borderRadius: BorderRadius.circular(10)),
-                          //       child: Icon(Icons.view_in_ar)),
-                          //   feedback: Material(
-                          //       child: Icon(Icons.view_in_ar,
-                          //           color: Colors.black)),
+                          // IconButton(
+                          //     onPressed: () => {
+                          //      setState (() {
+                          //        if (_action == action.ADD)
+                          //          _action = action.REMOVE;
+                          //        else if (_action == action.REMOVE)
+                          //          _action = action.UNKNOWN;
+                          //        else
+                          //          _action = action.ADD;
+                          //      })
+                          //     },
+                          //     icon: _action == action.ADD ?
+                          //     Icon(Icons.view_in_ar,
+                          //         color: Colors.white):
+                          //     _action == action.REMOVE ?
+                          //     Icon(Icons.close) :
+                          //     Icon(Icons.view_in_ar,
+                          //       color: Colors.blueGrey)
                           // ),
+                          Draggable<Obstacle>(
+                            data:
+                                new Obstacle(id: obstID++, action: action.ADD),
+                            child: Container(
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(10)),
+                                child: Icon(Icons.view_in_ar)),
+                            feedback: Material(
+                                child: Icon(Icons.view_in_ar,
+                                    color: Colors.black)),
+                          ),
 
                           Expanded(
                             child: FittedBox(
@@ -491,23 +501,23 @@ class _GridArenaState extends State<GridArena>
                         ],
                       ),
                     ),
-                // onWillAccept: (data) => true,
-                // onAccept: (data) {
-                //   setState(() {
-                //     if (data.action == action.REMOVE) {
-                //       _sendMessage("PC:SUB," +
-                //           getObstacleCoordinates(obstacles[data.index]!)["x"]
-                //               .toString() +
-                //           "," +
-                //           getObstacleCoordinates(obstacles[data.index]!)["y"]
-                //               .toString());
-                //
-                //       _index.remove(data.index);
-                //       obstacles.remove(data.index);
-                //       //print(obstacles);
-                //     }
-                  // });
-                // }),
+                onWillAccept: (data) => true,
+                onAccept: (data) {
+                  setState(() {
+                    if (data.action == action.REMOVE) {
+                      _sendMessage("PC:SUB," +
+                          getObstacleCoordinates(obstacles[data.index]!)["x"]
+                              .toString() +
+                          "," +
+                          getObstacleCoordinates(obstacles[data.index]!)["y"]
+                              .toString());
+
+                      _index.remove(data.index);
+                      obstacles.remove(data.index);
+                      //print(obstacles);
+                    }
+                  });
+                }),
             actions: [
               PopupMenuButton<int>(
                 onSelected: (item) => onSelected(context, item),
@@ -1212,7 +1222,7 @@ class _GridArenaState extends State<GridArena>
         Obstacle data = new Obstacle(
           id: id,
           index: index,
-          //action: action.UNKNOWN
+          action: action.UNKNOWN
         );
 
         data = Obstacle.updateDiscovery(data, true);
@@ -2351,5 +2361,5 @@ class Obstacle {
   }
 
   Obstacle(
-      {required this.id, this.index, this.direction});
+      {required this.id, this.index, this.direction, this.action});
 }
