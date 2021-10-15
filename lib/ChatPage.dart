@@ -147,8 +147,8 @@ class _ChatPage extends State<ChatPage> {
           title: (isConnecting
               ? Text('Connecting chat to ' + serverName + '...')
               : isConnected
-              ? Text('Chat Log ' + serverName)
-              : Text('Chat Log ' + serverName))),
+              ? Text('Command Log ' + serverName)
+              : Text('Command Log ' + serverName))),
       body: SafeArea(
         child: Column(
           children: <Widget>[

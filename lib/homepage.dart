@@ -78,7 +78,7 @@ class _HomePageState extends State<HomePage> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.chat),
-            title: Text("Chat log"),
+            title: Text("Command log"),
           ),
         ],
       ),

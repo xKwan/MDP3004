@@ -721,7 +721,7 @@ class _GridArenaState extends State<GridArena>
                                   ElevatedButton.icon(
                                     onPressed: () {
                                       if (isStarted == false) {
-                                        _sendMessage('PC:START');
+                                        _sendMessage('STM:g');
                                         //createImaginaryObstacleWest();
                                         isStarted = true;
                                       }
